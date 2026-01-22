@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password, fullName } = body
+    const { email, password, name } = body
 
     // Validation
     if (!email || !password) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       data: {
         email: email.toLowerCase().trim(),
         passwordHash,
-        name: fullName || null,
+        name: name || null,
         provider: 'credentials',
         role: 'BUYER',
       },

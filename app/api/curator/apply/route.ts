@@ -46,11 +46,11 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { fullName, socialLinks, audienceBand, reason } = body;
+    const { name, socialLinks, audienceBand, reason } = body;
 
     // Validate required fields
-    if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
-      return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
     // Optional field validation
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const application = await prisma.sellerApplication.upsert({
       where: { userId: session.user.id },
       update: {
-        name: fullName.trim(),
+        name: name.trim(),
         socialLinks: socialLinks?.trim() || null,
         audienceBand: audienceBand?.trim() || null,
         reason: reason?.trim() || null,
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       },
       create: {
         userId: session.user.id,
-        name: fullName.trim(),
+        name: name.trim(),
         socialLinks: socialLinks?.trim() || null,
         audienceBand: audienceBand?.trim() || null,
         reason: reason?.trim() || null,

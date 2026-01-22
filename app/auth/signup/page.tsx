@@ -53,7 +53,7 @@ export default function SignUpPage() {
 
   const validateForm = (): string | null => {
     if (!form.name.trim()) {
-      return 'Full name is required'
+      return 'Name is required'
     }
     if (!form.email.trim()) {
       return 'Email is required'
