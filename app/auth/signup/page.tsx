@@ -8,7 +8,7 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 interface SignUpForm {
-  fullName: string
+  name: string
   email: string
   password: string
   confirmPassword: string
@@ -16,7 +16,7 @@ interface SignUpForm {
 
 export default function SignUpPage() {
   const [form, setForm] = useState<SignUpForm>({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -52,7 +52,7 @@ export default function SignUpPage() {
   }
 
   const validateForm = (): string | null => {
-    if (!form.fullName.trim()) {
+    if (!form.name.trim()) {
       return 'Full name is required'
     }
     if (!form.email.trim()) {
@@ -89,7 +89,7 @@ export default function SignUpPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          fullName: form.fullName.trim(),
+          name: form.name.trim(),
           email: form.email.trim(),
           password: form.password,
           role: 'BUYER'
@@ -216,7 +216,7 @@ export default function SignUpPage() {
             )}
 
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Full name
               </label>
               <div className="mt-1 relative">
@@ -224,13 +224,13 @@ export default function SignUpPage() {
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="fullName"
-                  name="fullName"
+                  id="name"
+                  name="name"
                   type="text"
                   autoComplete="name"
                   required
-                  value={form.fullName}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
+                  value={form.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="Enter your full name"
                 />

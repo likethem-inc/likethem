@@ -23,8 +23,8 @@ export default async function ApplicationDetailPage({
         select: {
           id: true,
           email: true,
-          fullName: true,
-          avatar: true,
+          name: true,
+          image: true,
           role: true,
         },
       },
@@ -51,13 +51,13 @@ export default async function ApplicationDetailPage({
   return (
     <AdminPageShell
       title="Application Details"
-      subtitle={`Reviewing application from ${application.fullName}`}
+      subtitle={`Reviewing application from ${application.name}`}
     >
 
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">{application.fullName}</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{application.name}</h2>
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.status)}`}>
                 {application.status}
               </span>

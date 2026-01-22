@@ -55,7 +55,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
           
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">Full Name</h3>
-            <p className="text-lg text-gray-900">{user.fullName || '—'}</p>
+            <p className="text-lg text-gray-900">{user.name || '—'}</p>
           </div>
           
           <div>

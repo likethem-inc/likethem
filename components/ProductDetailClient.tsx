@@ -30,7 +30,7 @@ interface Product {
     bio?: string | null
     slug: string
     user: {
-      fullName?: string | null
+      name?: string | null
     }
   }
   images: Array<{
@@ -281,9 +281,9 @@ export default function ProductDetailClient({ product, hasAccess = true, isInner
                 >
                   Curated by {product.curator.storeName}
                 </Link>
-                {product.curator.user.fullName && (
+                {product.curator.user.name && (
                   <p className="text-xs text-gray-500">
-                    by {product.curator.user.fullName}
+                    by {product.curator.user.name}
                   </p>
                 )}
               </div>

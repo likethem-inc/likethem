@@ -55,14 +55,14 @@ export async function POST(request: NextRequest) {
       data: {
         email: email.toLowerCase().trim(),
         passwordHash,
-        fullName: fullName || null,
+        name: fullName || null,
         provider: 'credentials',
         role: 'BUYER',
       },
       select: {
         id: true,
         email: true,
-        fullName: true,
+        name: true,
         role: true,
       },
     })
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         user: {
           id: user.id,
           email: user.email,
-          fullName: user.fullName,
+          name: user.name,
         },
       },
       { status: 201 }

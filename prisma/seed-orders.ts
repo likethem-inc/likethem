@@ -102,7 +102,7 @@ async function main() {
       },
       shippingAddress: {
         create: {
-          fullName: "Gonzalo Yrigoyen Cook",
+          name: "Gonzalo Yrigoyen Cook",
           email: "gyrigoyen91@gmail.com",
           phone: "+1234567890",
           address: "123 Main Street",
@@ -136,7 +136,7 @@ async function main() {
       },
       shippingAddress: {
         create: {
-          fullName: "Gonzalo Yrigoyen Cook",
+          name: "Gonzalo Yrigoyen Cook",
           email: "gyrigoyen91@gmail.com",
           phone: "+1234567890",
           address: "123 Main Street",

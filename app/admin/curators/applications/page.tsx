@@ -16,7 +16,7 @@ export default async function ApplicationsPage() {
         select: {
           id: true,
           email: true,
-          fullName: true,
+          name: true,
         },
       },
     },
@@ -97,7 +97,7 @@ export default async function ApplicationsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {app.fullName}
+                          {app.name}
                         </div>
                         <div className="text-sm text-gray-500">
                           {app.user.email}

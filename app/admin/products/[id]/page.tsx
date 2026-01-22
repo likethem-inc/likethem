@@ -25,7 +25,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             select: {
               id: true,
               email: true,
-              fullName: true,
+              name: true,
             },
           },
         },

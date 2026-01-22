@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        name: true,
         role: true,
         createdAt: true,
         curatorProfile: {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        name: true,
         role: true
       }
     })

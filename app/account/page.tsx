@@ -26,8 +26,8 @@ export default async function AccountPage() {
     },
     select: { 
       id: true, 
-      fullName: true, 
-      avatar: true, 
+      name: true, 
+      image: true, 
       email: true, 
       phone: true, 
       provider: true, 

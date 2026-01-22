@@ -21,7 +21,7 @@ async function main() {
     create: {
       email: 'curator@test.com',
       passwordHash: hashedPassword,
-      fullName: 'Marcus Chen',
+      name: 'Marcus Chen',
       role: 'CURATOR',
       provider: 'credentials',
     },

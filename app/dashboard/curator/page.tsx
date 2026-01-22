@@ -11,5 +11,5 @@ export default async function CuratorDashboardPage() {
     redirect('/unauthorized')
   }
 
-  return <CuratorDashboard user={{ name: user?.fullName || 'Curator' }} />
+  return <CuratorDashboard user={{ name: user?.name || 'Curator' }} />
 } 

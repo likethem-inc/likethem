@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
         user: {
           select: {
             id: true,
-            fullName: true,
-            avatar: true
+            name: true,
+            image: true
           }
         }
       }
@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
       twitter: curatorProfile.twitter ?? undefined,
       user: {
         ...curatorProfile.user,
-        fullName: curatorProfile.user.fullName ?? undefined,
-        avatar: curatorProfile.user.avatar ?? undefined,
+        name: curatorProfile.user.name ?? undefined,
+        image: curatorProfile.user.image ?? undefined,
       }
     }
 
@@ -135,8 +135,8 @@ export async function POST(request: NextRequest) {
         user: {
           select: {
             id: true,
-            fullName: true,
-            avatar: true
+            name: true,
+            image: true
           }
         }
       }
@@ -159,8 +159,8 @@ export async function POST(request: NextRequest) {
       twitter: curatorProfile.twitter ?? undefined,
       user: {
         ...curatorProfile.user,
-        fullName: curatorProfile.user.fullName ?? undefined,
-        avatar: curatorProfile.user.avatar ?? undefined,
+        name: curatorProfile.user.name ?? undefined,
+        image: curatorProfile.user.image ?? undefined,
       }
     }
 

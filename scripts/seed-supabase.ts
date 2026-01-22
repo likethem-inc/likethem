@@ -33,8 +33,8 @@ async function main() {
         id: user.user!.id,
         email: 'gonzalo@likethem.io',
         password: 'hashed-password', // In real app, this would be properly hashed
-        fullName: 'Gonzalo Yrigoyen',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        name: 'Gonzalo Yrigoyen',
+        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
         role: 'CURATOR',
         provider: 'credentials',
         emailVerified: new Date().toISOString(),

@@ -29,7 +29,7 @@ async function checkNextAuthTables() {
           id: true,
           email: true,
           role: true,
-          fullName: true,
+          name: true,
           emailVerified: true,
         }
       });

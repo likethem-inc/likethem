@@ -31,7 +31,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   if (pagination.search) {
     where.OR = [
       { email: { contains: pagination.search, mode: 'insensitive' as const } },
-      { fullName: { contains: pagination.search, mode: 'insensitive' as const } },
+      { name: { contains: pagination.search, mode: 'insensitive' as const } },
     ]
   }
   
@@ -49,7 +49,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        name: true,
         role: true,
         provider: true,
         emailVerified: true,

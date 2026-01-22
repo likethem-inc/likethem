@@ -23,7 +23,7 @@ interface CuratorDetailClientProps {
     user: {
       id: string
       email: string
-      fullName: string | null
+      name: string | null
       role: string
       createdAt: Date
     }
@@ -97,7 +97,7 @@ export default function CuratorDetailClient({
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-1">User Name</h4>
-            <p className="text-gray-900">{curatorProfile.user.fullName || '—'}</p>
+            <p className="text-gray-900">{curatorProfile.user.name || '—'}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-1">Created At</h4>

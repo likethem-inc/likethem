@@ -25,7 +25,7 @@ export async function GET(
             user: {
               select: {
                 id: true,
-                fullName: true
+                name: true
               }
             }
           }
@@ -59,7 +59,7 @@ export async function GET(
         bio: product.curator.bio ?? undefined,
         user: {
           ...product.curator.user,
-          fullName: product.curator.user.fullName ?? undefined,
+          name: product.curator.user.name ?? undefined,
         }
       },
       images: product.images.map(image => ({

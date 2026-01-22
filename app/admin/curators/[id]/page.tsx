@@ -37,7 +37,7 @@ export default async function CuratorDetailPage({ params }: CuratorDetailPagePro
         select: {
           id: true,
           email: true,
-          fullName: true,
+          name: true,
           role: true,
           createdAt: true,
         },

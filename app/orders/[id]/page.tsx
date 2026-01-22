@@ -36,7 +36,7 @@ export default async function OrderDetail({ params }: { params: { id: string } }
           user: {
             select: {
               id: true,
-              fullName: true,
+              name: true,
               email: true
             }
           }

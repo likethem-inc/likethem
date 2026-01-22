@@ -17,7 +17,7 @@ interface Product {
     slug: string
     user: {
       email: string
-      fullName: string | null
+      name: string | null
     }
   }
   images: Array<{ url: string }>

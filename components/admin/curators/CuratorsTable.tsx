@@ -7,7 +7,7 @@ import { Eye, ChevronLeft, ChevronRight } from 'lucide-react'
 interface Curator {
   id: string
   email: string
-  fullName: string | null
+  name: string | null
   createdAt: Date
   curatorProfile: {
     id: string
@@ -146,7 +146,7 @@ export default function CuratorsTable({
                     <tr key={curator.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {curator.fullName || '—'}
+                          {curator.name || '—'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

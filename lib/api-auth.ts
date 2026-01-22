@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth'
+import { authOptions } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { UserRole } from './auth'
 
@@ -10,7 +10,7 @@ export interface ApiUser {
   id: string
   email: string
   role: UserRole
-  fullName?: string
+  name?: string
   curatorProfileId?: string
 }
 
@@ -28,7 +28,7 @@ export async function getApiUser(req: NextRequest): Promise<ApiUser | null> {
         id: true,
         email: true,
         role: true,
-        fullName: true,
+        name: true,
         curatorProfile: {
           select: {
             id: true
@@ -45,7 +45,7 @@ export async function getApiUser(req: NextRequest): Promise<ApiUser | null> {
       id: user.id,
       email: user.email,
       role: user.role as UserRole,
-      fullName: user.fullName || undefined,
+      name: user.name || undefined,
       curatorProfileId: user.curatorProfile?.id
     }
   } catch (error) {

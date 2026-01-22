@@ -33,7 +33,7 @@ export default async function CuratorsPage({ searchParams }: CuratorsPageProps) 
   if (pagination.search) {
     where.OR = [
       { email: { contains: pagination.search, mode: 'insensitive' as const } },
-      { fullName: { contains: pagination.search, mode: 'insensitive' as const } },
+      { name: { contains: pagination.search, mode: 'insensitive' as const } },
       { curatorProfile: { storeName: { contains: pagination.search, mode: 'insensitive' as const } } },
     ]
   }

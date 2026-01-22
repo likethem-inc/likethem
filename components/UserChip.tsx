@@ -43,8 +43,8 @@ export default function UserChip({ user }: { user: User | null }) {
     );
   }
 
-  const fullName = (user.name ?? "").trim();
-  const initial = fullName ? fullName[0].toUpperCase() : (user.email?.[0]?.toUpperCase() ?? "U");
+  const userName = (user.name ?? "").trim();
+  const initial = userName ? userName[0].toUpperCase() : (user.email?.[0]?.toUpperCase() ?? "U");
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -54,12 +54,12 @@ export default function UserChip({ user }: { user: User | null }) {
       >
         <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-sm">
           {user.image ? (
-            <Image src={safeSrc(user.image)} alt={fullName || "User"} width={32} height={32} className="object-cover" />
+            <Image src={safeSrc(user.image)} alt={userName || "User"} width={32} height={32} className="object-cover" />
           ) : (
             <UserCircle className="size-5 text-gray-700" strokeWidth={1.5} />
           )}
         </div>
-        <span className="truncate text-sm text-gray-800">{fullName}</span>
+        <span className="truncate text-sm text-gray-800">{userName}</span>
         <ChevronDown className="size-4 text-gray-600" strokeWidth={1.5} />
       </button>
 

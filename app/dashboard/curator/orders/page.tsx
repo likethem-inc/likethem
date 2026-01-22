@@ -13,11 +13,11 @@ interface Order {
   paymentProof?: string
   createdAt: string
   buyer: {
-    fullName: string
+    name: string
     email: string
   }
   shippingAddress: {
-    fullName: string
+    name: string
     address: string
     city: string
     state: string
@@ -279,7 +279,7 @@ export default function CuratorOrdersPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
                     <User className="w-4 h-4 text-gray-500" />
-                    <span>{order.buyer.fullName}</span>
+                    <span>{order.buyer.name}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Mail className="w-4 h-4 text-gray-500" />
@@ -368,7 +368,7 @@ export default function CuratorOrdersPage() {
                   <div>
                     <h3 className="font-medium mb-3">Shipping Address</h3>
                     <div className="text-sm text-gray-600">
-                      <p>{selectedOrder.shippingAddress.fullName}</p>
+                      <p>{selectedOrder.shippingAddress.name}</p>
                       <p>{selectedOrder.shippingAddress.address}</p>
                       <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
                       <p>{selectedOrder.shippingAddress.country}</p>
