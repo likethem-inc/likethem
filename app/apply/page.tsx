@@ -3,6 +3,9 @@ import CTAButton from '@/components/ui/CTAButton';
 import ApplicationForm from './ApplicationForm';
 import { getLocale } from '@/lib/i18n/getLocale';
 import { t } from '@/lib/i18n/t';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -17,6 +20,12 @@ export async function generateMetadata() {
 
 export default async function ApplyPage() {
   const locale = await getLocale();
+  const session = await getServerSession(authOptions);
+
+  // Redirect if already a curator
+  if (session?.user?.role === 'CURATOR') {
+    redirect('/dashboard/curator');
+  }
   
   return (
     <main className="min-h-[80vh]">
