@@ -60,7 +60,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             user: {
               select: {
                 email: true,
-                fullName: true,
+                name: true,
               },
             },
           },

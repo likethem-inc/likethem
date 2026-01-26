@@ -23,8 +23,8 @@ export async function GET(
         user: {
           select: {
             id: true,
-            fullName: true,
-            avatar: true
+            name: true,
+            image: true
           }
         },
         products: {

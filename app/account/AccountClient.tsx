@@ -8,7 +8,7 @@ import SavedItems from '@/components/account/SavedItems'
 interface User {
   id: string
   email: string
-  fullName: string | null
+  name: string | null
   avatar: string | null
   provider: string | null
   emailVerified: Date | null
@@ -36,10 +36,10 @@ export default function AccountClient({ user, session }: AccountClientProps) {
   ]
 
   // Use real user data with fallbacks
-  const displayName = user.fullName ?? session.user.name ?? ''
+  const displayName = user.name ?? session.user.name ?? ''
   const displayEmail = user.email ?? session.user.email ?? ''
   const displayPhone = user.phone ?? ''
-  const displayAvatar = user.avatar ?? session.user.image ?? null
+  const displayAvatar = user.image ?? session.user.image ?? null
 
   return (
     <div className="min-h-screen bg-white py-24">
@@ -134,7 +134,7 @@ function PersonalDetails({
   displayPhone: string
 }) {
   const [formData, setFormData] = useState({
-    fullName: displayName,
+    name: displayName,
     phone: displayPhone
   })
   const [isSaving, setIsSaving] = useState(false)
@@ -152,7 +152,7 @@ function PersonalDetails({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fullName: formData.fullName,
+          name: formData.name,
           phone: formData.phone,
         }),
       })
@@ -177,7 +177,7 @@ function PersonalDetails({
 
   const handleCancel = () => {
     setFormData({
-      fullName: displayName,
+      name: displayName,
       phone: displayPhone
     })
     setIsEditing(false)
@@ -201,8 +201,8 @@ function PersonalDetails({
           <label className="block text-sm font-medium mb-2">Full Name</label>
           <input
             type="text"
-            value={formData.fullName}
-            onChange={(e) => handleInputChange('fullName', e.target.value)}
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
             disabled={!isEditing}
             className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon disabled:bg-gray-50"
           />

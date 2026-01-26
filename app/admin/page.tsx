@@ -18,5 +18,5 @@ export default async function AdminPage() {
   // Fetch real stats from database
   const stats = await getAdminDashboardStats()
 
-  return <AdminDashboard userName={user?.fullName ?? undefined} stats={stats} />
+  return <AdminDashboard userName={user?.name ?? undefined} stats={stats} />
 } 

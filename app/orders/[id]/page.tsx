@@ -36,7 +36,7 @@ export default async function OrderDetail({ params }: { params: { id: string } }
           user: {
             select: {
               id: true,
-              fullName: true,
+              name: true,
               email: true
             }
           }
@@ -109,7 +109,7 @@ export default async function OrderDetail({ params }: { params: { id: string } }
           <Card className="rounded-2xl">
             <CardContent className="p-5">
               <div className="space-y-1">
-                <div className="font-medium">{order.shippingAddress.fullName}</div>
+                <div className="font-medium">{order.shippingAddress.name}</div>
                 <div>{order.shippingAddress.address}</div>
                 <div>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</div>
                 <div>{order.shippingAddress.country}</div>

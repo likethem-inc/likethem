@@ -142,7 +142,7 @@ export default function OrderConfirmationPage() {
                 <div>
                   <h3 className="font-medium mb-3">Shipping Address</h3>
                   <div className="text-sm text-gray-600">
-                    <p>{order.shippingAddress.fullName}</p>
+                    <p>{order.shippingAddress.name}</p>
                     <p>{order.shippingAddress.address}</p>
                     <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
                     <p>{order.shippingAddress.country}</p>

@@ -7,7 +7,7 @@ import { Upload, Instagram, Users, FileText, Send } from 'lucide-react'
 export default function RequestSellPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     instagram: '',
     tiktok: '',
@@ -94,8 +94,8 @@ export default function RequestSellPage() {
                 <input
                   type="text"
                   required
-                  value={formData.fullName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-6 py-4 border border-gray-300 focus:outline-none focus:border-carbon text-lg"
                   placeholder="Your full name"
                 />

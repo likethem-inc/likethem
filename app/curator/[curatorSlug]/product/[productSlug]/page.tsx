@@ -66,7 +66,7 @@ async function fetchData(curatorSlug: string, productSlug: string): Promise<Fetc
             isPublic: true,
             user: {
               select: {
-                avatar: true,
+                image: true,
               },
             },
           },
@@ -163,7 +163,7 @@ async function fetchData(curatorSlug: string, productSlug: string): Promise<Fetc
         storeName: product.curator.storeName,
         bannerImage: product.curator.bannerImage,
         isPublic: product.curator.isPublic,
-        avatar: product.curator.user?.avatar || product.curator.bannerImage || null,
+        avatar: product.curator.user?.image || product.curator.bannerImage || null,
       },
       images: product.images.map(img => ({
         id: img.id,

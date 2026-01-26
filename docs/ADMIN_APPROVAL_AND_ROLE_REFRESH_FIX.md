@@ -61,7 +61,7 @@ if (token.sub) {
 **Key Features:**
 - Logs role changes: `[NextAuth][jwt][ROLE_CHANGE]` when role changes
 - Handles missing users gracefully (logs warning, doesn't break auth)
-- Refreshes all user fields from DB (role, fullName, avatar, etc.)
+- Refreshes all user fields from DB (role, name, image, etc.)
 
 #### 5. Session Callback ✅
 - Already correctly uses `token.role` and `token.sub`

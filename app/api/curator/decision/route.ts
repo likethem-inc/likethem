@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
 
         if (!existingProfile) {
           // Create a default curator profile
-          const defaultHandle = application.fullName
+          const defaultHandle = application.name
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '-')
             .replace(/-+/g, '-')
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
           await tx.curatorProfile.create({
             data: {
               userId: application.userId,
-              storeName: application.fullName,
+              storeName: application.name,
               slug: defaultHandle,
               bio: 'Welcome to LikeThem!',
             },
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
       try {
         await sendApprovalNotification({
           applicantEmail: application.user.email,
-          applicantName: application.fullName,
+          applicantName: application.name,
         });
       } catch (emailError) {
         console.error('Failed to send approval email:', emailError);
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
       console.log('✅ Curator application approved:', {
         applicationId: application.id,
         userId: application.userId,
-        applicantName: application.fullName,
+        applicantName: application.name,
         reviewerEmail,
       });
 
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
         <html>
           <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
             <h2 style="color: #10b981;">✅ Application Approved</h2>
-            <p><strong>${application.fullName}</strong> has been approved as a curator!</p>
+            <p><strong>${application.name}</strong> has been approved as a curator!</p>
             <p>They have been notified by email and can now access their curator dashboard.</p>
             <a href="/admin/curators/applications?done=approved" style="color: #10b981;">← View Applications</a>
           </body>
@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
       try {
         await sendRejectionNotification({
           applicantEmail: application.user.email,
-          applicantName: application.fullName,
+          applicantName: application.name,
           decisionNote: 'Thank you for your interest. Please continue building your audience and reapply in the future.',
         });
       } catch (emailError) {
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
       console.log('❌ Curator application rejected:', {
         applicationId: application.id,
         userId: application.userId,
-        applicantName: application.fullName,
+        applicantName: application.name,
         reviewerEmail,
       });
 
@@ -198,7 +198,7 @@ export async function GET(request: NextRequest) {
         <html>
           <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
             <h2 style="color: #ef4444;">❌ Application Rejected</h2>
-            <p><strong>${application.fullName}</strong>'s application has been rejected.</p>
+            <p><strong>${application.name}</strong>'s application has been rejected.</p>
             <p>They have been notified by email.</p>
             <a href="/admin/curators/applications?done=rejected" style="color: #10b981;">← View Applications</a>
           </body>

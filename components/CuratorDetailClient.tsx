@@ -20,8 +20,8 @@ interface Curator {
   slug: string
   user: {
     id: string
-    fullName?: string
-    avatar?: string
+    name?: string
+    image?: string
   }
   products: Array<{
     id: string
@@ -134,7 +134,7 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
             <div className="relative">
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
                 <CuratorImage
-                  src={curator.user.avatar || '/default-avatar.png'}
+                  src={curator.user.image || '/default-avatar.png'}
                   alt={curator.storeName}
                   size="original"
                   width={128}
@@ -154,9 +154,9 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
               <h1 className="font-serif text-3xl md:text-4xl font-light mb-2">
                 {curator.storeName}
               </h1>
-              {curator.user.fullName && (
+              {curator.user.name && (
                 <p className="text-lg opacity-90 mb-4">
-                  by {curator.user.fullName}
+                  by {curator.user.name}
                 </p>
               )}
               {curator.bio && (

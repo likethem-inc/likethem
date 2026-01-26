@@ -175,7 +175,7 @@ export async function GET(req: NextRequest) {
       include: {
         user: {
           select: {
-            avatar: true,
+            image: true,
           },
         },
         products: {
@@ -319,7 +319,7 @@ export async function GET(req: NextRequest) {
       const priceRange = priceRanges.get(curator.id) || { min: null, max: null }
 
       // Get avatar
-      const avatar = curator.user?.avatar || null
+      const avatar = curator.user?.image || null
 
       // Parse style tags
       let styleTags: string[] = []

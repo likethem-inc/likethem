@@ -5,7 +5,7 @@ export type Curator = {
   id: string;
   slug: string;
   storeName: string | null;
-  avatar: string | null;
+  image: string | null;
   banner: string | null;
   feedImageUrl: string | null;   // IG cover if present
   feedPostUrl: string | null;
@@ -15,7 +15,7 @@ export type Curator = {
 };
 
 export const coverImageFor = (c: Curator) =>
-  c.feedImageUrl || c.banner || c.avatar || "/images/curators/default-cover.jpg";
+  c.feedImageUrl || c.banner || c.image || "/images/curators/default-cover.jpg";
 
 export async function fetchFeaturedWithFallback(minCount = 12): Promise<Curator[]> {
   try {
@@ -43,7 +43,7 @@ export async function fetchFeaturedWithFallback(minCount = 12): Promise<Curator[
         id: c.id,
         slug: c.slug,
         storeName: c.storeName,
-        avatar: null,
+        image: null,
         banner: c.bannerImage,
         feedImageUrl: null,
         feedPostUrl: null,
@@ -75,7 +75,7 @@ export async function fetchFeaturedWithFallback(minCount = 12): Promise<Curator[
             id: c.id,
             slug: c.slug,
             storeName: c.storeName,
-            avatar: null,
+            image: null,
             banner: c.bannerImage,
             feedImageUrl: null,
             feedPostUrl: null,
@@ -102,7 +102,7 @@ export async function fetchFeaturedWithFallback(minCount = 12): Promise<Curator[
         id: curator.id,
         slug: curator.slug,
         storeName: curator.storeName,
-        avatar: curator.user?.image || null,
+        image: curator.user?.image || null,
         banner: curator.bannerImage,
         feedImageUrl: null,
         feedPostUrl: null,
@@ -128,7 +128,7 @@ export async function fetchFeaturedWithFallback(minCount = 12): Promise<Curator[
       id: curator.id,
       slug: curator.slug,
       storeName: curator.storeName,
-      avatar: curator.user?.image || null,
+      image: curator.user?.image || null,
       banner: curator.bannerImage,
       feedImageUrl: null,
       feedPostUrl: null,

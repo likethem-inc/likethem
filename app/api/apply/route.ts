@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   try {
     const form = await req.formData();
     const payload = {
-      fullName: String(form.get('fullName') || ''),
+      name: String(form.get('name') || ''),
       socialLinks: String(form.get('socialLinks') || ''),
       audience: String(form.get('audience') || ''),
       motivation: String(form.get('motivation') || ''),

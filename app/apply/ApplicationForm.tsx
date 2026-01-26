@@ -35,7 +35,7 @@ export default function ApplicationForm() {
 
     try {
       const data = {
-        fullName: formData.get('fullName') as string,
+        name: formData.get('name') as string,
         socialLinks: formData.get('socialLinks') as string,
         audienceBand: formData.get('audience') as string,
         reason: formData.get('motivation') as string,
@@ -72,11 +72,11 @@ export default function ApplicationForm() {
   return (
     <form action={onSubmit} className="grid gap-5">
       <div className="grid gap-2">
-        <label className="text-sm text-neutral-700">{t('apply.form.fullName')}</label>
+        <label className="text-sm text-neutral-700">{t('apply.form.name')}</label>
         <input
-          name="fullName"
+          name="name"
           required
-          placeholder={t('apply.form.fullNamePlaceholder')}
+          placeholder={t('apply.form.namePlaceholder')}
           className="h-11 rounded-xl border border-black/10 bg-white px-3 text-[15px] text-neutral-900 placeholder:text-neutral-400
                      focus:outline-none focus:ring-2 focus:ring-black/15"
         />

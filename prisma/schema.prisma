@@ -24,8 +24,8 @@ model User {
   id            String          @id @default(cuid())
   email         String          @unique
   passwordHash  String?         // optional; only for credentials users, null for OAuth users
-  fullName      String?
-  avatar        String?
+  name          String?
+  image         String?
   provider      String?         // e.g. "google" or "credentials"
   emailVerified DateTime?
   phone         String?
@@ -207,7 +207,7 @@ model OrderItem {
 model ShippingAddress {
   id       String  @id @default(cuid())
   orderId  String  @unique
-  fullName String
+  name     String
   email    String
   phone    String?
   address  String
@@ -285,7 +285,7 @@ model CollaborationRequest {
 model SellerApplication {
   id           String            @id @default(cuid())
   userId       String            @unique
-  fullName     String
+  name         String
   socialLinks  String?           // comma-separated or JSON
   audienceBand String?           // e.g. "LT_10K", "10K_50K"
   reason       String?

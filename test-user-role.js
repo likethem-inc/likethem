@@ -7,7 +7,7 @@ async function testUserRole() {
   try {
     const user = await prisma.user.findUnique({
       where: { email: 'gyrigoyen91@gmail.com' },
-      select: { id: true, email: true, role: true, fullName: true }
+      select: { id: true, email: true, role: true, name: true }
     });
     
     console.log('✅ User from database:', user);

@@ -45,9 +45,9 @@ The User model includes the following fields:
 model User {
   id            String          @id @default(cuid())
   email         String          @unique
-  password      String          // empty for OAuth users
-  fullName      String?
-  avatar        String?
+  passwordHash  String?         // optional; only for credentials users
+  name          String?
+  image         String?
   provider      String?         // e.g. "google" or "credentials"
   emailVerified DateTime?
   phone         String?
@@ -61,8 +61,8 @@ model User {
 ### NextAuth Field Mapping
 
 - `session.user.id` ← `user.id`
-- `session.user.name` ← `user.fullName`
-- `session.user.image` ← `user.avatar`
+- `session.user.name` ← `user.name`
+- `session.user.image` ← `user.image`
 - `session.user.email` ← `user.email`
 
 ## Running Migrations

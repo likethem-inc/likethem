@@ -46,11 +46,11 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { fullName, socialLinks, audienceBand, reason } = body;
+    const { name, socialLinks, audienceBand, reason } = body;
 
     // Validate required fields
-    if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
-      return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
     // Optional field validation
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const application = await prisma.sellerApplication.upsert({
       where: { userId: session.user.id },
       update: {
-        fullName: fullName.trim(),
+        name: name.trim(),
         socialLinks: socialLinks?.trim() || null,
         audienceBand: audienceBand?.trim() || null,
         reason: reason?.trim() || null,
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       },
       create: {
         userId: session.user.id,
-        fullName: fullName.trim(),
+        name: name.trim(),
         socialLinks: socialLinks?.trim() || null,
         audienceBand: audienceBand?.trim() || null,
         reason: reason?.trim() || null,
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     // Send notification email to admin
     try {
       await sendApplicationNotification({
-        applicantName: application.fullName,
+        applicantName: application.name,
         applicantEmail: session.user.email || '',
         socialLinks: application.socialLinks || undefined,
         audienceBand: application.audienceBand || undefined,
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       applicationId: application.id,
       userId: session.user.id,
       userEmail: session.user.email,
-      applicantName: application.fullName,
+      applicantName: application.name,
       applicationUserId: application.userId,
       userIdsMatch: session.user.id === application.userId,
       status: application.status,

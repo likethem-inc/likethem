@@ -110,8 +110,8 @@ export const authOptions: NextAuthOptions = {
             email: true,
             passwordHash: true,
             role: true,
-            fullName: true,
-            avatar: true,
+            name: true,
+            image: true,
             curatorProfile: {
               select: {
                 id: true,
@@ -136,8 +136,8 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           role: user.role,
-          fullName: user.fullName || undefined,
-          avatar: user.avatar || undefined,
+          name: user.name || undefined,
+          image: user.image || undefined,
           curatorProfileId: user.curatorProfile?.id,
           storeName: user.curatorProfile?.storeName,
           isPublic: user.curatorProfile?.isPublic,
@@ -355,8 +355,8 @@ export const authOptions: NextAuthOptions = {
             where: { id: userId },
             select: {
               role: true,
-              fullName: true,
-              avatar: true,
+              name: true,
+              image: true,
               phone: true,
               curatorProfile: {
                 select: {
@@ -374,8 +374,8 @@ export const authOptions: NextAuthOptions = {
             // CRITICAL: Set role with fallback to ensure it's never null/undefined
             const previousRole = token.role;
             token.role = dbUser.role || 'BUYER'; // Fallback to BUYER if somehow null
-            token.fullName = dbUser.fullName ?? undefined;
-            token.avatar = dbUser.avatar ?? undefined;
+            token.name = dbUser.name ?? undefined;
+            token.picture = dbUser.image ?? undefined;
             token.phone = dbUser.phone ?? undefined;
             token.curatorProfileId = dbUser.curatorProfile?.id ?? undefined;
             token.storeName = dbUser.curatorProfile?.storeName ?? undefined;
@@ -442,8 +442,8 @@ export const authOptions: NextAuthOptions = {
         // CRITICAL: Ensure role is always set from token (which comes from DB)
         // token.role should always be set (with fallback to 'BUYER' in JWT callback)
         (session.user as any).role = (token.role as 'ADMIN' | 'BUYER' | 'CURATOR') || 'BUYER';
-        (session.user as any).fullName = token.fullName ?? null;
-        (session.user as any).avatar = token.avatar ?? null;
+        (session.user as any).name = token.name ?? null;
+        (session.user as any).image = token.picture ?? null;
         (session.user as any).phone = token.phone ?? null;
         (session.user as any).curatorProfileId = token.curatorProfileId ?? null;
         (session.user as any).storeName = token.storeName ?? null;

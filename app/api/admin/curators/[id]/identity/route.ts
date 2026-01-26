@@ -136,7 +136,7 @@ export async function POST(
         user: {
           select: {
             email: true,
-            fullName: true,
+            name: true,
           },
         },
       },

@@ -7,7 +7,7 @@ import { Eye, ChevronLeft, ChevronRight } from 'lucide-react'
 interface User {
   id: string
   email: string
-  fullName: string | null
+  name: string | null
   role: string
   provider: string | null
   emailVerified: Date | null
@@ -173,7 +173,7 @@ export default function UsersTable({
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {user.fullName || '—'}
+                        {user.name || '—'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

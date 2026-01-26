@@ -56,8 +56,8 @@ async function migrateUsers() {
         id: true,
         email: true,
         password: true,
-        fullName: true,
-        avatar: true,
+        name: true,
+        image: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -82,8 +82,8 @@ async function migrateUsers() {
           where: { email: user.email },
           update: {
             // Only update if the Postgres version is newer or has more data
-            fullName: user.fullName || undefined,
-            avatar: user.avatar || undefined,
+            name: user.name || undefined,
+            image: user.image || undefined,
             password: user.password || '',
             role: user.role,
             provider: 'legacy', // Mark as legacy migration
@@ -93,8 +93,8 @@ async function migrateUsers() {
             id: user.id,
             email: user.email,
             password: user.password || '',
-            fullName: user.fullName,
-            avatar: user.avatar,
+            name: user.name,
+            image: user.image,
             role: user.role,
             provider: 'legacy',
             emailVerified: null,

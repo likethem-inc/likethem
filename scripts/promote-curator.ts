@@ -26,7 +26,7 @@ async function main() {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        name: true,
         role: true,
         curatorProfile: {
           select: {
@@ -41,7 +41,7 @@ async function main() {
       throw new Error(`❌ User not found: ${email}`);
     }
 
-    console.log(`✅ Found user: ${user.fullName || user.email} (Current role: ${user.role})`);
+    console.log(`✅ Found user: ${user.name || user.email} (Current role: ${user.role})`);
 
     // Update user role to CURATOR
     const updated = await prisma.user.update({ 
@@ -53,7 +53,7 @@ async function main() {
     console.log(`📊 User details:`, {
       id: updated.id,
       email: updated.email,
-      fullName: updated.fullName,
+      name: updated.name,
       role: updated.role,
       hasCuratorProfile: !!user.curatorProfile
     });

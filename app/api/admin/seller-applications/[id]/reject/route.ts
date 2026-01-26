@@ -41,7 +41,7 @@ export async function POST(
           select: {
             id: true,
             email: true,
-            fullName: true,
+            name: true,
           },
         },
       },
@@ -87,7 +87,7 @@ export async function POST(
     try {
       await sendRejectionNotification({
         applicantEmail: application.user.email,
-        applicantName: application.fullName,
+        applicantName: application.name,
         decisionNote: decisionNote || undefined,
       });
       console.log(`[SELLER_REJECT][${correlationId}][EMAIL] Rejection email sent to:`, application.user.email);

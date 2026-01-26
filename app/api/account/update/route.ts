@@ -12,11 +12,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { fullName, phone } = body
+    const { name, phone } = body
 
     // Validate input
-    if (fullName && typeof fullName !== 'string') {
-      return NextResponse.json({ error: 'Invalid fullName' }, { status: 400 })
+    if (name && typeof name !== 'string') {
+      return NextResponse.json({ error: 'Invalid name' }, { status: 400 })
     }
 
     if (phone && typeof phone !== 'string') {
@@ -27,20 +27,20 @@ export async function POST(request: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        ...(fullName !== undefined && { fullName: fullName || null }),
+        ...(name !== undefined && { name: name || null }),
         ...(phone !== undefined && { phone: phone || null }),
       },
       select: {
         id: true,
         email: true,
-        fullName: true,
-        avatar: true,
+        name: true,
+        image: true,
         phone: true,
         role: true,
       }
     })
 
-    console.log('[account] User updated:', { userId: session.user.id, fullName, phone })
+    console.log('[account] User updated:', { userId: session.user.id, name, phone })
 
     return NextResponse.json({ 
       success: true, 

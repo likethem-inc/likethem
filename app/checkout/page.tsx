@@ -22,7 +22,7 @@ export default function CheckoutPage() {
 
   const [formData, setFormData] = useState({
     // Shipping Information
-    fullName: '',
+    name: '',
     email: '',
     phone: '',
     address: '',
@@ -84,7 +84,7 @@ export default function CheckoutPage() {
           curatorId: 'default' // Will be enhanced when we add curator info to cart
         })),
         shippingAddress: {
-          fullName: formData.fullName,
+          name: formData.name,
           email: formData.email,
           phone: formData.phone,
           address: formData.address,
@@ -223,8 +223,8 @@ export default function CheckoutPage() {
                     <input
                       type="text"
                       required
-                      value={formData.fullName}
-                      onChange={(e) => handleInputChange('fullName', e.target.value)}
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
                     />
                   </div>

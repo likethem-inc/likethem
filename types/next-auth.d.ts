@@ -5,8 +5,8 @@ declare module 'next-auth' {
     id: string
     email: string
     role: 'ADMIN' | 'BUYER' | 'CURATOR'
-    fullName?: string
-    avatar?: string
+    name?: string
+    image?: string
     curatorProfileId?: string
     storeName?: string
     isPublic?: boolean
@@ -20,8 +20,6 @@ declare module 'next-auth' {
       name?: string | null
       image?: string | null
       role?: 'ADMIN' | 'BUYER' | 'CURATOR' // CRITICAL: role should always be present
-      fullName?: string | null
-      avatar?: string | null
       phone?: string | null
       curatorProfileId?: string | null
       storeName?: string | null
@@ -35,8 +33,8 @@ declare module 'next-auth/jwt' {
   interface JWT {
     role?: 'ADMIN' | 'BUYER' | 'CURATOR' // CRITICAL: role should always be present
     id?: string
-    fullName?: string
-    avatar?: string
+    name?: string
+    picture?: string
     phone?: string
     curatorProfileId?: string
     storeName?: string

@@ -38,7 +38,7 @@ export async function POST(
           select: {
             id: true,
             email: true,
-            fullName: true,
+            name: true,
             role: true,
           },
         },
@@ -117,7 +117,7 @@ export async function POST(
       });
 
       // Generate store name from full name if needed
-      const storeName = application.fullName || `Store ${application.user.email}`;
+      const storeName = application.name || `Store ${application.user.email}`;
       
       // Check for existing slugs to ensure uniqueness
       const existingSlugs = await tx.curatorProfile.findMany({
@@ -146,7 +146,7 @@ export async function POST(
     try {
       await sendApprovalNotification({
         applicantEmail: application.user.email,
-        applicantName: application.fullName,
+        applicantName: application.name,
       });
       console.log(`[SELLER_APPROVE][${correlationId}][EMAIL] Approval email sent to:`, application.user.email);
     } catch (emailError) {
