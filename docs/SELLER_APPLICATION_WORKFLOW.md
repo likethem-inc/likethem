@@ -11,7 +11,7 @@ Complete admin notification and approval workflow for seller/curator application
 When a seller application is submitted:
 - Email is sent to `ADMIN_EMAIL` (configured in environment variables)
 - Email includes:
-  - Applicant full name
+  - Applicant name
   - Applicant email
   - Audience size
   - Reason/motivation text
@@ -62,7 +62,7 @@ When a seller application is submitted:
 1. Validates admin authentication
 2. Checks application status (must be PENDING)
 3. Creates curator profile with:
-   - Store name (from applicant full name)
+   - Store name (from applicant name)
    - Unique slug
    - Bio (from application reason)
 4. Updates user role to `CURATOR`
@@ -209,7 +209,7 @@ If the API endpoints are unavailable, you can manually approve via SQL:
 
 ```sql
 -- Step 1: Get the application details
-SELECT id, "userId", "fullName", reason, status 
+SELECT id, "userId", name, reason, status 
 FROM seller_applications 
 WHERE id = 'APPLICATION_ID_HERE';
 
@@ -227,7 +227,7 @@ SET role = 'CURATOR'
 WHERE id = 'APPLICANT_USER_ID_HERE';  -- From Step 1
 
 -- Step 4: Create curator profile (if it doesn't exist)
--- First, generate a unique slug from the full name
+-- First, generate a unique slug from the name
 -- Example: "John Doe" → "john-doe" (or "john-doe-2" if exists)
 
 INSERT INTO curator_profiles (
@@ -244,7 +244,7 @@ INSERT INTO curator_profiles (
 SELECT 
   gen_random_uuid()::text,  -- Or use cuid() equivalent
   'APPLICANT_USER_ID_HERE',
-  'Store Name Here',  -- Use fullName from application
+  'Store Name Here',  -- Use name from application
   'unique-slug-here',  -- Generate from store name, check uniqueness
   'Bio text here',  -- Optional: use reason from application
   true,
@@ -299,13 +299,13 @@ Returns current session role vs database role for debugging:
     "id": "user-id",
     "email": "user@example.com",
     "role": "ADMIN",
-    "fullName": "User Name"
+    "name": "User Name"
   },
   "database": {
     "id": "user-id",
     "email": "user@example.com",
     "role": "ADMIN",
-    "fullName": "User Name"
+    "name": "User Name"
   },
   "match": {
     "roleMatches": true,

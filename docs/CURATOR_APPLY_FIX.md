@@ -1,7 +1,7 @@
 # Curator Application Authentication Fix
 
 ## Problem
-Users were getting "Authentication required" error when submitting curator applications on `/apply` page, even though they were clearly logged in (header avatar visible).
+Users were getting "Authentication required" error when submitting curator applications on `/apply` page, even though they were clearly logged in (header profile image visible).
 
 ## Root Causes Identified
 
