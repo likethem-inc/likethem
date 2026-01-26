@@ -97,6 +97,27 @@ export default function CuratorDashboard({ curator }: CuratorDashboardProps) {
       icon: <Package className="w-6 h-6" />,
       href: '/dashboard/curator/orders',
       color: 'bg-gray-100 text-carbon hover:bg-gray-200'
+    },
+    {
+      title: 'Ask Nigel',
+      description: 'Get AI help with your store strategy',
+      icon: <MessageCircle className="w-6 h-6" />,
+      href: '/dashboard/curator/ask-nigel',
+      color: 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+    },
+    {
+      title: 'Collaborations',
+      description: 'Find Brands and Curators to work with',
+      icon: <Users className="w-6 h-6" />,
+      href: '/dashboard/curator/collaborations',
+      color: 'bg-purple-50 text-purple-600 hover:bg-purple-100'
+    },
+    {
+      title: 'Engagement',
+      description: 'Analyze your audience interaction',
+      icon: <TrendingUp className="w-6 h-6" />,
+      href: '/dashboard/curator/engagement',
+      color: 'bg-orange-50 text-orange-600 hover:bg-orange-100'
     }
   ]
 

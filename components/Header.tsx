@@ -18,7 +18,10 @@ export default function Header() {
 
   const NAV = [
     { href: '/explore', label: t('nav.dress') },
-    { href: '/apply', label: t('nav.sell') },
+    { 
+      href: user?.role === 'CURATOR' ? '/dashboard/curator' : '/apply', 
+      label: user?.role === 'CURATOR' ? t('user.curatorDashboard') : t('nav.sell') 
+    },
   ];
 
   return (
