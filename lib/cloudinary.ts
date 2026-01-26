@@ -86,7 +86,7 @@ export function getCuratorImageUrl(
   size: 'avatar' | 'banner' | 'original' = 'avatar'
 ): string {
   const sizes = {
-    image: { width: 200, height: 200, crop: 'thumb' as const },
+    avatar: { width: 200, height: 200, crop: 'thumb' as const },
     banner: { width: 1200, height: 400, crop: 'fill' as const },
     original: {}
   }
