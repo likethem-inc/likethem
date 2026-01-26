@@ -9,7 +9,7 @@ interface User {
   id: string
   email: string
   name: string | null
-  avatar: string | null
+  image: string | null
   provider: string | null
   emailVerified: Date | null
   phone: string | null
