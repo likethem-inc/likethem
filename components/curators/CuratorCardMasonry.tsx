@@ -12,6 +12,7 @@ type Props = {
     username: string;
     name: string;
     avatar?: string | null;
+    image?: string | null;
     followers?: number | null;
     coverImage?: string | null;
     isEditorsPick?: boolean;
@@ -73,8 +74,8 @@ export function CuratorCardMasonry({ curator, variant = "normal" }: Props) {
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 overflow-hidden rounded-full ring-1 ring-zinc-200/70 bg-zinc-100">
-            {curator.avatar ? (
-              <Image src={safeSrc(curator.avatar)} alt={`${curator.name} avatar`} width={36} height={36} className="h-9 w-9 object-cover" />
+            {(curator.image || curator.avatar) ? (
+              <Image src={safeSrc(curator.image || curator.avatar)} alt={`${curator.name} avatar`} width={36} height={36} className="h-9 w-9 object-cover" />
             ) : null}
           </div>
           <div className="min-w-0 flex-1">

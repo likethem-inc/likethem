@@ -76,7 +76,7 @@ export default function CuratorsSectionPeek({
                   id: c.id,
                   username: c.slug,
                   name: c.storeName || "Unknown Curator",
-                  avatar: c.avatar,
+                  avatar: c.image,
                   followers: c.followersCount,
                   coverImage: coverImageFor(c),
                   isEditorsPick: c.isEditorsPick ?? false,

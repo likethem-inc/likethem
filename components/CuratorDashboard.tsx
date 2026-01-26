@@ -29,13 +29,15 @@ interface DashboardMetric {
 interface CuratorDashboardProps {
   curator: {
     name: string
-    avatar: string
+    avatar?: string | null
+    image?: string | null
     storeName: string
     isEditorPick: boolean
   }
 }
 
 export default function CuratorDashboard({ curator }: CuratorDashboardProps) {
+  const avatarSrc = curator.image || curator.avatar || '/images/avatar-placeholder.svg';
   const metrics: DashboardMetric[] = [
     {
       label: 'Store Visits',
@@ -120,7 +122,7 @@ export default function CuratorDashboard({ curator }: CuratorDashboardProps) {
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <img
-                  src={curator.avatar}
+                  src={avatarSrc}
                   alt={curator.name}
                   className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-lg"
                 />
