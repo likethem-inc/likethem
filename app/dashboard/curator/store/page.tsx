@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Save, 
@@ -15,9 +15,12 @@ import {
   Star,
   ArrowLeft,
   X,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface StoreProfile {
   name: string
@@ -36,6 +39,7 @@ interface StoreProfile {
   }
   badges: string[]
   tags: string[]
+  slug?: string
 }
 
 const availableTags = [
@@ -45,46 +49,118 @@ const availableTags = [
 ]
 
 export default function StorePage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(true)
   const [profile, setProfile] = useState<StoreProfile>({
-    name: 'Isabella\'s Edit',
-    bio: 'Curating timeless pieces for the modern minimalist. Based in New York, inspired by Tokyo street style and Scandinavian design.',
-    city: 'New York',
-    style: 'minimal, oversized, neutral',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
-    banner: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    isEditorPick: true,
+    name: '',
+    bio: '',
+    city: '',
+    style: '',
+    avatar: '',
+    banner: '',
+    isEditorPick: false,
     isPublic: true,
-    socialLinks: {
-      instagram: '@isabella_edit',
-      twitter: '@isabella_style',
-      website: 'https://isabella-edit.com'
-    },
-    badges: ['Top Seller', 'Style Star'],
-    tags: ['Minimal', 'Oversized', 'Neutral']
+    socialLinks: {},
+    badges: [],
+    tags: []
   })
 
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [bannerPreview, setBannerPreview] = useState<string | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
+  const [showErrorToast, setShowErrorToast] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Fetch curator profile on mount
+  useEffect(() => {
+    async function fetchProfile() {
+      if (status === 'loading') return
+      
+      if (!session?.user) {
+        router.push('/auth/signin')
+        return
+      }
+
+      try {
+        const response = await fetch('/api/curator/profile')
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile')
+        }
+
+        const data = await response.json()
+        const curatorProfile = data.curatorProfile
+
+        // Parse styleTags if it's a JSON string
+        let tags: string[] = []
+        if (curatorProfile.styleTags) {
+          try {
+            tags = JSON.parse(curatorProfile.styleTags)
+          } catch {
+            tags = []
+          }
+        }
+
+        setProfile({
+          name: curatorProfile.storeName || '',
+          bio: curatorProfile.bio || '',
+          city: curatorProfile.city || '',
+          style: tags.join(', ') || '',
+          avatar: curatorProfile.user?.image || '',
+          banner: curatorProfile.bannerImage || '',
+          isEditorPick: curatorProfile.isEditorsPick || false,
+          isPublic: curatorProfile.isPublic ?? true,
+          socialLinks: {
+            instagram: curatorProfile.instagram || '',
+            twitter: curatorProfile.twitter || '',
+            youtube: curatorProfile.youtube || '',
+            website: curatorProfile.websiteUrl || ''
+          },
+          badges: [],
+          tags: tags,
+          slug: curatorProfile.slug
+        })
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+        setErrorMessage('Failed to load profile')
+        setShowErrorToast(true)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProfile()
+  }, [session, status, router])
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
+      setErrorMessage('File size must be less than 5MB')
+      setShowErrorToast(true)
       return
     }
 
     // Validate file type
-    if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
-      alert('Please upload a JPG or PNG file')
+    if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) {
+      setErrorMessage('Please upload a JPG, PNG, or WebP file')
+      setShowErrorToast(true)
       return
     }
 
+    // Store file for later upload
+    setAvatarFile(file)
+
+    // Show preview
     const reader = new FileReader()
     reader.onload = (e) => {
       setAvatarPreview(e.target?.result as string)
@@ -93,22 +169,28 @@ export default function StorePage() {
     reader.readAsDataURL(file)
   }
 
-  const handleBannerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
+      setErrorMessage('File size must be less than 5MB')
+      setShowErrorToast(true)
       return
     }
 
     // Validate file type
-    if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
-      alert('Please upload a JPG or PNG file')
+    if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) {
+      setErrorMessage('Please upload a JPG, PNG, or WebP file')
+      setShowErrorToast(true)
       return
     }
 
+    // Store file for later upload
+    setBannerFile(file)
+
+    // Show preview
     const reader = new FileReader()
     reader.onload = (e) => {
       setBannerPreview(e.target?.result as string)
@@ -142,16 +224,86 @@ export default function StorePage() {
   const handleSave = async () => {
     setIsSaving(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    console.log('Saving profile:', profile)
-    setIsSaving(false)
-    setHasUnsavedChanges(false)
-    
-    // Show success toast
-    setShowSuccessToast(true)
-    setTimeout(() => setShowSuccessToast(false), 3000)
+    try {
+      let bannerUrl = profile.banner
+      
+      // Upload banner image if changed
+      if (bannerFile) {
+        setIsUploadingBanner(true)
+        const formData = new FormData()
+        formData.append('image', bannerFile)
+        formData.append('type', 'banner')
+        
+        const uploadResponse = await fetch('/api/curator/upload-image', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (!uploadResponse.ok) {
+          const error = await uploadResponse.json()
+          throw new Error(error.error || 'Failed to upload banner image')
+        }
+
+        const uploadData = await uploadResponse.json()
+        bannerUrl = uploadData.url
+        setIsUploadingBanner(false)
+      }
+
+      // Prepare update data
+      const updateData = {
+        storeName: profile.name,
+        bio: profile.bio,
+        city: profile.city,
+        styleTags: JSON.stringify(profile.tags),
+        bannerImage: bannerUrl,
+        instagram: profile.socialLinks.instagram,
+        twitter: profile.socialLinks.twitter,
+        youtube: profile.socialLinks.youtube,
+        websiteUrl: profile.socialLinks.website,
+        isPublic: profile.isPublic
+      }
+
+      // Save to API
+      const response = await fetch('/api/curator/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to save profile')
+      }
+
+      const data = await response.json()
+      
+      // Update local state with saved data
+      setProfile(prev => ({
+        ...prev,
+        banner: bannerUrl
+      }))
+      
+      setHasUnsavedChanges(false)
+      setAvatarFile(null)
+      setBannerFile(null)
+      setAvatarPreview(null)
+      setBannerPreview(null)
+      
+      // Show success toast
+      setShowSuccessToast(true)
+      setTimeout(() => setShowSuccessToast(false), 3000)
+      
+    } catch (error) {
+      console.error('Error saving profile:', error)
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to save profile')
+      setShowErrorToast(true)
+      setTimeout(() => setShowErrorToast(false), 5000)
+    } finally {
+      setIsSaving(false)
+      setIsUploadingBanner(false)
+    }
   }
 
   const togglePublic = () => {
@@ -167,6 +319,17 @@ export default function StorePage() {
     } else {
       window.location.href = '/dashboard/curator'
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-24 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-carbon mx-auto mb-4" />
+          <p className="text-gray-600">Loading your store profile...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -190,12 +353,16 @@ export default function StorePage() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <a
-                href="/curator/isabella"
-                target="_blank"
-                className="flex items-center space-x-2 text-carbon hover:text-black transition-colors"
-              >
-                <Eye className="w-4 h-4" />
+              {profile.slug && (
+                <a
+                  href={`/curator/${profile.slug}`}
+                  target="_blank"
+                  className="flex items-center space-x-2 text-carbon hover:text-black transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>Preview My Store</span>
+                </a>
+              )}
                 <span>Preview My Store</span>
               </a>
             </div>
@@ -557,6 +724,25 @@ export default function StorePage() {
           <span>Profile updated successfully!</span>
           <button
             onClick={() => setShowSuccessToast(false)}
+            className="ml-4"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </motion.div>
+      )}
+
+      {/* Error Toast */}
+      {showErrorToast && (
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="fixed bottom-8 right-8 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 z-50"
+        >
+          <X className="w-5 h-5" />
+          <span>{errorMessage}</span>
+          <button
+            onClick={() => setShowErrorToast(false)}
             className="ml-4"
           >
             <X className="w-4 h-4" />

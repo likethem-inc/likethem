@@ -178,4 +178,143 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// PATCH /api/curator/profile - Update current user's curator profile
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Check if user has a curator profile
+    const existingProfile = await prisma.curatorProfile.findUnique({
+      where: { userId: session.user.id }
+    })
+
+    if (!existingProfile) {
+      return NextResponse.json(
+        { error: 'Curator profile not found' },
+        { status: 404 }
+      )
+    }
+
+    const body = await request.json()
+    const { 
+      storeName, 
+      bio, 
+      city,
+      styleTags,
+      bannerImage,
+      instagram, 
+      tiktok, 
+      youtube, 
+      twitter,
+      websiteUrl,
+      isPublic
+    } = body
+
+    // Prepare update data
+    const updateData: any = {}
+
+    if (storeName !== undefined) {
+      if (!storeName?.trim()) {
+        return NextResponse.json(
+          { error: 'Store name cannot be empty' },
+          { status: 400 }
+        )
+      }
+      updateData.storeName = storeName.trim()
+    }
+
+    if (bio !== undefined) {
+      updateData.bio = bio?.trim() || null
+    }
+
+    if (city !== undefined) {
+      updateData.city = city?.trim() || null
+    }
+
+    if (styleTags !== undefined) {
+      updateData.styleTags = styleTags
+    }
+
+    if (bannerImage !== undefined) {
+      updateData.bannerImage = bannerImage || null
+    }
+
+    if (instagram !== undefined) {
+      updateData.instagram = instagram?.trim() || null
+    }
+
+    if (tiktok !== undefined) {
+      updateData.tiktok = tiktok?.trim() || null
+    }
+
+    if (youtube !== undefined) {
+      updateData.youtube = youtube?.trim() || null
+    }
+
+    if (twitter !== undefined) {
+      updateData.twitter = twitter?.trim() || null
+    }
+
+    if (websiteUrl !== undefined) {
+      updateData.websiteUrl = websiteUrl?.trim() || null
+    }
+
+    if (isPublic !== undefined) {
+      updateData.isPublic = Boolean(isPublic)
+    }
+
+    // Update curator profile
+    const updatedProfile = await prisma.curatorProfile.update({
+      where: { userId: session.user.id },
+      data: updateData,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        }
+      }
+    })
+
+    // Transform the curator profile data to handle null values
+    const transformedProfile = {
+      ...updatedProfile,
+      bio: updatedProfile.bio ?? undefined,
+      bannerImage: updatedProfile.bannerImage ?? undefined,
+      instagram: updatedProfile.instagram ?? undefined,
+      tiktok: updatedProfile.tiktok ?? undefined,
+      youtube: updatedProfile.youtube ?? undefined,
+      twitter: updatedProfile.twitter ?? undefined,
+      websiteUrl: updatedProfile.websiteUrl ?? undefined,
+      city: updatedProfile.city ?? undefined,
+      user: {
+        ...updatedProfile.user,
+        name: updatedProfile.user.name ?? undefined,
+        image: updatedProfile.user.image ?? undefined,
+      }
+    }
+
+    return NextResponse.json({
+      message: 'Curator profile updated successfully',
+      curatorProfile: transformedProfile
+    })
+
+  } catch (error) {
+    console.error('Error updating curator profile:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
 } 
