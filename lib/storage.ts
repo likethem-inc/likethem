@@ -6,7 +6,7 @@ export interface UploadResult {
   altText: string;
 }
 
-const BUCKET_NAME = 'products';
+const BUCKET_NAME = 'likethem-assets';
 
 /**
  * Upload a file to Supabase Storage

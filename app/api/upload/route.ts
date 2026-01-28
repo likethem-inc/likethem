@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Upload to Supabase Storage
-      return uploadToSupabase(file, 'likethem/products')
+      return uploadToSupabase(file, 'products')
     })
 
     const uploadResults = await Promise.all(uploadPromises)
