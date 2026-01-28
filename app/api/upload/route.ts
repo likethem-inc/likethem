@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { v2 as cloudinary } from 'cloudinary'
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
+import { uploadToSupabase } from '@/lib/storage'
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,12 +22,11 @@ export async function POST(request: NextRequest) {
 
     console.log('Upload API: Session found for user:', session.user.id, 'Role:', session.user.role)
 
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Cloudinary configuration missing:', {
-        cloud_name: !!process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: !!process.env.CLOUDINARY_API_KEY,
-        api_secret: !!process.env.CLOUDINARY_API_SECRET
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Supabase configuration missing:', {
+        url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        service_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY
       })
       return NextResponse.json(
         { error: 'Image upload service not configured' },
@@ -70,35 +62,8 @@ export async function POST(request: NextRequest) {
         throw new Error(`File ${file.name} is not an image.`)
       }
 
-      // Convert file to buffer
-      const bytes = await file.arrayBuffer()
-      const buffer = Buffer.from(bytes)
-
-      // Upload to Cloudinary
-      return new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          {
-            folder: 'likethem/products',
-            resource_type: 'image',
-            transformation: [
-              { width: 800, height: 800, crop: 'limit' },
-              { quality: 'auto' }
-            ]
-          },
-          (error, result) => {
-            if (error) {
-              console.error('Cloudinary upload error:', error)
-              reject(error)
-            } else {
-              resolve({
-                url: result?.secure_url,
-                publicId: result?.public_id,
-                altText: file.name
-              })
-            }
-          }
-        ).end(buffer)
-      })
+      // Upload to Supabase Storage
+      return uploadToSupabase(file, 'products')
     })
 
     const uploadResults = await Promise.all(uploadPromises)

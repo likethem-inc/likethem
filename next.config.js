@@ -32,7 +32,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'picsum.photos' },
-      { protocol: 'https', hostname: 'mineihnvptbfkqdfcrzg.supabase.co' },
+      { protocol: 'https', hostname: '*.supabase.co' },
     ],
   },
 };

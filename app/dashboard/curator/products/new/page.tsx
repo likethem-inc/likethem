@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { 
@@ -28,6 +29,8 @@ const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 const availableColors = ['Black', 'White', 'Navy', 'Camel', 'Gray', 'Beige', 'Brown', 'Green', 'Blue', 'Red', 'Pink', 'Yellow']
 
 export default function AddProductPage() {
+  const router = useRouter()
+  const [isCheckingProfile, setIsCheckingProfile] = useState(true)
   const [form, setForm] = useState<ProductForm>({
     name: '',
     price: '',
@@ -42,6 +45,42 @@ export default function AddProductPage() {
   const [newTag, setNewTag] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Check if user has a curator profile before allowing access
+  useEffect(() => {
+    async function checkCuratorProfile() {
+      try {
+        const response = await fetch('/api/curator/profile', {
+          credentials: 'include'
+        })
+        
+        if (!response.ok) {
+          // User doesn't have a curator profile, redirect to setup
+          router.push('/sell')
+          return
+        }
+        
+        setIsCheckingProfile(false)
+      } catch (error) {
+        console.error('Error checking curator profile:', error)
+        router.push('/sell')
+      }
+    }
+
+    checkCuratorProfile()
+  }, [router])
+
+  // Show loading state while checking profile
+  if (isCheckingProfile) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-gray-600">Verificando perfil...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
@@ -116,13 +155,13 @@ export default function AddProductPage() {
     setIsSubmitting(true)
     
     try {
-      // First, upload images to Cloudinary
+      // First, upload images to Supabase Storage
       const formData = new FormData()
       form.images.forEach((image) => {
         formData.append('images', image)
       })
 
-      console.log('Uploading images to Cloudinary...')
+      console.log('Uploading images to Supabase Storage...')
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         credentials: 'include',

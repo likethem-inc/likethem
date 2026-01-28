@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { 
@@ -63,6 +64,7 @@ const parseTags = (tags: string | null | undefined): string[] => {
 }
 
 export default function ProductsPage() {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -78,6 +80,11 @@ export default function ProductsPage() {
       })
       
       if (!response.ok) {
+        if (response.status === 404) {
+          // User doesn't have a curator profile, redirect to setup
+          router.push('/sell')
+          return
+        }
         throw new Error('Failed to fetch products')
       }
       
