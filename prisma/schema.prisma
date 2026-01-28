@@ -89,6 +89,7 @@ model CuratorProfile {
   userId                        String                 @unique
   storeName                     String
   bio                           String?                @db.Text
+  avatarImage                   String?
   bannerImage                   String?
   instagram                     String?
   tiktok                        String?
