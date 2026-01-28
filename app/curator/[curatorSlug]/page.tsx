@@ -290,7 +290,7 @@ export default async function CuratorPage({
               bannerImage: (curator as any).bannerImage || null,
               isEditorsPick: (curator as any).isEditorsPick || false,
               slug: (curator as any).slug,
-              avatarUrl: (curator as any).user?.image || null,
+              avatarUrl: (curator as any).avatarImage || null,
             }}
           />
 
