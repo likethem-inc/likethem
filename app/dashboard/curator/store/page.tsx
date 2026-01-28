@@ -113,7 +113,7 @@ export default function StorePage() {
           bio: curatorProfile.bio || '',
           city: curatorProfile.city || '',
           style: tags.join(', ') || '',
-          avatar: curatorProfile.user?.image || '',
+          avatar: curatorProfile.avatarImage || curatorProfile.user?.image || '',
           banner: curatorProfile.bannerImage || '',
           isEditorPick: curatorProfile.isEditorsPick || false,
           isPublic: curatorProfile.isPublic ?? true,
@@ -225,7 +225,30 @@ export default function StorePage() {
     setIsSaving(true)
     
     try {
+      let avatarUrl = profile.avatar
       let bannerUrl = profile.banner
+
+      // Upload avatar image if changed
+      if (avatarFile) {
+        setIsUploadingAvatar(true)
+        const formData = new FormData()
+        formData.append('image', avatarFile)
+        formData.append('type', 'avatar')
+        
+        const uploadResponse = await fetch('/api/curator/upload-image', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (!uploadResponse.ok) {
+          const error = await uploadResponse.json()
+          throw new Error(error.error || 'Failed to upload avatar image')
+        }
+
+        const uploadData = await uploadResponse.json()
+        avatarUrl = uploadData.url
+        setIsUploadingAvatar(false)
+      }
       
       // Upload banner image if changed
       if (bannerFile) {
@@ -255,6 +278,7 @@ export default function StorePage() {
         bio: profile.bio,
         city: profile.city,
         styleTags: JSON.stringify(profile.tags),
+        avatarImage: avatarUrl,
         bannerImage: bannerUrl,
         instagram: profile.socialLinks.instagram,
         twitter: profile.socialLinks.twitter,
@@ -282,6 +306,7 @@ export default function StorePage() {
       // Update local state with saved data
       setProfile(prev => ({
         ...prev,
+        avatar: avatarUrl,
         banner: bannerUrl
       }))
       
@@ -302,6 +327,7 @@ export default function StorePage() {
       setTimeout(() => setShowErrorToast(false), 5000)
     } finally {
       setIsSaving(false)
+      setIsUploadingAvatar(false)
       setIsUploadingBanner(false)
     }
   }
@@ -363,8 +389,6 @@ export default function StorePage() {
                   <span>Preview My Store</span>
                 </a>
               )}
-                <span>Preview My Store</span>
-              </a>
             </div>
           </div>
           

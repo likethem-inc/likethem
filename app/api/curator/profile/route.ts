@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     const transformedCuratorProfile = {
       ...curatorProfile,
       bio: curatorProfile.bio ?? undefined,
+      avatarImage: curatorProfile.avatarImage ?? undefined,
       bannerImage: curatorProfile.bannerImage ?? undefined,
       instagram: curatorProfile.instagram ?? undefined,
       tiktok: curatorProfile.tiktok ?? undefined,
@@ -210,6 +211,7 @@ export async function PATCH(request: NextRequest) {
       bio, 
       city,
       styleTags,
+      avatarImage,
       bannerImage,
       instagram, 
       tiktok, 
@@ -242,6 +244,10 @@ export async function PATCH(request: NextRequest) {
 
     if (styleTags !== undefined) {
       updateData.styleTags = styleTags
+    }
+
+    if (avatarImage !== undefined) {
+      updateData.avatarImage = avatarImage || null
     }
 
     if (bannerImage !== undefined) {
@@ -291,6 +297,7 @@ export async function PATCH(request: NextRequest) {
     const transformedProfile = {
       ...updatedProfile,
       bio: updatedProfile.bio ?? undefined,
+      avatarImage: updatedProfile.avatarImage ?? undefined,
       bannerImage: updatedProfile.bannerImage ?? undefined,
       instagram: updatedProfile.instagram ?? undefined,
       tiktok: updatedProfile.tiktok ?? undefined,
