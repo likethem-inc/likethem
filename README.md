@@ -70,6 +70,9 @@ LikeThem es una marketplace de moda exclusiva que conecta a los seguidores con l
 - **Styling**: Tailwind CSS
 - **Animaciones**: Framer Motion
 - **Iconos**: Lucide React
+- **Almacenamiento**: Supabase Storage
+- **Base de Datos**: PostgreSQL (Prisma + Supabase)
+- **Autenticación**: NextAuth.js
 - **Imágenes**: Unsplash (placeholder)
 
 ## 📦 Instalación
@@ -85,12 +88,44 @@ cd LikeThem
 npm install
 ```
 
-3. Ejecuta el servidor de desarrollo:
+3. Configura las variables de entorno:
+```bash
+cp .env.example .env
+```
+
+Edita `.env` con tus credenciales:
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL="your-project-url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-here"
+
+# Database (PostgreSQL)
+DATABASE_URL="your-database-url"
+DIRECT_URL="your-direct-database-url"
+```
+
+4. Configura Supabase Storage para imágenes:
+```bash
+# Sigue la guía completa en docs/SUPABASE_STORAGE_SETUP.md
+# O verifica tu configuración con:
+npm run verify:storage
+```
+
+5. Ejecuta el servidor de desarrollo:
 ```bash
 npm run dev
 ```
 
 4. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+
+## 📖 Documentación Adicional
+
+- **[Configuración de Supabase Storage](docs/SUPABASE_STORAGE_SETUP.md)**: Guía completa para configurar el almacenamiento de imágenes
 
 ## 📁 Estructura del Proyecto
 
