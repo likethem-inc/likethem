@@ -116,13 +116,13 @@ export default function AddProductPage() {
     setIsSubmitting(true)
     
     try {
-      // First, upload images to Cloudinary
+      // First, upload images to Supabase Storage
       const formData = new FormData()
       form.images.forEach((image) => {
         formData.append('images', image)
       })
 
-      console.log('Uploading images to Cloudinary...')
+      console.log('Uploading images to Supabase Storage...')
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         credentials: 'include',
