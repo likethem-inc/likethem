@@ -14,6 +14,7 @@ interface User {
   emailVerified: Date | null
   phone: string | null
   role: string
+  passwordHash: string | null
 }
 
 import type { Session } from 'next-auth'
@@ -138,6 +139,14 @@ function PersonalDetails({
     phone: displayPhone
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState('')
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -181,6 +190,78 @@ function PersonalDetails({
       phone: displayPhone
     })
     setIsEditing(false)
+  }
+
+  const handlePasswordChange = (field: string, value: string) => {
+    setPasswordData(prev => ({ ...prev, [field]: value }))
+    setPasswordError('')
+    setPasswordSuccess('')
+  }
+
+  const handleChangePassword = async () => {
+    setPasswordError('')
+    setPasswordSuccess('')
+
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordError('Please fill in all password fields')
+      return
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('New passwords do not match')
+      return
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/account/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+          confirmPassword: passwordData.confirmPassword,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setPasswordSuccess('Password changed successfully!')
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
+        setIsChangingPassword(false)
+        setTimeout(() => setPasswordSuccess(''), 3000)
+      } else {
+        setPasswordError(result.error || 'Failed to change password')
+      }
+    } catch (error) {
+      console.error('[account] Password change error:', error)
+      setPasswordError('Failed to change password. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCancelPasswordChange = () => {
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    })
+    setPasswordError('')
+    setPasswordSuccess('')
+    setIsChangingPassword(false)
   }
 
   return (
@@ -229,9 +310,62 @@ function PersonalDetails({
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Password</label>
-          <button className="w-full px-4 py-3 border border-gray-300 text-left hover:bg-gray-50 transition-colors">
-            Change Password
-          </button>
+          {!isChangingPassword ? (
+            <button 
+              onClick={() => setIsChangingPassword(true)}
+              className="w-full px-4 py-3 border border-gray-300 text-left hover:bg-gray-50 transition-colors"
+            >
+              Change Password
+            </button>
+          ) : (
+            <div className="space-y-3">
+              {user.passwordHash && (
+                <input
+                  type="password"
+                  placeholder="Current Password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                />
+              )}
+              <input
+                type="password"
+                placeholder="New Password"
+                value={passwordData.newPassword}
+                onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
+              <input
+                type="password"
+                placeholder="Confirm New Password"
+                value={passwordData.confirmPassword}
+                onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
+              {passwordError && (
+                <p className="text-sm text-red-600">{passwordError}</p>
+              )}
+              {passwordSuccess && (
+                <p className="text-sm text-green-600">{passwordSuccess}</p>
+              )}
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleCancelPasswordChange}
+                  disabled={isSaving}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangePassword}
+                  disabled={isSaving}
+                  className="flex-1 px-4 py-2 bg-carbon text-white text-sm hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : 'Save Password'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

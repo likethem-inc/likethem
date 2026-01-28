@@ -32,7 +32,8 @@ export default async function AccountPage() {
       phone: true, 
       provider: true, 
       emailVerified: true,
-      role: true
+      role: true,
+      passwordHash: true
     },
   })
 
