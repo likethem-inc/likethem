@@ -78,8 +78,18 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
         </button>
       </form>
 
-      {/* Back link */}
+      {/* Sign up link */}
       <div className="mt-6 text-center">
+        <p className="text-sm text-gray-600">
+          Don&apos;t have an account?{' '}
+          <Link href="/auth/signup" className="font-medium text-black hover:underline">
+            Sign up
+          </Link>
+        </p>
+      </div>
+
+      {/* Back link */}
+      <div className="mt-4 text-center">
         <Link href="/" className="text-sm text-gray-600 hover:underline">
           Back to Home
         </Link>
