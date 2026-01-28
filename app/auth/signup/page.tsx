@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useT } from '@/hooks/useT'
 
 interface SignUpForm {
   name: string
@@ -30,6 +31,7 @@ export default function SignUpPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/'
+  const t = useT();
 
   // Check if user is already signed in
   useEffect(() => {
@@ -53,19 +55,19 @@ export default function SignUpPage() {
 
   const validateForm = (): string | null => {
     if (!form.name.trim()) {
-      return 'Name is required'
+      return t('auth.validation.nameRequired')
     }
     if (!form.email.trim()) {
-      return 'Email is required'
+      return t('auth.validation.emailRequired')
     }
     if (!form.email.includes('@')) {
-      return 'Please enter a valid email address'
+      return t('auth.validation.emailInvalid')
     }
     if (form.password.length < 8) {
-      return 'Password must be at least 8 characters long'
+      return t('auth.validation.passwordLength')
     }
     if (form.password !== form.confirmPassword) {
-      return 'Passwords do not match'
+      return t('auth.validation.passwordMismatch')
     }
     return null
   }
@@ -99,7 +101,7 @@ export default function SignUpPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create account')
+        setError(data.error || t('auth.validation.createAccountError'))
         return
       }
 
@@ -111,7 +113,7 @@ export default function SignUpPage() {
       })
 
       if (result?.error) {
-        setError('Account created but sign-in failed. Please try signing in.')
+        setError(t('auth.validation.accountCreatedSignInFailed'))
         return
       }
 
@@ -123,7 +125,7 @@ export default function SignUpPage() {
       }
       
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError(t('auth.validation.genericError'))
     } finally {
       setIsLoading(false)
     }
@@ -140,12 +142,12 @@ export default function SignUpPage() {
       })
 
       if (result?.error) {
-        setError('Google sign-in failed. Please try again.')
+        setError(t('auth.validation.googleSignInFailed'))
       } else if (result?.url) {
         router.push(result.url)
       }
     } catch (error) {
-      setError('An error occurred during Google sign-in.')
+      setError(t('auth.validation.googleSignInError'))
     } finally {
       setIsGoogleLoading(false)
     }
@@ -159,13 +161,13 @@ export default function SignUpPage() {
           className="flex items-center justify-center space-x-2 text-carbon hover:text-black transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
+          <span>{t('auth.signUp.backToHome')}</span>
         </Link>
         
         <div className="text-center">
-          <h1 className="font-serif text-3xl font-light text-carbon">Create your account</h1>
+          <h1 className="font-serif text-3xl font-light text-carbon">{t('auth.signUp.title')}</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Join LikeThem and start discovering curated fashion
+            {t('auth.signUp.subtitle')}
           </p>
         </div>
       </div>
@@ -194,7 +196,7 @@ export default function SignUpPage() {
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
               )}
-              Continue with Google
+              {t('auth.signUp.continueWithGoogle')}
             </button>
           </div>
 
@@ -204,7 +206,7 @@ export default function SignUpPage() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or sign up with email</span>
+              <span className="px-2 bg-white text-gray-500">{t('auth.signUp.orSignUpWithEmail')}</span>
             </div>
           </div>
 
@@ -217,7 +219,7 @@ export default function SignUpPage() {
 
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full name
+                {t('auth.signUp.fullName')}
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -232,14 +234,14 @@ export default function SignUpPage() {
                   value={form.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="Enter your full name"
+                  placeholder={t('auth.signUp.fullNamePlaceholder')}
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                {t('auth.signUp.emailAddress')}
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -254,14 +256,14 @@ export default function SignUpPage() {
                   value={form.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="Enter your email"
+                  placeholder={t('auth.signUp.emailPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                {t('auth.signUp.password')}
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -276,7 +278,7 @@ export default function SignUpPage() {
                   value={form.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="Create a password"
+                  placeholder={t('auth.signUp.passwordPlaceholder')}
                 />
                 <button
                   type="button"
@@ -290,12 +292,12 @@ export default function SignUpPage() {
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+              <p className="mt-1 text-xs text-gray-500">{t('auth.signUp.passwordHint')}</p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm password
+                {t('auth.signUp.confirmPassword')}
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -310,7 +312,7 @@ export default function SignUpPage() {
                   value={form.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                   className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="Confirm your password"
+                  placeholder={t('auth.signUp.confirmPasswordPlaceholder')}
                 />
                 <button
                   type="button"
@@ -335,32 +337,32 @@ export default function SignUpPage() {
                 {isLoading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  'Create account'
+                  t('auth.signUp.createAccount')
                 )}
               </button>
             </div>
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Already have an account?{' '}
+                {t('auth.signUp.alreadyHaveAccount')}{' '}
                 <Link
                   href={`/auth/signin?redirect=${encodeURIComponent(redirectTo)}`}
                   className="font-medium text-black hover:text-gray-700 transition-colors"
                 >
-                  Sign in
+                  {t('auth.signUp.signInLink')}
                 </Link>
               </p>
             </div>
 
             <div className="text-center text-xs text-gray-500">
               <p>
-                By creating an account, you agree to our{' '}
+                {t('auth.signUp.terms')}{' '}
                 <a href="#" className="text-black hover:underline">
-                  Terms of Service
+                  {t('auth.signUp.termsOfService')}
                 </a>{' '}
-                and{' '}
+                {t('auth.signUp.and')}{' '}
                 <a href="#" className="text-black hover:underline">
-                  Privacy Policy
+                  {t('auth.signUp.privacyPolicy')}
                 </a>
               </p>
             </div>
