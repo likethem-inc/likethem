@@ -63,9 +63,9 @@ body:
       label: Entorno
       description: Información sobre el entorno donde ocurre el bug
       value: |
-        - OS: 
-        - Navegador: 
-        - Versión: 
+        - OS:
+        - Navegador:
+        - Versión:
     validations:
       required: false
 
