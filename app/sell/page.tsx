@@ -109,7 +109,7 @@ export default function BecomeCurator() {
       let bannerImageUrl = null
       if (form.bannerImage) {
         const formData = new FormData()
-        formData.append('file', form.bannerImage)
+        formData.append('images', form.bannerImage)
         
         const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
@@ -118,11 +118,12 @@ export default function BecomeCurator() {
         })
 
         if (!uploadResponse.ok) {
-          throw new Error('Failed to upload banner image')
+          const errorData = await uploadResponse.json()
+          throw new Error(errorData.error || 'Failed to upload banner image')
         }
 
         const uploadData = await uploadResponse.json()
-        bannerImageUrl = uploadData.urls[0]
+        bannerImageUrl = uploadData.images[0].url
       }
 
       // Create curator profile

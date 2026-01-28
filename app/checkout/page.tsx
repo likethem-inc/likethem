@@ -101,7 +101,7 @@ export default function CheckoutPage() {
       // Upload payment proof if provided
       if (paymentProof) {
         const formDataUpload = new FormData()
-        formDataUpload.append('file', paymentProof)
+        formDataUpload.append('images', paymentProof)
         
         const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
@@ -111,7 +111,7 @@ export default function CheckoutPage() {
         
         if (uploadResponse.ok) {
           const uploadResult = await uploadResponse.json()
-          orderData.paymentProof = uploadResult.url
+          orderData.paymentProof = uploadResult.images[0].url
         }
       }
 
