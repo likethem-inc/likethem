@@ -27,6 +27,18 @@ body:
       required: true
 
   - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Criterios de Éxito
+      description: ¿Cómo sabremos que esta funcionalidad está completa y funciona correctamente?
+      placeholder: |
+        - [ ] Criterio 1...
+        - [ ] Criterio 2...
+        - [ ] Criterio 3...
+    validations:
+      required: false
+
+  - type: textarea
     id: alternatives
     attributes:
       label: Alternativas Consideradas
