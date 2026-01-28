@@ -3,41 +3,51 @@
 import { signIn, getCsrfToken } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useT } from "@/hooks/useT";
 
 export default function SignInPage({ searchParams }: { searchParams: { callbackUrl?: string; error?: string } }) {
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
   const error = searchParams?.error;
   const callbackUrl = searchParams?.callbackUrl ?? "/account";
+  const t = useT();
 
   useEffect(() => {
     getCsrfToken().then((token) => setCsrfToken(token || null));
   }, []);
 
+  const getErrorMessage = (errorCode: string) => {
+    switch (errorCode) {
+      case "OAuthAccountNotLinked":
+        return t("auth.error.OAuthAccountNotLinked");
+      case "OAuthCreateAccount":
+        return t("auth.error.OAuthCreateAccount");
+      case "AccessDenied":
+        return t("auth.error.AccessDenied");
+      case "OAuthSignin":
+        return t("auth.error.OAuthSignin");
+      case "Callback":
+      case "OAuthCallback":
+      case "CallbackRouteError":
+        return t("auth.error.OAuthCallback");
+      case "Configuration":
+        return t("auth.error.Configuration");
+      case "EmailCreateAccount":
+        return t("auth.error.EmailCreateAccount");
+      case "CredentialsSignin":
+        return t("auth.error.CredentialsSignin");
+      default:
+        return t("auth.error.generic", { error: errorCode });
+    }
+  };
+
   return (
     <main className="mx-auto max-w-md px-4 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">Sign in</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("auth.signIn.title")}</h1>
 
       {/* Error message */}
       {error && (
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          {error === "OAuthAccountNotLinked" 
-            ? "This email is already associated with another account. Please log in using the original method."
-            : error === "OAuthCreateAccount"
-            ? "We couldn't create your account. This usually means a duplicate email or a database constraint. Please contact support with error code: OAuthCreateAccount"
-            : error === "AccessDenied"
-            ? "Access denied. Please try again."
-            : error === "OAuthSignin"
-            ? "Error initiating Google sign-in. Please try again."
-            : error === "Callback" || error === "OAuthCallback" || error === "CallbackRouteError"
-            ? "There was an error during Google sign-in (OAuth callback). This may be due to a configuration issue. Please try again or contact support if this persists."
-            : error === "Configuration"
-            ? "Authentication configuration error. Please contact support."
-            : error === "EmailCreateAccount"
-            ? "Error creating account with email. Please try again."
-            : error === "CredentialsSignin"
-            ? "Invalid email or password. Please try again."
-            : `Sign-in error: ${error}. Please contact support with this error code if the issue persists.`
-          }
+          {getErrorMessage(error)}
         </div>
       )}
 
@@ -46,11 +56,11 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
         onClick={() => signIn("google", { callbackUrl })}
         className="w-full rounded-md border px-4 py-2 hover:bg-gray-50 transition-colors"
       >
-        Continue with Google
+        {t("auth.signIn.continueWithGoogle")}
       </button>
 
       {/* Divider */}
-      <div className="my-6 text-center text-sm text-gray-500">or</div>
+      <div className="my-6 text-center text-sm text-gray-500">{t("auth.signIn.or")}</div>
 
       {/* Credentials (only works if CredentialsProvider is enabled) */}
       <form method="post" action="/api/auth/callback/credentials" className="space-y-3">
@@ -60,30 +70,30 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
           name="email" 
           type="email" 
           required 
-          placeholder="Email" 
+          placeholder={t("auth.signIn.emailPlaceholder")}
           className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/10"
         />
         <input 
           name="password" 
           type="password" 
           required 
-          placeholder="Password" 
+          placeholder={t("auth.signIn.passwordPlaceholder")}
           className="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black/10"
         />
         <button 
           type="submit" 
           className="w-full rounded-md bg-black px-4 py-2 text-white hover:opacity-90 transition-opacity"
         >
-          Continue with email
+          {t("auth.signIn.continueWithEmail")}
         </button>
       </form>
 
       {/* Sign up link */}
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
-          Don&apos;t have an account?{' '}
+          {t("auth.signIn.noAccount")}{' '}
           <Link href="/auth/signup" className="font-medium text-black hover:underline">
-            Sign up
+            {t("auth.signIn.signUpLink")}
           </Link>
         </p>
       </div>
@@ -91,7 +101,7 @@ export default function SignInPage({ searchParams }: { searchParams: { callbackU
       {/* Back link */}
       <div className="mt-4 text-center">
         <Link href="/" className="text-sm text-gray-600 hover:underline">
-          Back to Home
+          {t("auth.signIn.backToHome")}
         </Link>
       </div>
     </main>
