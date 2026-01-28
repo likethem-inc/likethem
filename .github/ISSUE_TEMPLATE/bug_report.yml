@@ -62,10 +62,6 @@ body:
     attributes:
       label: Entorno
       description: Información sobre el entorno donde ocurre el bug
-      placeholder: |
-        - OS: [e.g., macOS, Windows, Linux]
-        - Navegador: [e.g., Chrome, Safari, Firefox]
-        - Versión: [e.g., 22]
       value: |
         - OS: 
         - Navegador: 
