@@ -1,0 +1,45 @@
+name: 🚀 Feature Request
+description: Proponer una nueva funcionalidad o mejora
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por tomarte el tiempo de completar este formulario de solicitud de funcionalidad.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Descripción del Problema
+      description: ¿Qué problema está resolviendo esta funcionalidad?
+      placeholder: Describe el problema que te gustaría resolver...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución Propuesta
+      description: ¿Cómo te gustaría que se resolviera este problema?
+      placeholder: Describe la solución que propones...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: ¿Has considerado alguna solución alternativa?
+      placeholder: Describe cualquier alternativa que hayas considerado...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto Adicional
+      description: ¿Hay algún contexto adicional o capturas de pantalla que ayuden a entender mejor la solicitud?
+      placeholder: Agrega cualquier otro contexto, capturas de pantalla, mockups, etc.
+    validations:
+      required: false
