@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ArrowLeft,
@@ -31,6 +31,8 @@ import {
   Camera
 } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { safeSrc } from '@/lib/img'
 
 interface CuratorSettings {
   storeName: string
@@ -57,6 +59,7 @@ interface CuratorSettings {
 }
 
 export default function SettingsPage() {
+  const { data: session } = useSession()
   const [activeTab, setActiveTab] = useState<'store' | 'notifications' | 'security' | 'privacy' | 'danger'>('store')
   const [settings, setSettings] = useState<CuratorSettings>({
     storeName: "Isabella's Closet",
@@ -81,6 +84,17 @@ export default function SettingsPage() {
       allowCollaborations: true
     }
   })
+
+  // Sync settings with session data when it loads
+  useEffect(() => {
+    if (session?.user) {
+      setSettings(prev => ({
+        ...prev,
+        storeName: (session.user as any).storeName || prev.storeName,
+        profileImage: session.user.image || prev.profileImage
+      }))
+    }
+  }, [session])
 
   // Security state
   const [currentPassword, setCurrentPassword] = useState('')
@@ -365,7 +379,7 @@ export default function SettingsPage() {
                         <div className="flex items-center space-x-4">
                           <div className="relative">
                             <img
-                              src={profilePreview || settings.profileImage}
+                              src={profilePreview || safeSrc(settings.profileImage)}
                               alt="Profile"
                               className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                             />

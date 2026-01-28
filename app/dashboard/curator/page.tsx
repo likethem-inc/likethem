@@ -11,5 +11,10 @@ export default async function CuratorDashboardPage() {
     redirect('/unauthorized')
   }
 
+  // If curator doesn't have a profile yet, redirect to creation page
+  if (!(user as any).curatorProfileId) {
+    redirect('/sell')
+  }
+
   return <CuratorDashboard user={{ name: user?.name || 'Curator' }} />
 } 
