@@ -42,7 +42,7 @@ export default function ShareButton({ url, title, className }: ShareButtonProps)
       aria-label="Share this closet"
       className={
         className ??
-        "rounded-full border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+        "rounded-full border px-3 py-1.5 text-sm text-white hover:text-gray-700 hover:bg-gray-50 transition"
       }
     >
       {copied ? "Copied!" : "Share"}
