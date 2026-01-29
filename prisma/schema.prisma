@@ -8,39 +8,27 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Role {
-  ADMIN
-  CURATOR
-  BUYER
-}
-
-enum ApplicationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 model User {
-  id            String          @id @default(cuid())
-  email         String          @unique
-  passwordHash  String?         // optional; only for credentials users, null for OAuth users
-  name          String?
-  image         String?
-  provider      String?         // e.g. "google" or "credentials"
-  emailVerified DateTime?
-  phone         String?
-  role          Role            @default(BUYER)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  cartItems     CartItem[]
-  curatorProfile CuratorProfile?
-  favorites     Favorite[]
-  wishlistItems WishlistItem[]
-  follows       Follow[]
-  orders        Order[]         @relation("BuyerOrders")
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String?
+  provider          String?
+  emailVerified     DateTime?
+  phone             String?
+  role              Role               @default(BUYER)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  image             String?
+  name              String?
+  accounts          Account[]
+  cartItems         CartItem[]
+  curatorProfile    CuratorProfile?
+  favorites         Favorite[]
+  follows           Follow[]
+  orders            Order[]            @relation("BuyerOrders")
   sellerApplication SellerApplication?
-  accounts      Account[]
-  sessions      Session[]
+  sessions          Session[]
+  wishlistItems     WishlistItem[]
 
   @@map("users")
 }
@@ -58,8 +46,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -88,20 +75,19 @@ model CuratorProfile {
   id                            String                 @id @default(cuid())
   userId                        String                 @unique
   storeName                     String
-  bio                           String?                @db.Text
-  avatarImage                   String?
+  bio                           String?
   bannerImage                   String?
   instagram                     String?
   tiktok                        String?
   youtube                       String?
   twitter                       String?
-  instagramUrl                  String?                // Full URL (validated)
-  tiktokUrl                     String?                // Full URL (validated)
-  youtubeUrl                    String?                // Full URL (validated)
-  websiteUrl                    String?                // Full URL (validated)
+  instagramUrl                  String?
+  tiktokUrl                     String?
+  youtubeUrl                    String?
+  websiteUrl                    String?
   city                          String?
   country                       String?
-  styleTags                     String?                @default("[]") // JSON array of allowed tags
+  styleTags                     String?                @default("[]")
   isPublic                      Boolean                @default(true)
   isEditorsPick                 Boolean                @default(false)
   notifyFollowers               Boolean                @default(true)
@@ -116,16 +102,16 @@ model CuratorProfile {
   createdAt                     DateTime               @default(now())
   updatedAt                     DateTime               @updatedAt
   slug                          String                 @unique
-  collaborationRequestsReceived CollaborationRequest[] @relation("ToCurator")
+  avatarImage                   String?
   collaborationRequests         CollaborationRequest[] @relation("FromCurator")
-  collaborations2               Collaboration[]        @relation("CuratorCollaborations2")
+  collaborationRequestsReceived CollaborationRequest[] @relation("ToCurator")
   collaborations1               Collaboration[]        @relation("CuratorCollaborations1")
+  collaborations2               Collaboration[]        @relation("CuratorCollaborations2")
   user                          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  followers                     Follow[]
   orders                        Order[]                @relation("CuratorOrders")
   products                      Product[]
-  followers                     Follow[]
 
-  @@unique([slug], map: "curator_slug_unique")
   @@map("curator_profiles")
 }
 
@@ -148,10 +134,10 @@ model Product {
   updatedAt     DateTime       @updatedAt
   cartItems     CartItem[]
   favorites     Favorite[]
-  wishlistItems WishlistItem[]
   orderItems    OrderItem[]
   images        ProductImage[]
   curator       CuratorProfile @relation(fields: [curatorId], references: [id], onDelete: Cascade)
+  wishlistItems WishlistItem[]
 
   @@map("products")
 }
@@ -184,8 +170,8 @@ model Order {
   paymentProof          String?
   transactionCode       String?
   items                 OrderItem[]
-  curator               CuratorProfile   @relation("CuratorOrders", fields: [curatorId], references: [id])
   buyer                 User             @relation("BuyerOrders", fields: [buyerId], references: [id])
+  curator               CuratorProfile   @relation("CuratorOrders", fields: [curatorId], references: [id])
   shippingAddress       ShippingAddress?
 
   @@map("orders")
@@ -199,24 +185,24 @@ model OrderItem {
   price     Float
   size      String?
   color     String?
-  product   Product @relation(fields: [productId], references: [id])
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
 
   @@map("order_items")
 }
 
 model ShippingAddress {
-  id       String  @id @default(cuid())
-  orderId  String  @unique
-  name     String
-  email    String
-  phone    String?
-  address  String
-  city     String
-  state    String
-  zipCode  String
-  country  String
-  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id      String  @id @default(cuid())
+  orderId String  @unique
+  email   String
+  phone   String?
+  address String
+  city    String
+  state   String
+  zipCode String
+  country String
+  name    String
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("shipping_addresses")
 }
@@ -261,8 +247,8 @@ model Collaboration {
   endDate      DateTime?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  curator2     CuratorProfile @relation("CuratorCollaborations2", fields: [curator2Id], references: [id])
   curator1     CuratorProfile @relation("CuratorCollaborations1", fields: [curator1Id], references: [id])
+  curator2     CuratorProfile @relation("CuratorCollaborations2", fields: [curator2Id], references: [id])
 
   @@unique([curator1Id, curator2Id])
   @@map("collaborations")
@@ -277,8 +263,8 @@ model CollaborationRequest {
   status        String         @default("PENDING")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  toCurator     CuratorProfile @relation("ToCurator", fields: [toCuratorId], references: [id], onDelete: Cascade)
   fromCurator   CuratorProfile @relation("FromCurator", fields: [fromCuratorId], references: [id], onDelete: Cascade)
+  toCurator     CuratorProfile @relation("ToCurator", fields: [toCuratorId], references: [id], onDelete: Cascade)
 
   @@map("collaboration_requests")
 }
@@ -286,9 +272,8 @@ model CollaborationRequest {
 model SellerApplication {
   id           String            @id @default(cuid())
   userId       String            @unique
-  name         String
-  socialLinks  String?           // comma-separated or JSON
-  audienceBand String?           // e.g. "LT_10K", "10K_50K"
+  socialLinks  String?
+  audienceBand String?
   reason       String?
   status       ApplicationStatus @default(PENDING)
   reviewedBy   String?
@@ -296,7 +281,7 @@ model SellerApplication {
   decisionNote String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
-
+  name         String
   user         User              @relation(fields: [userId], references: [id])
 
   @@map("seller_applications")
@@ -307,8 +292,8 @@ model Follow {
   userId    String
   curatorId String
   createdAt DateTime       @default(now())
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   curator   CuratorProfile @relation(fields: [curatorId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, curatorId])
   @@map("follows")
@@ -318,10 +303,22 @@ model WishlistItem {
   id        String   @id @default(cuid())
   userId    String
   productId String
-  createdAt DateTime  @default(now())
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
   @@map("wishlist_items")
+}
+
+enum Role {
+  ADMIN
+  CURATOR
+  BUYER
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
