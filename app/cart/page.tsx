@@ -112,6 +112,11 @@ export default function CartPage() {
                     <p className="text-sm text-gray-500 mb-4">
                       Curated by {item.curator}
                     </p>
+                    {(item.size || item.color) && (
+                      <p className="text-sm text-gray-600 mb-4">
+                        {[item.size, item.color].filter(Boolean).join(' • ')}
+                      </p>
+                    )}
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
