@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { ProductImageWithFallback, CuratorImageWithFallback } from "@/components/ImageWithFallback";
+import { ProductImageWithFallback } from "@/components/ImageWithFallback";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import AddToCartButton from "@/components/cart/AddToCartButton";
-import CollapsibleSection from "@/components/ui/CollapsibleSection";
-import WishlistButton from "@/components/product/WishlistButton";
-import { CheckCircle2 } from "lucide-react";
+import ProductInfoSection from "@/components/product/ProductInfoSection";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/t";
 import ProductUnavailable from "@/components/product/ProductUnavailable";
@@ -344,127 +341,28 @@ export default async function ProductPage({ params }: Props) {
         </section>
 
         {/* Info */}
-        <section className="space-y-5">
-          <div>
-            <h1 className="text-2xl font-medium tracking-tight text-neutral-900">{product.title}</h1>
-            <Link
-              href={`/curator/${product.curator.slug}`}
-              className="mt-1 inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900"
-            >
-              <div className="relative h-6 w-6 overflow-hidden rounded-full bg-neutral-200">
-                <CuratorImageWithFallback
-                  src={product.curator.avatar}
-                  alt={product.curator.storeName}
-                  size="avatar"
-                  width={24}
-                  height={24}
-                  className="h-6 w-6 object-cover"
-                />
-              </div>
-              {product.curator.storeName}
-            </Link>
-          </div>
-
-          {/* Price */}
-          <div className="flex items-center gap-4">
-            <div className="text-xl text-neutral-900">
-              ${product.price.toFixed(2)}
-            </div>
-          </div>
-
-          {/* Description (short) */}
-          <p className="text-sm leading-6 text-neutral-600">{product.description}</p>
-
-          {/* Product Metadata (Size, Color, Condition - Informational Only) */}
-          <div className="space-y-3">
-            {product.sizes?.length > 0 && (
-              <div>
-                <div className="text-sm font-medium text-neutral-700 mb-1">{t(locale, 'product.size')}</div>
-                <div className="text-sm text-neutral-600">
-                  {product.sizes.join(', ')}
-                </div>
-              </div>
-            )}
-            {product.colors?.length > 0 && (
-              <div>
-                <div className="text-sm font-medium text-neutral-700 mb-1">{t(locale, 'product.color')}</div>
-                <div className="text-sm text-neutral-600">
-                  {product.colors.join(', ')}
-                </div>
-              </div>
-            )}
-            {/* Condition - gracefully hide if missing */}
-            {(product as any).condition && (
-              <div>
-                <div className="text-sm font-medium text-neutral-700 mb-1">{t(locale, 'product.condition')}</div>
-                <div className="text-sm text-neutral-600 capitalize">
-                  {t(locale, `product.condition.${(product as any).condition.toLowerCase().replace(/\s+/g, '')}` as any) || (product as any).condition}
-                </div>
-              </div>
-            )}
-            
-            {/* Product Clarity Note */}
-            <div className="pt-2 border-t border-neutral-200">
-              <p className="text-xs text-neutral-600 leading-relaxed">
-                {t(locale, 'product.oneOfAKind')}
-                <span className="text-neutral-500"> {t(locale, 'product.onlyOneAvailable')}</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Purchase */}
-          <div className="space-y-4">
-            {/* Authenticity Badge */}
-            <div className="flex items-center gap-2 text-xs text-neutral-600">
-              <CheckCircle2 className="h-4 w-4 text-neutral-500" />
-              <span>{t(locale, 'product.verified')}</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <AddToCartButton
-                productId={product.id}
-                productTitle={product.title}
-                productPrice={product.price}
-                productImage={product.images[0]?.url || ''}
-                curatorName={product.curator.storeName}
-                size={product.sizes?.length > 0 ? product.sizes[0] : undefined}
-                color={product.colors?.length > 0 ? product.colors[0] : undefined}
-                disabled={!product.isActive || product.stockQuantity <= 0}
-                className="flex-1 rounded-xl bg-black px-5 py-3 text-sm text-white hover:bg-neutral-900 disabled:cursor-not-allowed disabled:bg-neutral-200"
-              >
-                {product.stockQuantity > 0 ? t(locale, 'product.addToCart') : t(locale, 'product.outOfStock')}
-              </AddToCartButton>
-              <WishlistButton
-                productSlug={product.slug}
-                curatorSlug={product.curator.slug}
-                variant="icon-only"
-              />
-            </div>
-
-            {/* Shipping & Returns - Collapsible */}
-            <CollapsibleSection title={t(locale, 'product.shippingReturns')}>
-              <div className="space-y-3">
-                <div>
-                  <p className="font-medium text-neutral-900 mb-1">{t(locale, 'product.shipping')}</p>
-                  <p className="text-neutral-600">
-                    {t(locale, 'product.shippingDesc')}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium text-neutral-900 mb-1">{t(locale, 'product.returns')}</p>
-                  <p className="text-neutral-600">
-                    {t(locale, 'product.returnsDesc')}
-                  </p>
-                </div>
-              </div>
-            </CollapsibleSection>
-          </div>
-
-          {/* Subtle meta */}
-          <div className="pt-4 text-xs text-neutral-400">
-            SKU: {product.slug.toUpperCase()} • Curated by {product.curator.storeName}
-          </div>
-        </section>
+        <ProductInfoSection 
+          product={{
+            id: product.id,
+            slug: product.slug,
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            isActive: product.isActive,
+            stockQuantity: product.stockQuantity,
+            sizes: product.sizes,
+            colors: product.colors,
+            images: product.images,
+            curator: {
+              id: product.curator.id,
+              slug: product.curator.slug,
+              storeName: product.curator.storeName,
+              avatar: product.curator.avatar,
+            },
+          }}
+          locale={locale}
+          t={t}
+        />
       </div>
 
       {/* (Optional) Related products */}
