@@ -87,7 +87,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
   useEffect(() => {
     async function loadProduct() {
       try {
-        const response = await fetch(`/api/products/${params.id}`, {
+        const response = await fetch(`/api/curator/products/${params.id}`, {
           credentials: 'include'
         })
         
@@ -210,7 +210,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     setIsSubmitting(true)
     
     try {
-      let allImages = [...form.existingImages]
+      let allImages: Array<{ url: string; altText?: string }> = []
       
       // Upload new images if any
       if (form.images.length > 0) {
@@ -241,7 +241,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           altText: img.altText
         }))
         
-        allImages = [...allImages.map(img => ({ url: img.url, altText: img.altText })), ...uploadedImages]
+        allImages = [...form.existingImages.map(img => ({ url: img.url, altText: img.altText })), ...uploadedImages]
       } else {
         // No new images, just use existing ones
         allImages = form.existingImages.map(img => ({ url: img.url, altText: img.altText }))
@@ -262,7 +262,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       }
 
       console.log('Updating product...')
-      const productResponse = await fetch(`/api/products/${productId}`, {
+      const productResponse = await fetch(`/api/curator/products/${productId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {

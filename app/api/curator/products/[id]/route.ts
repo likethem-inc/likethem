@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 
 const prisma = new PrismaClient()
 
-// GET /api/products/[id] - Get a specific product by ID (curator only)
+// GET /api/curator/products/[id] - Get a specific product by ID (curator only)
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -61,7 +61,7 @@ export async function GET(
   }
 }
 
-// PUT /api/products/[id] - Update a product by ID (curator only)
+// PUT /api/curator/products/[id] - Update a product by ID (curator only)
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
