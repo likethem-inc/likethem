@@ -57,6 +57,7 @@
   "auth.validation.googleSignInError": "Ocurrió un error durante el inicio de sesión con Google.",
   "user.account": "Configuración de cuenta",
   "user.orders": "Tus pedidos",
+  "user.products": "Mis productos",
   "user.curatorDashboard": "Panel del curador",
   "explore.title": "Descubre curadores",
   "explore.subtitle": "Explora closets de los creadores que admiras. Publicaciones frescas, curadas diariamente.",

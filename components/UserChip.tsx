@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { signIn, signOut } from "next-auth/react";
-import { UserCircle, LogOut, ChevronDown, BarChart3, ShoppingBag } from "lucide-react";
+import { UserCircle, LogOut, ChevronDown, BarChart3, ShoppingBag, Package } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { safeSrc } from "@/lib/img";
 import { useT } from "@/hooks/useT";
@@ -81,6 +81,17 @@ export default function UserChip({ user }: { user: User | null }) {
             <ShoppingBag className="size-4" strokeWidth={1.5} />
             {t('user.orders')}
           </Link>
+          
+          {user.role === "CURATOR" && (
+            <Link
+              href="/dashboard/curator/products"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <Package className="size-4" strokeWidth={1.5} />
+              {t('user.products')}
+            </Link>
+          )}
           
           {user.role === "CURATOR" && (
             <Link

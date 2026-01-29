@@ -57,6 +57,7 @@
   "auth.validation.googleSignInError": "An error occurred during Google sign-in.",
   "user.account": "Account Settings",
   "user.orders": "Your Orders",
+  "user.products": "My Products",
   "user.curatorDashboard": "Curator Dashboard",
   "explore.title": "Discover Curators",
   "explore.subtitle": "Explore closets by the creators you admire. Fresh posts, curated daily.",
