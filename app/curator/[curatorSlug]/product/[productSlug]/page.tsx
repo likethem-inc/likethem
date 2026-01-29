@@ -114,17 +114,6 @@ async function fetchData(curatorSlug: string, productSlug: string): Promise<Fetc
       };
     }
 
-    // Check if curator is public
-    if (!product.curator.isPublic) {
-      console.log(`[PRODUCT_DETAIL][${correlationId}][NOT_FOUND]`, {
-        productId: product.id,
-        curatorId: product.curator.id,
-        curatorSlug: product.curator.slug,
-        reason: 'NOT_FOUND', // Treat as not found for UX
-      });
-      return { error: 'product_not_found', correlationId };
-    }
-
     // Normalize sizes and colors from string to array
     const sizes =
       typeof product.sizes === "string" && product.sizes.trim()
