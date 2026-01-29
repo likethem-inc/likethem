@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const files = formData.getAll('images') as File[]
+    const folder = formData.get('folder') as string || 'products'
 
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Upload to Supabase Storage
-      return uploadToSupabase(file, 'products')
+      return uploadToSupabase(file, folder)
     })
 
     const uploadResults = await Promise.all(uploadPromises)

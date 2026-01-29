@@ -160,6 +160,7 @@ export default function AddProductPage() {
       form.images.forEach((image) => {
         formData.append('images', image)
       })
+      formData.append('folder', 'store/products')
 
       console.log('Uploading images to Supabase Storage...')
       const uploadResponse = await fetch('/api/upload', {

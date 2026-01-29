@@ -45,12 +45,12 @@ export async function GET(request: NextRequest) {
     const transformedCuratorProfile = {
       ...curatorProfile,
       bio: curatorProfile.bio ?? undefined,
-      avatarImage: curatorProfile.avatarImage ?? undefined,
-      bannerImage: curatorProfile.bannerImage ?? undefined,
-      instagram: curatorProfile.instagram ?? undefined,
-      tiktok: curatorProfile.tiktok ?? undefined,
-      youtube: curatorProfile.youtube ?? undefined,
-      twitter: curatorProfile.twitter ?? undefined,
+      avatarImage: curatorProfile.avatarImage || curatorProfile.user.image || undefined,
+      bannerImage: curatorProfile.bannerImage || undefined,
+      instagram: curatorProfile.instagram || undefined,
+      tiktok: curatorProfile.tiktok || undefined,
+      youtube: curatorProfile.youtube || undefined,
+      twitter: curatorProfile.twitter || undefined,
       user: {
         ...curatorProfile.user,
         name: curatorProfile.user.name ?? undefined,
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { storeName, bio, instagram, tiktok, bannerImage } = await request.json()
+    const { storeName, bio, instagram, tiktok, avatarImage, bannerImage } = await request.json()
 
     // Validation
     if (!storeName?.trim()) {
@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
         storeName: storeName.trim(),
         slug: uniqueSlug,
         bio: bio.trim(),
+        avatarImage: avatarImage || null,
         instagram: instagram?.trim() || null,
         tiktok: tiktok?.trim() || null,
         bannerImage: bannerImage || null,
@@ -218,7 +219,14 @@ export async function PATCH(request: NextRequest) {
       youtube, 
       twitter,
       websiteUrl,
-      isPublic
+      isPublic,
+      notifyFollowers,
+      notifyFavorites,
+      notifyCollaborations,
+      notifyOrders,
+      showSales,
+      showEarnings,
+      allowCollaborations
     } = body
 
     // Prepare update data
@@ -278,6 +286,14 @@ export async function PATCH(request: NextRequest) {
       updateData.isPublic = Boolean(isPublic)
     }
 
+    if (notifyFollowers !== undefined) updateData.notifyFollowers = Boolean(notifyFollowers)
+    if (notifyFavorites !== undefined) updateData.notifyFavorites = Boolean(notifyFavorites)
+    if (notifyCollaborations !== undefined) updateData.notifyCollaborations = Boolean(notifyCollaborations)
+    if (notifyOrders !== undefined) updateData.notifyOrders = Boolean(notifyOrders)
+    if (showSales !== undefined) updateData.showSales = Boolean(showSales)
+    if (showEarnings !== undefined) updateData.showEarnings = Boolean(showEarnings)
+    if (allowCollaborations !== undefined) updateData.allowCollaborations = Boolean(allowCollaborations)
+
     // Update curator profile
     const updatedProfile = await prisma.curatorProfile.update({
       where: { userId: session.user.id },
@@ -297,7 +313,7 @@ export async function PATCH(request: NextRequest) {
     const transformedProfile = {
       ...updatedProfile,
       bio: updatedProfile.bio ?? undefined,
-      avatarImage: updatedProfile.avatarImage ?? undefined,
+      avatarImage: updatedProfile.avatarImage || updatedProfile.user.image || undefined,
       bannerImage: updatedProfile.bannerImage ?? undefined,
       instagram: updatedProfile.instagram ?? undefined,
       tiktok: updatedProfile.tiktok ?? undefined,

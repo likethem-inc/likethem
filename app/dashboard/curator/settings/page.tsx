@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { safeSrc } from '@/lib/img'
 
 interface CuratorSettings {
@@ -58,19 +59,22 @@ interface CuratorSettings {
   }
 }
 
+const DEFAULT_BANNER = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
+
 export default function SettingsPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'store' | 'notifications' | 'security' | 'privacy' | 'danger'>('store')
   const [settings, setSettings] = useState<CuratorSettings>({
-    storeName: "Isabella's Closet",
-    bio: "Eclectic, vibrant, conscious fashion for the modern woman who values both style and sustainability.",
-    profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
-    bannerImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    storeName: '',
+    bio: '',
+    profileImage: '',
+    bannerImage: DEFAULT_BANNER,
     socialLinks: {
-      instagram: "https://instagram.com/isabella_edit",
-      tiktok: "https://tiktok.com/@isabella_style",
-      youtube: "",
-      twitter: "https://twitter.com/isabella_fashion"
+      instagram: '',
+      tiktok: '',
+      youtube: '',
+      twitter: ''
     },
     notifications: {
       followers: true,
@@ -85,16 +89,73 @@ export default function SettingsPage() {
     }
   })
 
-  // Sync settings with session data when it loads
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [profileError, setProfileError] = useState<string | null>(null)
+
   useEffect(() => {
-    if (session?.user) {
-      setSettings(prev => ({
-        ...prev,
-        storeName: (session.user as any).storeName || prev.storeName,
-        profileImage: session.user.image || prev.profileImage
-      }))
+    if (status === 'loading') return
+
+    if (!session?.user) {
+      router.push('/auth/signin?redirect=/dashboard/curator/settings')
+      return
     }
-  }, [session])
+
+    const fetchProfile = async () => {
+      setIsLoadingProfile(true)
+      setProfileError(null)
+
+      try {
+        const response = await fetch('/api/curator/profile', {
+          credentials: 'include'
+        })
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            router.push('/sell')
+            return
+          }
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to load store profile')
+        }
+
+        const data = await response.json()
+        const profile = data?.curatorProfile
+
+        setSettings(prev => ({
+          ...prev,
+          storeName: profile?.storeName || '',
+          bio: profile?.bio || '',
+          profileImage: profile?.avatarImage || session.user?.image || '',
+          bannerImage: profile?.bannerImage || DEFAULT_BANNER,
+          socialLinks: {
+            instagram: profile?.instagram || '',
+            tiktok: profile?.tiktok || '',
+            youtube: profile?.youtube || '',
+            twitter: profile?.twitter || ''
+          },
+          notifications: {
+            followers: profile?.notifyFollowers ?? true,
+            favorites: profile?.notifyFavorites ?? true,
+            collaborations: profile?.notifyCollaborations ?? true,
+            orders: profile?.notifyOrders ?? true
+          },
+          privacy: {
+            showSales: profile?.showSales ?? false,
+            showEarnings: profile?.showEarnings ?? true,
+            allowCollaborations: profile?.allowCollaborations ?? true
+          }
+        }))
+
+        setHasUnsavedChanges(false)
+      } catch (error) {
+        setProfileError(error instanceof Error ? error.message : 'Failed to load store profile')
+      } finally {
+        setIsLoadingProfile(false)
+      }
+    }
+
+    fetchProfile()
+  }, [session, status, router])
 
   // Security state
   const [currentPassword, setCurrentPassword] = useState('')
@@ -105,6 +166,8 @@ export default function SettingsPage() {
   // Image upload states
   const [profilePreview, setProfilePreview] = useState<string | null>(null)
   const [bannerPreview, setBannerPreview] = useState<string | null>(null)
+  const [profileFile, setProfileFile] = useState<File | null>(null)
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
 
   // Danger zone state
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -181,34 +244,118 @@ export default function SettingsPage() {
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const result = e.target?.result as string
-      if (type === 'profile') {
-        setProfilePreview(result)
-        handleFieldChange('profileImage', result)
-      } else {
-        setBannerPreview(result)
-        handleFieldChange('bannerImage', result)
-      }
-      setHasUnsavedChanges(true)
+    // Update state with file and local preview
+    if (type === 'profile') {
+      setProfileFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => setProfilePreview(e.target?.result as string)
+      reader.readAsDataURL(file)
+    } else {
+      setBannerFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => setBannerPreview(e.target?.result as string)
+      reader.readAsDataURL(file)
     }
-    reader.readAsDataURL(file)
+    setHasUnsavedChanges(true)
   }
 
   const saveStoreInfo = async () => {
     setIsSaving(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    console.log('Saving store info:', settings)
-    
-    setIsSaving(false)
-    setHasUnsavedChanges(false)
-    setShowSuccessToast(true)
-    
-    setTimeout(() => setShowSuccessToast(false), 3000)
+    try {
+      let avatarUrl = settings.profileImage
+      let bannerUrl = settings.bannerImage
+
+      // Upload profile image if changed
+      if (profileFile) {
+        const formData = new FormData()
+        formData.append('images', profileFile)
+        formData.append('folder', 'store/avatars')
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          // API returns an 'images' array of UploadResult objects
+          if (uploadData.images && uploadData.images.length > 0) {
+            avatarUrl = uploadData.images[0].url
+          }
+        } else {
+          throw new Error('Failed to upload profile image')
+        }
+      }
+
+      // Upload banner image if changed
+      if (bannerFile) {
+        const formData = new FormData()
+        formData.append('images', bannerFile)
+        formData.append('folder', 'store/banners')
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          if (uploadData.images && uploadData.images.length > 0) {
+            bannerUrl = uploadData.images[0].url
+          }
+        } else {
+          throw new Error('Failed to upload banner image')
+        }
+      }
+
+      // Prepare patch data
+      const patchData = {
+        storeName: settings.storeName,
+        bio: settings.bio,
+        avatarImage: avatarUrl,
+        bannerImage: bannerUrl,
+        instagram: settings.socialLinks.instagram,
+        tiktok: settings.socialLinks.tiktok,
+        youtube: settings.socialLinks.youtube,
+        twitter: settings.socialLinks.twitter
+      }
+
+      const response = await fetch('/api/curator/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(patchData)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update profile')
+      }
+
+      // Update local state with final URLs
+      setSettings(prev => ({
+        ...prev,
+        profileImage: avatarUrl,
+        bannerImage: bannerUrl
+      }))
+      
+      // Clear files and previews
+      setProfileFile(null)
+      setBannerFile(null)
+      setProfilePreview(null)
+      setBannerPreview(null)
+
+      setHasUnsavedChanges(false)
+      setShowSuccessToast(true)
+      setTimeout(() => setShowSuccessToast(false), 3000)
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      alert(error instanceof Error ? error.message : 'Failed to save settings')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const changePassword = async () => {
@@ -245,31 +392,66 @@ export default function SettingsPage() {
   const updateNotifications = async () => {
     setIsSaving(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    console.log('Updating notifications:', settings.notifications)
-    
-    setIsSaving(false)
-    setHasUnsavedChanges(false)
-    setShowSuccessToast(true)
-    
-    setTimeout(() => setShowSuccessToast(false), 3000)
+    try {
+      const response = await fetch('/api/curator/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          notifyFollowers: settings.notifications.followers,
+          notifyFavorites: settings.notifications.favorites,
+          notifyCollaborations: settings.notifications.collaborations,
+          notifyOrders: settings.notifications.orders
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update notifications')
+      }
+
+      setHasUnsavedChanges(false)
+      setShowSuccessToast(true)
+      setTimeout(() => setShowSuccessToast(false), 3000)
+    } catch (error) {
+      console.error('Error updating notifications:', error)
+      alert(error instanceof Error ? error.message : 'Failed to update notifications')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const updatePrivacy = async () => {
     setIsSaving(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    console.log('Updating privacy settings:', settings.privacy)
-    
-    setIsSaving(false)
-    setHasUnsavedChanges(false)
-    setShowSuccessToast(true)
-    
-    setTimeout(() => setShowSuccessToast(false), 3000)
+    try {
+      const response = await fetch('/api/curator/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          showSales: settings.privacy.showSales,
+          showEarnings: settings.privacy.showEarnings,
+          allowCollaborations: settings.privacy.allowCollaborations
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update privacy settings')
+      }
+
+      setHasUnsavedChanges(false)
+      setShowSuccessToast(true)
+      setTimeout(() => setShowSuccessToast(false), 3000)
+    } catch (error) {
+      console.error('Error updating privacy:', error)
+      alert(error instanceof Error ? error.message : 'Failed to update privacy settings')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const deleteAccount = async () => {
@@ -291,6 +473,14 @@ export default function SettingsPage() {
     
     // Redirect to homepage after deletion
     window.location.href = '/'
+  }
+
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-carbon rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -367,6 +557,11 @@ export default function SettingsPage() {
                   transition={{ duration: 0.5 }}
                 >
                   <h2 className="text-2xl font-light mb-6">Store Information</h2>
+                  {profileError && (
+                    <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {profileError}
+                    </div>
+                  )}
                   
                   <div className="space-y-8">
                     {/* Profile & Banner Images */}
@@ -408,7 +603,7 @@ export default function SettingsPage() {
                         <div className="space-y-3">
                           <div className="relative">
                             <img
-                              src={bannerPreview || settings.bannerImage}
+                              src={bannerPreview || settings.bannerImage || DEFAULT_BANNER}
                               alt="Banner"
                               className="w-full h-20 rounded-lg object-cover border-2 border-gray-200"
                             />
@@ -477,6 +672,19 @@ export default function SettingsPage() {
                           />
                         </div>
 
+                         <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            TikTok
+                          </label>
+                          <input
+                            type="url"
+                            value={settings.socialLinks.tiktok}
+                            onChange={(e) => handleSocialLinkChange('tiktok', e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
+                            placeholder="https://tiktok.com/@username"
+                          />
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             <Twitter className="w-4 h-4 inline mr-2" />
@@ -505,18 +713,7 @@ export default function SettingsPage() {
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            TikTok
-                          </label>
-                          <input
-                            type="url"
-                            value={settings.socialLinks.tiktok}
-                            onChange={(e) => handleSocialLinkChange('tiktok', e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
-                            placeholder="https://tiktok.com/@username"
-                          />
-                        </div>
+                       
                       </div>
                     </div>
 
