@@ -89,7 +89,7 @@ export default function ImageWithFallback({
   // If no src provided initially, use fallback immediately
   if (!src || src.trim() === '') {
     return (
-      <div className={`relative ${className}`}>
+      <div className={`relative ${fill ? 'w-full h-full' : ''} ${className}`}>
         <div 
           className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center"
           style={fill ? {} : { width, height }}
@@ -113,7 +113,7 @@ export default function ImageWithFallback({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${fill ? 'w-full h-full' : ''} ${className}`}>
       <Image
         src={finalSrc}
         alt={alt}

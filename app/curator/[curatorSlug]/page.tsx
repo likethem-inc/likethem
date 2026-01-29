@@ -4,6 +4,7 @@ import { CuratorSEO } from '@/components/SEO'
 import CuratorHero from '@/components/curator/CuratorHero'
 import CuratorTabs from './CuratorTabs'
 import ClosetSectionWrapper from '@/components/curator/ClosetSectionWrapper'
+import { prisma } from '@/lib/prisma'
 import { 
   getMockCuratorBySlug, 
   getMockProductsByCurator, 
@@ -16,19 +17,70 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const getBaseUrl = () => process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
+const DEFAULT_BANNER = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
+
+const toPublicUrl = (path?: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http') || path.startsWith('data:')) return path
+  if (path.startsWith('/')) return path
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!base) return path
+  return `${base}/storage/v1/object/public/likethem-assets/${path}`
+}
+
+const getFirstProductImageUrl = (product: any) => {
+  // If it's already a full URL in images[0].url, it was normalized by fetchCuratorBySlug
+  if (Array.isArray(product?.images) && product.images[0]?.url) return product.images[0].url
+  if (Array.isArray(product?.product_images) && product.product_images[0]?.url) return product.product_images[0].url
+  if (typeof product?.imageUrl === 'string' && product.imageUrl.trim().length > 0) return product.imageUrl
+  return null
+}
 
 const fetchCuratorBySlug = async (slug: string) => {
-  const res = await fetch(`${getBaseUrl()}/api/curators/${encodeURIComponent(slug)}`, {
-    cache: 'no-store'
-  })
+  try {
+    const curator = await prisma.curatorProfile.findUnique({
+      where: { slug: decodeURIComponent(slug) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
+        products: {
+          where: { isActive: true },
+          include: {
+            images: {
+              orderBy: { order: 'asc' }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    })
 
-  if (!res.ok) {
+    if (!curator || !curator.isPublic) {
+      return null
+    }
+
+    // Normalize images
+    return {
+      ...curator,
+      avatarImage: toPublicUrl(curator.avatarImage) || curator.user.image || null,
+      bannerImage: toPublicUrl(curator.bannerImage),
+      products: curator.products.map(product => ({
+        ...product,
+        images: product.images.map(image => ({
+          ...image,
+          url: toPublicUrl(image.url)
+        }))
+      }))
+    }
+  } catch (error) {
+    console.error('[fetchCuratorBySlug] Error:', error)
     return null
   }
-
-  const data = await res.json()
-  return data?.curator ?? null
 }
 
 const parseIdOrSlug = (param: string) => {
@@ -58,7 +110,7 @@ export async function generateMetadata({ params }: CuratorPageProps) {
     }
 
     const description = curator.bio || `Discover unique fashion curated by ${curator.storeName}`
-    const imageUrl = curator.bannerImage || ''
+    const imageUrl = curator.bannerImage || DEFAULT_BANNER
 
     return {
       title: `${curator.storeName} - Curator`,
@@ -154,7 +206,7 @@ export default async function CuratorPage({
         title: p.title,
         price: Number(p.price ?? 0),
         slug: p.slug ?? null,
-        imageUrl: (Array.isArray(p.images) && p.images[0]?.url) || null,
+        imageUrl: getFirstProductImageUrl(p),
         category: p.category ?? null,
         createdAt: p.createdAt,
         visibility: 'general' as const // Temporary default until visibility system is implemented
@@ -187,7 +239,7 @@ export default async function CuratorPage({
     ]
 
     const description = (curator as any).bio || `Discover unique fashion curated by ${(curator as any).storeName}`
-    const imageUrl = (curator as any).bannerImage || ''
+    const imageUrl = (curator as any).bannerImage || DEFAULT_BANNER
 
     console.log('[curator][page] Successfully loaded curator with 3-tier system:', {
       id: (curator as any).id,
@@ -222,7 +274,7 @@ export default async function CuratorPage({
               tiktokUrl: (curator as any).tiktokUrl,
               youtubeUrl: (curator as any).youtubeUrl,
               websiteUrl: (curator as any).websiteUrl,
-              bannerImage: (curator as any).bannerImage || null,
+              bannerImage: (curator as any).bannerImage || DEFAULT_BANNER,
               isEditorsPick: (curator as any).isEditorsPick || false,
               slug: (curator as any).slug,
               avatarUrl: (curator as any).avatarImage || null,

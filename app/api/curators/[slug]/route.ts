@@ -6,6 +6,15 @@ export const runtime = 'nodejs';
 
 const prisma = new PrismaClient()
 
+const toPublicUrl = (path?: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http') || path.startsWith('data:')) return path
+  if (path.startsWith('/')) return path
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!base) return path
+  return `${base}/storage/v1/object/public/likethem-assets/${path}`
+}
+
 // GET /api/curators/[slug] - Get curator profile and products (public access)
 export async function GET(
   request: NextRequest,
@@ -63,8 +72,8 @@ export async function GET(
         id: curator.id,
         storeName: curator.storeName,
         bio: curator.bio,
-        avatarImage: curator.avatarImage || curator.user.image || null,
-        bannerImage: curator.bannerImage,
+        avatarImage: toPublicUrl(curator.avatarImage) || curator.user.image || null,
+        bannerImage: toPublicUrl(curator.bannerImage),
         instagram: curator.instagram,
         tiktok: curator.tiktok,
         youtube: curator.youtube,
@@ -86,7 +95,10 @@ export async function GET(
           slug: product.slug,
           createdAt: product.createdAt,
           updatedAt: product.updatedAt,
-          images: product.images
+          images: product.images.map(image => ({
+            ...image,
+            url: toPublicUrl(image.url)
+          }))
         }))
       }
     })

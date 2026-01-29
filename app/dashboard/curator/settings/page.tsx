@@ -37,6 +37,7 @@ import { safeSrc } from '@/lib/img'
 
 interface CuratorSettings {
   storeName: string
+  slug: string
   bio: string
   profileImage: string
   bannerImage: string
@@ -56,6 +57,7 @@ interface CuratorSettings {
     showSales: boolean
     showEarnings: boolean
     allowCollaborations: boolean
+    isPublic: boolean
   }
 }
 
@@ -67,6 +69,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'store' | 'notifications' | 'security' | 'privacy' | 'danger'>('store')
   const [settings, setSettings] = useState<CuratorSettings>({
     storeName: '',
+    slug: '',
     bio: '',
     profileImage: '',
     bannerImage: DEFAULT_BANNER,
@@ -85,7 +88,8 @@ export default function SettingsPage() {
     privacy: {
       showSales: false,
       showEarnings: true,
-      allowCollaborations: true
+      allowCollaborations: true,
+      isPublic: true
     }
   })
 
@@ -124,6 +128,7 @@ export default function SettingsPage() {
         setSettings(prev => ({
           ...prev,
           storeName: profile?.storeName || '',
+          slug: profile?.slug || '',
           bio: profile?.bio || '',
           profileImage: profile?.avatarImage || session.user?.image || '',
           bannerImage: profile?.bannerImage || DEFAULT_BANNER,
@@ -142,7 +147,8 @@ export default function SettingsPage() {
           privacy: {
             showSales: profile?.showSales ?? false,
             showEarnings: profile?.showEarnings ?? true,
-            allowCollaborations: profile?.allowCollaborations ?? true
+            allowCollaborations: profile?.allowCollaborations ?? true,
+            isPublic: profile?.isPublic ?? true
           }
         }))
 
@@ -318,7 +324,15 @@ export default function SettingsPage() {
         instagram: settings.socialLinks.instagram,
         tiktok: settings.socialLinks.tiktok,
         youtube: settings.socialLinks.youtube,
-        twitter: settings.socialLinks.twitter
+        twitter: settings.socialLinks.twitter,
+        notifyFollowers: settings.notifications.followers,
+        notifyFavorites: settings.notifications.favorites,
+        notifyCollaborations: settings.notifications.collaborations,
+        notifyOrders: settings.notifications.orders,
+        showSales: settings.privacy.showSales,
+        showEarnings: settings.privacy.showEarnings,
+        allowCollaborations: settings.privacy.allowCollaborations,
+        isPublic: settings.privacy.isPublic
       }
 
       const response = await fetch('/api/curator/profile', {
@@ -635,6 +649,13 @@ export default function SettingsPage() {
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
                           placeholder="Enter your store name"
                         />
+                        {settings.slug && (
+                          <p className="mt-2 text-xs text-blue-600 font-medium">
+                            <a href={`/curator/${settings.slug}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                              Ver tienda pública: likethem.com/curator/{settings.slug}
+                            </a>
+                          </p>
+                        )}
                       </div>
 
                       <div>
