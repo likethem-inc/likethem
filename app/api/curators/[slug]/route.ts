@@ -63,6 +63,7 @@ export async function GET(
         id: curator.id,
         storeName: curator.storeName,
         bio: curator.bio,
+        avatarImage: curator.avatarImage || curator.user.image || null,
         bannerImage: curator.bannerImage,
         instagram: curator.instagram,
         tiktok: curator.tiktok,

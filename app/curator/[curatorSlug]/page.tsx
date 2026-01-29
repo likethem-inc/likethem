@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import { getSupabaseServer } from '@/lib/supabase-server'
 import { checkAccessServer } from '@/lib/access/checkAccessServer'
 import { CuratorSEO } from '@/components/SEO'
 import CuratorHero from '@/components/curator/CuratorHero'
@@ -17,6 +16,21 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+const getBaseUrl = () => process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
+
+const fetchCuratorBySlug = async (slug: string) => {
+  const res = await fetch(`${getBaseUrl()}/api/curators/${encodeURIComponent(slug)}`, {
+    cache: 'no-store'
+  })
+
+  if (!res.ok) {
+    return null
+  }
+
+  const data = await res.json()
+  return data?.curator ?? null
+}
+
 const parseIdOrSlug = (param: string) => {
   const n = Number(param)
   const numericId = Number.isFinite(n) && String(n) === param ? n : undefined
@@ -33,20 +47,7 @@ export async function generateMetadata({ params }: CuratorPageProps) {
     const { numericId, isUuid, slug } = parseIdOrSlug(params.curatorSlug)
     console.log('[curator][metadata] Parsed params:', { numericId, isUuid, slug, original: params.curatorSlug })
 
-    const s = getSupabaseServer()
-    const { data: curator, error } = await s
-      .from('curator_profiles')
-      .select('*')
-      .or(`id.eq.${slug},slug.eq.${slug}`)
-      .single()
-
-    if (error) {
-      console.error('[curator][metadata] error', error)
-      return {
-        title: 'Curator Not Found',
-        description: 'The requested curator could not be found.'
-      }
-    }
+    const curator = await fetchCuratorBySlug(slug)
 
     if (!curator) {
       console.log('[curator][metadata] Curator not found for slug:', slug)
@@ -56,35 +57,26 @@ export async function generateMetadata({ params }: CuratorPageProps) {
       }
     }
 
-    // Only gate on isPublic === false
-    if ((curator as any).isPublic === false) {
-      console.log('[curator][metadata] Curator is not public:', { id: (curator as any).id, isPublic: (curator as any).isPublic })
+    const description = curator.bio || `Discover unique fashion curated by ${curator.storeName}`
+    const imageUrl = curator.bannerImage || ''
+
     return {
-      title: 'Curator Not Found',
-      description: 'The requested curator could not be found.'
-    }
-  }
-
-    const description = (curator as any).bio || `Discover unique fashion curated by ${(curator as any).storeName}`
-    const imageUrl = (curator as any).bannerImage || ''
-
-  return {
-      title: `${(curator as any).storeName} - Curator`,
-    description: description.substring(0, 160),
-    openGraph: {
-        title: `${(curator as any).storeName} - Curator`,
+      title: `${curator.storeName} - Curator`,
       description: description.substring(0, 160),
-      images: imageUrl ? [imageUrl] : [],
-      type: 'profile',
-        url: `/curator/${(curator as any).slug}`
-    },
-    twitter: {
-      card: 'summary_large_image',
-        title: `${(curator as any).storeName} - Curator`,
-      description: description.substring(0, 160),
-      images: imageUrl ? [imageUrl] : []
+      openGraph: {
+        title: `${curator.storeName} - Curator`,
+        description: description.substring(0, 160),
+        images: imageUrl ? [imageUrl] : [],
+        type: 'profile',
+        url: `/curator/${curator.slug}`
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${curator.storeName} - Curator`,
+        description: description.substring(0, 160),
+        images: imageUrl ? [imageUrl] : []
+      }
     }
-  }
   } catch (error) {
     console.error('[curator][metadata] Error:', error)
     return {
@@ -118,32 +110,12 @@ export default async function CuratorPage({
     console.log('[curator:slug] incoming', slug)
     console.log('[curator][page] Parsed params:', { numericId, isUuid, slug, original: params.curatorSlug, tab, selectedCategory })
 
-    let curator: any = null
+    let curator: any = await fetchCuratorBySlug(slug)
     let useMockData = false
 
-    try {
-      const s = getSupabaseServer()
-      
-      // 1) Fetch curator allowing id OR slug
-      const { data: curatorData, error: curatorError } = await s
-        .from('curator_profiles')
-        .select('*')
-        .or(`slug.eq.${slug},id.eq.${slug}`)
-        .single()
-
-      if (curatorError) {
-        console.error('[curator/page] Supabase error, falling back to mock data:', curatorError)
-        useMockData = true
-      } else {
-        curator = curatorData
-      }
-    } catch (error) {
-      console.error('[curator/page] Supabase connection failed, using mock data:', error)
+    // Fallback to mock data if API fails
+    if (!curator) {
       useMockData = true
-    }
-
-    // Fallback to mock data if Supabase fails
-    if (useMockData) {
       curator = getMockCuratorBySlug(slug)
       if (!curator) {
         console.log('[curator/page] Curator not found in mock data for slug:', slug)
@@ -151,17 +123,6 @@ export default async function CuratorPage({
       }
     }
     
-    if (!curator) {
-      console.log('[curator/page] Curator not found for slug:', slug)
-    notFound()
-  }
-
-    // Only gate on isPublic === false
-    if ((curator as any).isPublic === false) {
-      console.log('[curator/page] Curator is not public:', { id: (curator as any).id, isPublic: (curator as any).isPublic })
-      notFound()
-    }
-
     console.log('[curator][page] Found curator:', { id: (curator as any).id, storeName: (curator as any).storeName, useMockData })
 
     // 2) Get tab counts and active drop
@@ -187,48 +148,22 @@ export default async function CuratorPage({
         products = allProducts
       }
     } else {
-      // Use Supabase (when available)
-      const s = getSupabaseServer()
-      const [generalCountResult, innerCountResult, dropCountResult] = await Promise.all([
-        s.from('products')
-          .select('id', { count: 'exact', head: true })
-          .eq('curatorId', (curator as any).id)
-          .eq('isActive', true),
-        s.from('products')
-          .select('id', { count: 'exact', head: true })
-          .eq('curatorId', (curator as any).id)
-          .eq('isActive', true),
-        Promise.resolve({ count: 0 }) // No drops yet
-      ])
-
-      generalCount = generalCountResult
-      innerCount = innerCountResult
-      dropCount = dropCountResult
-      activeDrop = { data: null }
-      
-      // Fetch products from Supabase
-      let productsQuery = s
-        .from('products')
-        .select(`
-          id, title, price, slug, category, createdAt,
-          product_images (
-            url, "order"
-          )
-        `)
-        .eq('curatorId', (curator as any).id)
-        .eq('isActive', true)
-
-      const { data: productsRaw } = await productsQuery
-      products = ((productsRaw as any[]) || []).map((p: any) => ({
+      const rawProducts = (curator as any).products || []
+      products = rawProducts.map((p: any) => ({
         id: p.id,
         title: p.title,
         price: Number(p.price ?? 0),
         slug: p.slug ?? null,
-        imageUrl: (Array.isArray(p.product_images) && p.product_images[0]?.url) || null,
+        imageUrl: (Array.isArray(p.images) && p.images[0]?.url) || null,
         category: p.category ?? null,
         createdAt: p.createdAt,
         visibility: 'general' as const // Temporary default until visibility system is implemented
       }))
+
+      generalCount = { count: products.length }
+      innerCount = { count: 0 }
+      dropCount = { count: 0 }
+      activeDrop = { data: null }
     }
 
     // 3) Check access for inner tier
