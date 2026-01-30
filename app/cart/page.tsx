@@ -192,13 +192,13 @@ export default function CartPage() {
               {/* Promo Code (Optional) */}
               <div className="mb-6">
                 <label className="block text-sm font-medium mb-2">Promo Code</label>
-                <div className="flex">
+                <div className="flex w-full overflow-hidden">
                   <input
                     type="text"
                     placeholder="Enter code"
-                    className="flex-1 px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                    className="min-w-0 flex-1 px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
                   />
-                  <button className="px-4 py-3 bg-carbon text-white hover:bg-gray-800 transition-colors">
+                  <button className="shrink-0 px-4 py-3 bg-carbon text-white hover:bg-gray-800 transition-colors">
                     Apply
                   </button>
                 </div>
