@@ -185,7 +185,7 @@ export default function CuratorAutocomplete({
                 </div>
                 {it.isEditorsPick ? (
                   <span className="ml-auto rounded-full border px-2 py-0.5 text-[10px] text-neutral-600">
-                    Editor's Pick
+                    Editor&apos;s Pick
                   </span>
                 ) : null}
               </li>
@@ -199,7 +199,7 @@ export default function CuratorAutocomplete({
               submitSearch();
             }}
           >
-            See all results for "{q}"
+            See all results for &quot;{q}&quot;
           </li>
         </ul>
       )}

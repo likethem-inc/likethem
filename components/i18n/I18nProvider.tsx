@@ -38,7 +38,7 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
     if (cookieLocale !== locale) {
       setLocaleState(cookieLocale)
     }
-  }, [])
+  }, [locale])
 
   const setLocale = async (newLocale: Locale) => {
     setLocaleState(newLocale)
