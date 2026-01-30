@@ -19,6 +19,17 @@ export const revalidate = 0
 
 const DEFAULT_BANNER = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
 
+type ProductItem = {
+  id: string
+  title: string
+  price: number
+  slug: string | null
+  imageUrl: string | null
+  category: string | null
+  createdAt: string | Date
+  visibility: 'general' | 'inner' | 'drop'
+}
+
 const toPublicUrl = (path?: string | null) => {
   if (!path) return null
   if (path.startsWith('http') || path.startsWith('data:')) return path
@@ -178,7 +189,7 @@ export default async function CuratorPage({
     console.log('[curator][page] Found curator:', { id: (curator as any).id, storeName: (curator as any).storeName, useMockData })
 
     // 2) Get tab counts and active drop
-    let generalCount, innerCount, dropCount, activeDrop, products
+    let generalCount: { count: number }, innerCount: { count: number }, dropCount: { count: number }, activeDrop: { data: any }, products: ProductItem[]
 
     if (useMockData) {
       // Use mock data
@@ -189,7 +200,7 @@ export default async function CuratorPage({
       activeDrop = { data: getMockActiveDrop((curator as any).id) }
       
       // Get products based on tab
-      const allProducts = getMockProductsByCurator((curator as any).id)
+      const allProducts = getMockProductsByCurator((curator as any).id) as ProductItem[]
       if (tab === 'general') {
         products = allProducts.filter(p => p.visibility === 'general')
       } else if (tab === 'inner') {
