@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 import { Trash2, ArrowLeft, ShoppingBag } from 'lucide-react'
 
@@ -92,9 +93,11 @@ export default function CartPage() {
                 >
                   {/* Product Image */}
                   <div className="w-24 h-32 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.name}
+                      width={96}
+                      height={128}
                       className="w-full h-full object-cover"
                     />
                   </div>

@@ -28,7 +28,7 @@ export default function UnauthorizedPage() {
 
           {/* Description */}
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            You don't have permission to access this page. This area is restricted to authorized users only.
+            You don&apos;t have permission to access this page. This area is restricted to authorized users only.
           </p>
 
           {/* Actions */}

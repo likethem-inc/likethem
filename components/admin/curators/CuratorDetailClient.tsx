@@ -161,9 +161,9 @@ export default function CuratorDetailClient({
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-sm font-medium text-gray-900">Editor's Pick</h4>
+              <h4 className="text-sm font-medium text-gray-900">Editor&apos;s Pick</h4>
               <p className="text-sm text-gray-500">
-                Feature this curator as an editor's pick
+                Feature this curator as an editor&apos;s pick
               </p>
             </div>
             <button

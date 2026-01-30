@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { CuratorCardMasonry } from "@/components/curators/CuratorCardMasonry";
 import { MasonryColumns } from "@/components/curators/MasonryColumns";
 import { isTallByIndex } from "@/lib/masonry";
@@ -47,13 +47,15 @@ export default function Feed() {
   const hasMore = data.length > 0 && data[data.length - 1]?.nextCursor !== null;
 
   const sentinel = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
 
-  const fetchPage = async (cursor?: string) => {
-    if (loading) return;
-    
+  const fetchPage = useCallback(async (cursor?: string) => {
+    if (isFetchingRef.current) return;
+
+    isFetchingRef.current = true;
     setLoading(true);
     setError(null);
-    
+
     try {
       const params = new URLSearchParams();
       params.set("limit", "24");
@@ -64,14 +66,14 @@ export default function Feed() {
       if (priceRange) params.set("priceRange", priceRange);
       if (sort) params.set("sort", sort);
       if (cursor) params.set("cursor", cursor);
-      
+
       const response = await fetch(`/api/curators/discover?${params}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const result: FeedResponse = await response.json();
-      
+
       if (cursor) {
         setData(prev => [...prev, result]);
       } else {
@@ -80,16 +82,16 @@ export default function Feed() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch data");
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
-  };
+  }, [q, style, city, country, priceRange, sort]);
 
   // Initial load and filter changes
   useEffect(() => {
     setData([]);
     fetchPage();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, style, city, country, priceRange, sort]);
+  }, [q, style, city, country, priceRange, sort, fetchPage]);
 
   // Note: fetchPage is intentionally not in deps to avoid re-creating on every render
   // Filters are in deps to trigger refetch when they change
@@ -114,12 +116,12 @@ export default function Feed() {
     
     io.observe(sentinel.current);
     return () => io.disconnect();
-  }, [hasMore, loading, data]);
+  }, [hasMore, loading, data, fetchPage]);
 
-  if (error) {
+  if (error && items.length === 0) {
     return (
-      <div className="pb-24 text-center text-sm text-red-500">
-        {t('common.error')}: {error}
+      <div className="pb-24 text-center text-sm text-zinc-500">
+        {t('explore.noResults')}
       </div>
     );
   }

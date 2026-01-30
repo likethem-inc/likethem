@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 import { 
   Search, 
@@ -75,7 +76,7 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await fetch('/api/products', {
@@ -98,11 +99,11 @@ export default function ProductsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [router])
 
   useEffect(() => {
     fetchProducts()
-  }, [])
+  }, [fetchProducts])
 
   // Filter and sort products
   const filteredProducts = products.filter(product => {
@@ -298,10 +299,12 @@ export default function ProductsPage() {
                 {/* Product Image */}
                 <div className="relative h-48 bg-gray-100">
                   {product.images.length > 0 ? (
-                    <img
+                    <Image
                       src={product.images[0].url}
                       alt={product.images[0].altText || product.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">

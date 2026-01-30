@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import NextImage from 'next/image'
 import { 
   Send, 
   Paperclip, 
-  Image, 
+  Image as ImageIcon, 
   Loader2, 
   Brain,
   ArrowLeft,
@@ -384,11 +385,15 @@ Just let me know what specific area you'd like to focus on, and I'll provide per
                       }`}>
                         {message.image && (
                           <div className="mb-3">
-                            <img
-                              src={message.image}
-                              alt="Uploaded"
-                              className="w-32 h-32 object-cover rounded-lg"
-                            />
+                            <div className="relative w-32 h-32">
+                              <NextImage
+                                src={message.image}
+                                alt="Uploaded"
+                                fill
+                                sizes="128px"
+                                className="object-cover rounded-lg"
+                              />
+                            </div>
                           </div>
                         )}
                         
@@ -471,11 +476,15 @@ Just let me know what specific area you'd like to focus on, and I'll provide per
                 className="mb-4 relative"
               >
                 <div className="relative inline-block">
-                  <img
-                    src={uploadedImage}
-                    alt="Preview"
-                    className="w-20 h-20 object-cover rounded-lg"
-                  />
+                  <div className="relative w-20 h-20">
+                    <NextImage
+                      src={uploadedImage}
+                      alt="Preview"
+                      fill
+                      sizes="80px"
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
                   <button
                     onClick={removeImage}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
@@ -557,7 +566,7 @@ Just let me know what specific area you'd like to focus on, and I'll provide per
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-            <Image className="w-8 h-8 text-purple-500 mx-auto mb-3" />
+            <ImageIcon className="w-8 h-8 text-purple-500 mx-auto mb-3" />
             <h3 className="font-medium text-carbon mb-2">Visual Search</h3>
             <p className="text-sm text-gray-600">
               Upload images to find similar products and styling inspiration

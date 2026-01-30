@@ -17,7 +17,7 @@ export default function AccessPage() {
           className="text-center mb-16"
         >
           <h1 className="text-heading font-serif mb-6">
-            This isn't for everyone. But maybe it's for you.
+            This isn&apos;t for everyone. But maybe it&apos;s for you.
           </h1>
           <p className="text-subheading max-w-2xl mx-auto">
             Únete a la comunidad exclusiva de LikeThem

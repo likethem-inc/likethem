@@ -325,7 +325,7 @@ export default function ProductDetailClient({ product, hasAccess = true, isInner
             {product.curatorNote && (
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-700 italic">
-                  "{product.curatorNote}"
+                  &ldquo;{product.curatorNote}&rdquo;
                 </p>
               </div>
             )}

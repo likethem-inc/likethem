@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 import { 
   ArrowLeft, 
@@ -514,11 +515,15 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                       <div className="grid grid-cols-2 gap-3">
                         {form.existingImages.map((image, index) => (
                           <div key={image.id} className="relative">
-                            <img
-                              src={image.url}
-                              alt={image.altText || `Image ${index + 1}`}
-                              className="w-full h-24 object-cover rounded-lg"
-                            />
+                            <div className="relative w-full h-24">
+                              <Image
+                                src={image.url}
+                                alt={image.altText || `Image ${index + 1}`}
+                                fill
+                                sizes="(max-width: 768px) 50vw, 25vw"
+                                className="object-cover rounded-lg"
+                              />
+                            </div>
                             <button
                               type="button"
                               onClick={() => removeExistingImage(index)}
@@ -564,11 +569,15 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                       <div className="grid grid-cols-2 gap-3">
                         {form.imagePreviews.map((preview, index) => (
                           <div key={index} className="relative">
-                            <img
-                              src={preview}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-24 object-cover rounded-lg"
-                            />
+                            <div className="relative w-full h-24">
+                              <Image
+                                src={preview}
+                                alt={`Preview ${index + 1}`}
+                                fill
+                                sizes="(max-width: 768px) 50vw, 25vw"
+                                className="object-cover rounded-lg"
+                              />
+                            </div>
                             <button
                               type="button"
                               onClick={() => removeNewImage(index)}
@@ -590,11 +599,15 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 
                 {form.name && form.price && (form.imagePreviews.length > 0 || form.existingImages.length > 0) ? (
                   <div className="space-y-4">
-                    <img
-                      src={form.imagePreviews[0] || form.existingImages[0]?.url}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
+                    <div className="relative w-full h-48">
+                      <Image
+                        src={form.imagePreviews[0] || form.existingImages[0]?.url}
+                        alt="Preview"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
                     <div>
                       <h3 className="font-medium text-carbon">{form.name}</h3>
                       <p className="font-serif text-lg font-light text-carbon">

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Instagram } from 'lucide-react'
 import { useState } from 'react'
+import Image from 'next/image'
 
 const curators = [
   {
@@ -99,12 +100,13 @@ function CuratorCard({ curator, index }: { curator: any; index: number }) {
       <Link href={`/curator/${curator.slug ?? curator.id}`}>
         <div className="relative overflow-hidden bg-stone h-80 md:h-[420px]">
           {!imageError ? (
-            <img
+            <Image
               src={curator.image}
               alt={curator.name}
-              className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
               onError={() => setImageError(true)}
-              loading="lazy"
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">

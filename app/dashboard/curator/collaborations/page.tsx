@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { 
   Users, 
   UserPlus, 
@@ -359,10 +360,12 @@ export default function CollaborationsPage() {
                   className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
                 >
                   <div className="flex items-start space-x-4 mb-4">
-                    <img
+                    <Image
                       src={curator.avatar}
                       alt={curator.name}
-                      className="w-16 h-16 rounded-full object-cover"
+                      width={64}
+                      height={64}
+                      className="rounded-full object-cover"
                     />
                     <div className="flex-1">
                       <h3 className="font-medium text-carbon">{curator.name}</h3>
@@ -426,10 +429,12 @@ export default function CollaborationsPage() {
                       <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-4 px-6">
                           <div className="flex items-center space-x-3">
-                            <img
+                            <Image
                               src={request.toCurator.avatar}
                               alt={request.toCurator.name}
-                              className="w-10 h-10 rounded-full object-cover"
+                              width={40}
+                              height={40}
+                              className="rounded-full object-cover"
                             />
                             <div>
                               <p className="font-medium text-carbon">{request.toCurator.name}</p>
@@ -488,10 +493,12 @@ export default function CollaborationsPage() {
                       <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-4 px-6">
                           <div className="flex items-center space-x-3">
-                            <img
+                            <Image
                               src={request.fromCurator.avatar}
                               alt={request.fromCurator.name}
-                              className="w-10 h-10 rounded-full object-cover"
+                              width={40}
+                              height={40}
+                              className="rounded-full object-cover"
                             />
                             <div>
                               <p className="font-medium text-carbon">{request.fromCurator.name}</p>
@@ -549,10 +556,12 @@ export default function CollaborationsPage() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-4">
-                      <img
+                      <Image
                         src={collaboration.partner.avatar}
                         alt={collaboration.partner.name}
-                        className="w-16 h-16 rounded-full object-cover"
+                        width={64}
+                        height={64}
+                        className="rounded-full object-cover"
                       />
                       <div>
                         <h3 className="font-medium text-carbon">{collaboration.partner.name}</h3>
@@ -631,10 +640,12 @@ export default function CollaborationsPage() {
 
                 <div className="mb-4">
                   <div className="flex items-center space-x-3 mb-3">
-                    <img
+                    <Image
                       src={selectedCurator.avatar}
                       alt={selectedCurator.name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      width={48}
+                      height={48}
+                      className="rounded-full object-cover"
                     />
                     <div>
                       <p className="font-medium text-carbon">{selectedCurator.name}</p>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft, Share2, Heart, Filter, Grid, List } from 'lucide-react'
 import ProductCard from '@/components/ProductCard'
 
@@ -162,23 +163,25 @@ export default function ClosetPage({ params }: ClosetPageProps) {
           
           <div className="flex items-end gap-6 pb-8">
             <div className="relative">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                <img 
-                  src={closet.image} 
+              <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                <Image
+                  src={closet.image}
                   alt={closet.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 96px, 128px"
+                  className="object-cover"
                 />
               </div>
               {closet.isEditorPick && (
                 <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                  Editor's Pick
+                  Editor&apos;s Pick
                 </div>
               )}
             </div>
             
             <div className="flex-1 text-white">
               <h1 className="font-serif text-3xl md:text-4xl font-light mb-2">
-                {closet.name}'s Closet
+                {closet.name}&apos;s Closet
               </h1>
               <p className="text-lg opacity-90 mb-4">by {closet.name}</p>
               <p className="text-lg opacity-90 max-w-2xl mb-4">
@@ -206,7 +209,7 @@ export default function ClosetPage({ params }: ClosetPageProps) {
       {/* Category Filters - Airbnb Style */}
       <div className="container-custom max-w-7xl py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-serif text-2xl font-light">What's in this closet?</h2>
+          <h2 className="font-serif text-2xl font-light">What&apos;s in this closet?</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -257,10 +260,10 @@ export default function ClosetPage({ params }: ClosetPageProps) {
 
         {/* Closet Sections */}
         <div className="space-y-12">
-          {/* Editor's Picks */}
+          {/* Editor&apos;s Picks */}
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-serif text-xl font-light">Editor's Picks</h3>
+              <h3 className="font-serif text-xl font-light">Editor&apos;s Picks</h3>
               <span className="text-sm text-gray-500">
                 {mockProducts.filter(p => p.section === 'Editor\'s Picks').length} items
               </span>

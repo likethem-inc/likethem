@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
@@ -594,23 +595,19 @@ export default function CheckoutPage() {
                     const selectedMethod = paymentMethods.find(m => m.type === paymentMethod)
                     if (!selectedMethod) return null
                     
-                    return (
-                      <div className="mt-6 p-6 bg-gray-50 rounded-lg">
-                        <h3 className="font-medium mb-4">Pay with {selectedMethod.name}</h3>
-                        
-                        {/* QR Code */}
-                        {selectedMethod.qrCode && (
-                          <div className="text-center mb-6">
-                            <img
-                              src={selectedMethod.qrCode}
-                              alt={`${selectedMethod.name} QR Code`}
-                              className="w-48 h-48 mx-auto border border-gray-200 rounded-lg object-contain"
-                            />
-                            <p className="text-sm text-gray-600 mt-2">
-                              Scan this QR code with your {selectedMethod.name} app
-                            </p>
-                          </div>
-                        )}
+                    {/* QR Code */}
+                    <div className="text-center mb-6">
+                      <Image
+                        src={`/payment-qr/${paymentMethod}-qr.svg`}
+                        alt={`${paymentMethod} QR Code`}
+                        width={192}
+                        height={192}
+                        className="mx-auto border border-gray-200 rounded-lg"
+                      />
+                      <p className="text-sm text-gray-600 mt-2">
+                        Scan this QR code with your {paymentMethod === 'yape' ? 'Yape' : 'Plin'} app
+                      </p>
+                    </div>
 
                         {/* Phone Number */}
                         {selectedMethod.phoneNumber && (
@@ -776,9 +773,11 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center space-x-3">
                     <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.name}
+                        width={48}
+                        height={64}
                         className="w-full h-full object-cover"
                       />
                     </div>

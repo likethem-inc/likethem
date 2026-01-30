@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, User, Tag, ShoppingBag, TrendingUp, Star, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 interface SearchResult {
   id: string
@@ -74,6 +75,34 @@ export default function SearchBar({
     return () => clearTimeout(timer)
   }, [query])
 
+  const handleSearch = useCallback(() => {
+    if (query.trim()) {
+      onSearch?.(query.trim())
+      setIsOpen(false)
+      setQuery('')
+      setResults([])
+    }
+  }, [onSearch, query])
+
+  const handleResultClick = useCallback((result: SearchResult) => {
+    // Navigate based on result type
+    switch (result.type) {
+      case 'product':
+        router.push(`/product/${result.id}`)
+        break
+      case 'curator':
+        router.push(`/curator/${result.id}`)
+        break
+      case 'tag':
+        // Navigate to search results page with tag filter
+        router.push(`/search?q=${encodeURIComponent(result.title)}&type=tag`)
+        break
+    }
+    setIsOpen(false)
+    setQuery('')
+    setResults([])
+  }, [router])
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -106,35 +135,7 @@ export default function SearchBar({
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, results, selectedIndex, query])
-
-  const handleSearch = () => {
-    if (query.trim()) {
-      onSearch?.(query.trim())
-      setIsOpen(false)
-      setQuery('')
-      setResults([])
-    }
-  }
-
-  const handleResultClick = (result: SearchResult) => {
-    // Navigate based on result type
-    switch (result.type) {
-      case 'product':
-        router.push(`/product/${result.id}`)
-        break
-      case 'curator':
-        router.push(`/curator/${result.id}`)
-        break
-      case 'tag':
-        // Navigate to search results page with tag filter
-        router.push(`/search?q=${encodeURIComponent(result.title)}&type=tag`)
-        break
-    }
-    setIsOpen(false)
-    setQuery('')
-    setResults([])
-  }
+  }, [isOpen, results, selectedIndex, query, handleResultClick, handleSearch])
 
   const handleSuggestionClick = (suggestion: typeof trendingSuggestions[0]) => {
     setQuery(suggestion.query)
@@ -243,10 +244,12 @@ export default function SearchBar({
                             }`}
                           >
                             {result.image ? (
-                              <img
+                              <Image
                                 src={result.image}
                                 alt={result.title}
-                                className="w-12 h-12 object-cover rounded"
+                                width={48}
+                                height={48}
+                                className="object-cover rounded"
                               />
                             ) : (
                               <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
@@ -319,10 +322,12 @@ export default function SearchBar({
                   }`}
                 >
                   {result.image ? (
-                    <img
+                    <Image
                       src={result.image}
                       alt={result.title}
-                      className="w-12 h-12 object-cover rounded"
+                      width={48}
+                      height={48}
+                      className="object-cover rounded"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">

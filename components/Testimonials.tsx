@@ -50,7 +50,7 @@ export default function Testimonials() {
               className="text-center"
             >
               <blockquote className="font-serif text-xl font-light italic text-carbon mb-6 leading-relaxed">
-                "{testimonial.quote}"
+                &ldquo;{testimonial.quote}&rdquo;
               </blockquote>
               
               <div className="text-warm-gray">

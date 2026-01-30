@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { CheckCircle, XCircle, Clock, Package, Eye, DollarSign, User, Mail } from 'lucide-react'
 
 interface Order {
@@ -161,7 +162,6 @@ export default function CuratorOrdersPage() {
 
         {/* Stats */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
@@ -381,9 +381,11 @@ export default function CuratorOrdersPage() {
                   <div className="mb-6">
                     <h3 className="font-medium mb-3">Payment Proof</h3>
                     <div className="border border-gray-200 rounded-lg p-4">
-                      <img
+                      <Image
                         src={selectedOrder.paymentProof}
                         alt="Payment Proof"
+                        width={800}
+                        height={600}
                         className="max-w-full h-auto rounded"
                       />
                     </div>
@@ -397,9 +399,11 @@ export default function CuratorOrdersPage() {
                     {selectedOrder.items.map((item: any) => (
                       <div key={item.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
                         <div className="w-12 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                          <img
+                          <Image
                             src={item.product.images[0]?.url || '/placeholder-product.jpg'}
                             alt={item.product.title}
+                            width={48}
+                            height={64}
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -427,6 +431,7 @@ export default function CuratorOrdersPage() {
                     >
                       <CheckCircle className="w-4 h-4" />
                       <span>Mark as Paid</span>
+
                     </button>
                     <button
                       onClick={() => {
