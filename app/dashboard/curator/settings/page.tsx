@@ -237,6 +237,19 @@ export default function SettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const [deletionCheckData, setDeletionCheckData] = useState<{
+    canDelete: boolean
+    ordersCount: number
+    collaborationsCount: number
+    productsCount: number
+    followersCount: number
+    blockers: {
+      hasOrders: boolean
+      hasCollaborations: boolean
+    }
+  } | null>(null)
+  const [isCheckingDeletion, setIsCheckingDeletion] = useState(false)
+  const [deletionError, setDeletionError] = useState<string | null>(null)
 
   // Payment settings state
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>(DEFAULT_PAYMENT_SETTINGS)
@@ -534,26 +547,68 @@ export default function SettingsPage() {
     }
   }
 
+  const checkDeletion = async () => {
+    setIsCheckingDeletion(true)
+    setDeletionError(null)
+
+    try {
+      const response = await fetch('/api/curator/store/check-deletion', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to check deletion status')
+      }
+
+      const data = await response.json()
+      setDeletionCheckData(data)
+    } catch (error) {
+      setDeletionError(error instanceof Error ? error.message : 'Failed to check deletion status')
+    } finally {
+      setIsCheckingDeletion(false)
+    }
+  }
+
   const deleteAccount = async () => {
     if (deleteConfirmation !== 'DELETE') {
-      alert('Please type DELETE to confirm account deletion')
+      alert('Please type DELETE to confirm store deletion')
+      return
+    }
+
+    if (!deletionCheckData?.canDelete) {
+      alert('Store cannot be deleted due to existing orders or collaborations')
       return
     }
 
     setIsDeleting(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    console.log('Deleting account...')
-    
-    setIsDeleting(false)
-    setShowDeleteModal(false)
-    setDeleteConfirmation('')
-    
-    // Redirect to homepage after deletion
-    window.location.href = '/'
+    try {
+      const response = await fetch('/api/curator/store/delete', {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to delete store')
+      }
+
+      // Success - redirect to homepage
+      window.location.href = '/'
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to delete store')
+      setIsDeleting(false)
+    }
   }
+
+  // Check deletion status when modal opens
+  useEffect(() => {
+    if (showDeleteModal) {
+      checkDeletion()
+    }
+  }, [showDeleteModal])
 
   // Fetch payment settings
   useEffect(() => {
@@ -1479,17 +1534,17 @@ export default function SettingsPage() {
                     <div className="flex items-start space-x-4">
                       <AlertTriangle className="w-6 h-6 text-red-600 mt-1" />
                       <div className="flex-1">
-                        <h3 className="text-lg font-medium text-red-900 mb-2">Delete Account</h3>
+                        <h3 className="text-lg font-medium text-red-900 mb-2">Delete Store</h3>
                         <p className="text-red-700 mb-4">
-                          This action cannot be undone. This will permanently delete your account, 
-                          remove all your products, collaborations, and data from LikeThem.
+                          This action cannot be undone. This will permanently delete your store, 
+                          remove all your products, and followers from LikeThem. Your account will remain active but your role will change to BUYER.
                         </p>
                         <button
                           onClick={() => setShowDeleteModal(true)}
                           className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
                         >
                           <Trash2 className="w-4 h-4" />
-                          <span>Delete My Account</span>
+                          <span>Delete My Store</span>
                         </button>
                       </div>
                     </div>
@@ -1521,7 +1576,7 @@ export default function SettingsPage() {
           )}
         </AnimatePresence>
 
-        {/* Delete Account Modal */}
+        {/* Delete Store Modal */}
         <AnimatePresence>
           {showDeleteModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -1533,27 +1588,75 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center space-x-3 mb-4">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
-                  <h2 className="text-xl font-semibold text-red-900">Delete Account</h2>
+                  <h2 className="text-xl font-semibold text-red-900">Delete Store</h2>
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-gray-700 mb-4">
-                    This action is irreversible. All your data, products, and collaborations will be permanently deleted.
-                  </p>
-                  
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-red-700">
-                      To confirm deletion, please type <strong>DELETE</strong> in the field below:
-                    </p>
-                  </div>
+                  {isCheckingDeletion ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
+                    </div>
+                  ) : deletionError ? (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                      <p className="text-sm text-red-700">{deletionError}</p>
+                    </div>
+                  ) : deletionCheckData ? (
+                    <>
+                      <p className="text-gray-700 mb-4">
+                        This action is irreversible. Your store and all associated data will be permanently deleted.
+                      </p>
 
-                  <input
-                    type="text"
-                    value={deleteConfirmation}
-                    onChange={(e) => setDeleteConfirmation(e.target.value)}
-                    placeholder="Type DELETE to confirm"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500"
-                  />
+                      {/* What will be deleted */}
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                        <p className="text-sm font-medium text-gray-900 mb-2">What will be deleted:</p>
+                        <ul className="text-sm text-gray-700 space-y-1">
+                          <li>• {deletionCheckData.productsCount} product{deletionCheckData.productsCount !== 1 ? 's' : ''}</li>
+                          <li>• {deletionCheckData.followersCount} follower{deletionCheckData.followersCount !== 1 ? 's' : ''}</li>
+                          <li>• All store settings and data</li>
+                        </ul>
+                      </div>
+
+                      {/* Blockers */}
+                      {!deletionCheckData.canDelete && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                          <p className="text-sm font-medium text-red-900 mb-2">Cannot delete store:</p>
+                          <ul className="text-sm text-red-700 space-y-1">
+                            {deletionCheckData.blockers.hasOrders && (
+                              <li>• You have {deletionCheckData.ordersCount} existing order{deletionCheckData.ordersCount !== 1 ? 's' : ''}</li>
+                            )}
+                            {deletionCheckData.blockers.hasCollaborations && (
+                              <li>• You have {deletionCheckData.collaborationsCount} active collaboration{deletionCheckData.collaborationsCount !== 1 ? 's' : ''}</li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Account will remain */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <p className="text-sm text-blue-700">
+                          <strong>Note:</strong> Your account will remain active, but your role will change to BUYER. You can create a new store at any time.
+                        </p>
+                      </div>
+
+                      {deletionCheckData.canDelete && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                          <p className="text-sm text-red-700">
+                            To confirm deletion, please type <strong>DELETE</strong> in the field below:
+                          </p>
+                        </div>
+                      )}
+
+                      {deletionCheckData.canDelete && (
+                        <input
+                          type="text"
+                          value={deleteConfirmation}
+                          onChange={(e) => setDeleteConfirmation(e.target.value)}
+                          placeholder="Type DELETE to confirm"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500"
+                        />
+                      )}
+                    </>
+                  ) : null}
                 </div>
 
                 <div className="flex items-center justify-end space-x-3">
@@ -1561,6 +1664,8 @@ export default function SettingsPage() {
                     onClick={() => {
                       setShowDeleteModal(false)
                       setDeleteConfirmation('')
+                      setDeletionCheckData(null)
+                      setDeletionError(null)
                     }}
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
@@ -1568,7 +1673,7 @@ export default function SettingsPage() {
                   </button>
                   <button
                     onClick={deleteAccount}
-                    disabled={deleteConfirmation !== 'DELETE' || isDeleting}
+                    disabled={!deletionCheckData?.canDelete || deleteConfirmation !== 'DELETE' || isDeleting || isCheckingDeletion}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   >
                     {isDeleting ? (
