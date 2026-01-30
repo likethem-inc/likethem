@@ -8,6 +8,7 @@ import WishlistButton from "@/components/product/WishlistButton";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
 import ProductVariantSelector from "@/components/product/ProductVariantSelector";
 import { CuratorImageWithFallback } from "@/components/ImageWithFallback";
+import { useT } from "@/hooks/useT";
 
 type Props = {
   product: {
@@ -28,11 +29,10 @@ type Props = {
       avatar: string | null;
     };
   };
-  locale: string;
-  t: (locale: string, key: string) => string;
 };
 
-export default function ProductInfoSection({ product, locale, t }: Props) {
+export default function ProductInfoSection({ product }: Props) {
+  const t = useT();
   // Initialize selected size and color with the first available option
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
     product.sizes?.length > 0 ? product.sizes[0] : undefined
@@ -81,15 +81,15 @@ export default function ProductInfoSection({ product, locale, t }: Props) {
         selectedColor={selectedColor}
         onSizeChange={setSelectedSize}
         onColorChange={setSelectedColor}
-        sizeLabel={t(locale, 'product.size')}
-        colorLabel={t(locale, 'product.color')}
+        sizeLabel={t('product.size')}
+        colorLabel={t('product.color')}
       />
 
       {/* Product Clarity Note */}
       <div className="pt-2 border-t border-neutral-200">
         <p className="text-xs text-neutral-600 leading-relaxed">
-          {t(locale, 'product.oneOfAKind')}
-          <span className="text-neutral-500"> {t(locale, 'product.onlyOneAvailable')}</span>
+          {t('product.oneOfAKind')}
+          <span className="text-neutral-500"> {t('product.onlyOneAvailable')}</span>
         </p>
       </div>
 
@@ -98,7 +98,7 @@ export default function ProductInfoSection({ product, locale, t }: Props) {
         {/* Authenticity Badge */}
         <div className="flex items-center gap-2 text-xs text-neutral-600">
           <CheckCircle2 className="h-4 w-4 text-neutral-500" />
-          <span>{t(locale, 'product.verified')}</span>
+          <span>{t('product.verified')}</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export default function ProductInfoSection({ product, locale, t }: Props) {
             disabled={!product.isActive || product.stockQuantity <= 0}
             className="flex-1 rounded-xl bg-black px-5 py-3 text-sm text-white hover:bg-neutral-900 disabled:cursor-not-allowed disabled:bg-neutral-200"
           >
-            {product.stockQuantity > 0 ? t(locale, 'product.addToCart') : t(locale, 'product.outOfStock')}
+            {product.stockQuantity > 0 ? t('product.addToCart') : t('product.outOfStock')}
           </AddToCartButton>
           <WishlistButton
             productSlug={product.slug}
@@ -123,18 +123,18 @@ export default function ProductInfoSection({ product, locale, t }: Props) {
         </div>
 
         {/* Shipping & Returns - Collapsible */}
-        <CollapsibleSection title={t(locale, 'product.shippingReturns')}>
+        <CollapsibleSection title={t('product.shippingReturns')}>
           <div className="space-y-3">
             <div>
-              <p className="font-medium text-neutral-900 mb-1">{t(locale, 'product.shipping')}</p>
+              <p className="font-medium text-neutral-900 mb-1">{t('product.shipping')}</p>
               <p className="text-neutral-600">
-                {t(locale, 'product.shippingDesc')}
+                {t('product.shippingDesc')}
               </p>
             </div>
             <div>
-              <p className="font-medium text-neutral-900 mb-1">{t(locale, 'product.returns')}</p>
+              <p className="font-medium text-neutral-900 mb-1">{t('product.returns')}</p>
               <p className="text-neutral-600">
-                {t(locale, 'product.returnsDesc')}
+                {t('product.returnsDesc')}
               </p>
             </div>
           </div>

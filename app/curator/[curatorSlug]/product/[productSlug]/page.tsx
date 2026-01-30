@@ -4,8 +4,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProductInfoSection from "@/components/product/ProductInfoSection";
-import { getLocale } from "@/lib/i18n/getLocale";
-import { t } from "@/lib/i18n/t";
 import ProductUnavailable from "@/components/product/ProductUnavailable";
 
 export const runtime = "nodejs";
@@ -203,7 +201,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const locale = await getLocale();
   const result = await fetchData(params.curatorSlug, params.productSlug);
   
   // Handle explicit error states with trust-building UX
@@ -349,8 +346,6 @@ export default async function ProductPage({ params }: Props) {
               avatar: product.curator.avatar,
             },
           }}
-          locale={locale}
-          t={t}
         />
       </div>
 
