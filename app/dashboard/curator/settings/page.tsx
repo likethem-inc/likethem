@@ -90,6 +90,35 @@ const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
   }
 }
 
+const mapServerToPaymentSettings = (data: any): PaymentSettings => {
+  const settings = data?.settings ?? data ?? {}
+  return {
+    yape: {
+      enabled: Boolean(settings.yapeEnabled ?? false),
+      phoneNumber: settings.yapePhoneNumber ?? '',
+      qrCodeUrl: settings.yapeQRCode ?? '',
+      instructions: settings.yapeInstructions ?? ''
+    },
+    plin: {
+      enabled: Boolean(settings.plinEnabled ?? false),
+      phoneNumber: settings.plinPhoneNumber ?? '',
+      qrCodeUrl: settings.plinQRCode ?? '',
+      instructions: settings.plinInstructions ?? ''
+    }
+  }
+}
+
+const mapPaymentSettingsToServer = (settings: PaymentSettings) => ({
+  yapeEnabled: settings.yape.enabled,
+  yapePhoneNumber: settings.yape.phoneNumber,
+  yapeQRCode: settings.yape.qrCodeUrl,
+  yapeInstructions: settings.yape.instructions,
+  plinEnabled: settings.plin.enabled,
+  plinPhoneNumber: settings.plin.phoneNumber,
+  plinQRCode: settings.plin.qrCodeUrl,
+  plinInstructions: settings.plin.instructions
+})
+
 const DEFAULT_BANNER = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
 
 export default function SettingsPage() {
@@ -544,19 +573,7 @@ export default function SettingsPage() {
 
       if (response.ok) {
         const data = await response.json()
-        const normalized: PaymentSettings = {
-          ...DEFAULT_PAYMENT_SETTINGS,
-          ...data,
-          yape: {
-            ...DEFAULT_PAYMENT_SETTINGS.yape,
-            ...(data?.yape ?? {})
-          },
-          plin: {
-            ...DEFAULT_PAYMENT_SETTINGS.plin,
-            ...(data?.plin ?? {})
-          }
-        }
-        setPaymentSettings(normalized)
+        setPaymentSettings(mapServerToPaymentSettings(data))
       }
     } catch (error) {
       console.error('Error fetching payment settings:', error)
@@ -644,7 +661,7 @@ export default function SettingsPage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(paymentSettings)
+        body: JSON.stringify(mapPaymentSettingsToServer(paymentSettings))
       })
 
       if (!response.ok) {
