@@ -26,7 +26,7 @@ type ProductItem = {
   slug: string | null
   imageUrl: string | null
   category: string | null
-  createdAt: string | Date
+  createdAt: string
   visibility: 'general' | 'inner' | 'drop'
 }
 
@@ -219,7 +219,7 @@ export default async function CuratorPage({
         slug: p.slug ?? null,
         imageUrl: getFirstProductImageUrl(p),
         category: p.category ?? null,
-        createdAt: p.createdAt,
+        createdAt: new Date(p.createdAt).toISOString(),
         visibility: 'general' as const // Temporary default until visibility system is implemented
       }))
 
