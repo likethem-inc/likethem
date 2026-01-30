@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
         OR: [
           { curator1Id: curatorProfile.id },
           { curator2Id: curatorProfile.id }
-        ]
+        ],
+        status: 'ACTIVE'
       }
     })
 

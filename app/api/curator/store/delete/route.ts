@@ -50,7 +50,8 @@ export async function DELETE(request: NextRequest) {
         OR: [
           { curator1Id: curatorProfile.id },
           { curator2Id: curatorProfile.id }
-        ]
+        ],
+        status: 'ACTIVE'
       }
     })
 
@@ -85,6 +86,24 @@ export async function DELETE(request: NextRequest) {
 
   } catch (error) {
     console.error('Error deleting store:', error)
+    
+    // Check for Prisma constraint errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as { code: string; meta?: { target?: string } }
+      if (prismaError.code === 'P2003') {
+        return NextResponse.json(
+          { error: 'Cannot delete store: foreign key constraint failed. You may have new orders or collaborations.' },
+          { status: 400 }
+        )
+      }
+      if (prismaError.code === 'P2025') {
+        return NextResponse.json(
+          { error: 'Store not found' },
+          { status: 404 }
+        )
+      }
+    }
+    
     return NextResponse.json(
       { error: 'Failed to delete store' },
       { status: 500 }

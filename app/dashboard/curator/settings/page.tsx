@@ -549,6 +549,13 @@ export default function SettingsPage() {
     }
   }
 
+  const closeDeleteModal = useCallback(() => {
+    setShowDeleteModal(false)
+    setDeleteConfirmation('')
+    setDeletionCheckData(null)
+    setDeletionError(null)
+  }, [])
+
   const checkDeletion = useCallback(async () => {
     setIsCheckingDeletion(true)
     setDeletionError(null)
@@ -573,24 +580,44 @@ export default function SettingsPage() {
     }
   }, [])
 
-  const deleteAccount = async () => {
+  const deleteStore = async () => {
     if (deleteConfirmation !== 'DELETE') {
       setErrorMessage('Please type DELETE to confirm store deletion')
       setShowErrorToast(true)
-      setTimeout(() => setShowErrorToast(false), 3000)
+      setTimeout(() => setShowErrorToast(false), 5000)
       return
     }
 
     if (!deletionCheckData?.canDelete) {
       setErrorMessage('Store cannot be deleted due to existing orders or collaborations')
       setShowErrorToast(true)
-      setTimeout(() => setShowErrorToast(false), 3000)
+      setTimeout(() => setShowErrorToast(false), 5000)
       return
     }
 
     setIsDeleting(true)
     
     try {
+      // Re-check deletion status to prevent race conditions
+      const checkResponse = await fetch('/api/curator/store/check-deletion', {
+        method: 'GET',
+        credentials: 'include'
+      })
+      
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json()
+        if (!checkData.canDelete) {
+          setErrorMessage('Store state changed. Please review the current status.')
+          setShowErrorToast(true)
+          setTimeout(() => setShowErrorToast(false), 5000)
+          setIsDeleting(false)
+          setDeleteConfirmation('')
+          // Refresh deletion check data
+          setDeletionCheckData(checkData)
+          return
+        }
+      }
+      
       const response = await fetch('/api/curator/store/delete', {
         method: 'DELETE',
         credentials: 'include'
@@ -606,8 +633,9 @@ export default function SettingsPage() {
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to delete store')
       setShowErrorToast(true)
-      setTimeout(() => setShowErrorToast(false), 3000)
+      setTimeout(() => setShowErrorToast(false), 7000)
       setIsDeleting(false)
+      setDeleteConfirmation('')
     }
   }
 
@@ -617,6 +645,20 @@ export default function SettingsPage() {
       checkDeletion()
     }
   }, [showDeleteModal, checkDeletion])
+
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showDeleteModal && !isDeleting) {
+        closeDeleteModal()
+      }
+    }
+    
+    if (showDeleteModal) {
+      document.addEventListener('keydown', handleEscape)
+      return () => document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showDeleteModal, isDeleting, closeDeleteModal])
 
   // Fetch payment settings
   useEffect(() => {
@@ -1608,7 +1650,14 @@ export default function SettingsPage() {
         {/* Delete Store Modal */}
         <AnimatePresence>
           {showDeleteModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              onClick={(e) => {
+                if (e.target === e.currentTarget && !isDeleting) {
+                  closeDeleteModal()
+                }
+              }}
+            >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -1690,18 +1739,13 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-end space-x-3">
                   <button
-                    onClick={() => {
-                      setShowDeleteModal(false)
-                      setDeleteConfirmation('')
-                      setDeletionCheckData(null)
-                      setDeletionError(null)
-                    }}
+                    onClick={closeDeleteModal}
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
-                    onClick={deleteAccount}
+                    onClick={deleteStore}
                     disabled={!deletionCheckData?.canDelete || deleteConfirmation !== 'DELETE' || isDeleting || isCheckingDeletion}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   >
