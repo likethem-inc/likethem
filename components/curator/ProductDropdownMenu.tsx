@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { MoreVertical, Eye, Edit, Trash2, Power } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useT } from '@/hooks/useT'
 
 interface ProductDropdownMenuProps {
   productId: string
@@ -21,7 +21,7 @@ export default function ProductDropdownMenu({
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { t } = useTranslation()
+  const t = useT()
 
   // Close dropdown when clicking outside
   useEffect(() => {
