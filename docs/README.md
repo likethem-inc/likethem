@@ -1,266 +1,296 @@
-# Documentación: Registro de Usuarios
+# LikeThem Documentation
 
-Esta carpeta contiene la documentación completa para la funcionalidad de registro de usuarios en **likethem**.
+Welcome to the LikeThem documentation hub. This directory contains comprehensive guides and references for developers working on the platform.
 
-## 📚 Índice de Documentos
+## 📚 Documentation Index
 
-### 1. [SUMMARY.md](./SUMMARY.md) - Resumen Ejecutivo
-**Recomendado empezar aquí**
+### 1. **REPOSITORY_OVERVIEW.md** 📖
+**Comprehensive codebase overview**
 
-- Vista general del proyecto
-- Estado de implementación
-- Criterios de éxito cumplidos
-- Resumen de archivos y tecnologías
-- Conclusiones
+Complete exploration of the LikeThem repository covering:
+- Technology stack (Next.js, Prisma, Supabase)
+- Project structure and folder organization
+- Database models and relationships
+- API routes architecture
+- Current implementations (settings, payments, checkout, file uploads)
+- Development guidelines and best practices
 
-**Para quién**: Product Managers, stakeholders, desarrolladores nuevos
-
----
-
-### 2. [REGISTRO_USUARIO.md](./REGISTRO_USUARIO.md) - Documentación Técnica
-**Para desarrolladores**
-
-- Arquitectura detallada de la funcionalidad
-- Explicación de cada archivo y su propósito
-- Flujo de datos completo
-- Modelo de base de datos
-- Configuración de NextAuth
-- Validaciones implementadas
-- Consideraciones de seguridad
-- Diferencias entre endpoints de API
-
-**Para quién**: Desarrolladores que necesitan entender o modificar el código
+**Read this first** to understand the entire codebase structure.
 
 ---
 
-### 3. [TESTING_REGISTRO.md](./TESTING_REGISTRO.md) - Guía de Pruebas
-**Para QA y testing**
+### 2. **PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md** 🚀
+**Detailed implementation guide for payment configuration**
 
-- 10 casos de prueba detallados
-- Pasos a seguir para cada test
-- Resultados esperados
-- Checklist de funcionalidades
-- Verificación en base de datos
-- Verificación de seguridad
+Step-by-step guide for implementing the payment methods configuration feature:
+- Database schema changes (PaymentSettings model)
+- Admin API routes (settings CRUD, QR upload)
+- Public API for checkout integration
+- Admin UI implementation (full code examples)
+- Checkout page updates
+- Order creation API
+- Testing checklist
+- Deployment notes
 
-**Para quién**: QA Engineers, testers, desarrolladores haciendo pruebas
-
----
-
-### 4. [VISUAL_GUIDE.md](./VISUAL_GUIDE.md) - Guía Visual
-**Para UX y entendimiento del flujo**
-
-- Mockups ASCII del formulario
-- Experiencia del usuario paso a paso
-- Casos de error visualizados
-- Diagramas de flujo
-- Interacciones de UI
-- Checklist visual de funcionalidades
-
-**Para quién**: Designers, UX, Product Managers, usuarios finales
+**Use this** when implementing the payment methods feature.
 
 ---
 
-## 🎯 Guía de Lectura Recomendada
+### 3. **QUICK_START_PAYMENT_FEATURE.md** ⚡
+**Fast-track implementation guide**
 
-### Si eres nuevo en el proyecto:
-1. Empieza con [SUMMARY.md](./SUMMARY.md) para entender el panorama general
-2. Lee [VISUAL_GUIDE.md](./VISUAL_GUIDE.md) para ver cómo funciona desde el punto de vista del usuario
-3. Si necesitas detalles técnicos, consulta [REGISTRO_USUARIO.md](./REGISTRO_USUARIO.md)
+Quick reference guide with:
+- Implementation checklist (7 steps)
+- File structure overview
+- Key code snippets
+- Testing commands
+- Common issues & solutions
+- Estimated timeline (7-10 hours)
 
-### Si eres desarrollador:
-1. Lee [REGISTRO_USUARIO.md](./REGISTRO_USUARIO.md) para entender la arquitectura
-2. Consulta [TESTING_REGISTRO.md](./TESTING_REGISTRO.md) para saber qué probar
-3. Usa [VISUAL_GUIDE.md](./VISUAL_GUIDE.md) como referencia de UX
-
-### Si eres QA/Tester:
-1. Empieza con [TESTING_REGISTRO.md](./TESTING_REGISTRO.md) - es tu guía principal
-2. Usa [VISUAL_GUIDE.md](./VISUAL_GUIDE.md) para verificar estados visuales
-3. Consulta [REGISTRO_USUARIO.md](./REGISTRO_USUARIO.md) si necesitas contexto técnico
-
-### Si eres Product Manager:
-1. Lee [SUMMARY.md](./SUMMARY.md) para el overview ejecutivo
-2. Revisa [VISUAL_GUIDE.md](./VISUAL_GUIDE.md) para entender la experiencia del usuario
-3. Consulta los otros docs según necesites detalles específicos
+**Start here** for a quick overview before diving into implementation.
 
 ---
 
-## 📋 Resumen de Criterios de Éxito
+### 4. **ARCHITECTURE_DIAGRAM.md** 🏗️
+**Visual system architecture**
 
-Todos los criterios del issue original han sido cumplidos:
+ASCII diagrams showing:
+- Complete data flow (Admin → Database → Checkout → Orders)
+- Component interactions
+- Security layers
+- Technology stack
+- Integration points
+- State management flow
+- Error handling strategy
 
-| # | Criterio | Estado |
-|---|----------|--------|
-| 1 | Usuario puede registrarse sin autenticarse con Google | ✅ |
-| 2 | Usuario puede registrarse con Nombre, Correo y Password | ✅ |
-| 3 | Existe validación de contraseña (colocar dos veces) | ✅ |
-
----
-
-## 🔐 Características de Seguridad
-
-- ✅ Hash de contraseñas con bcrypt (12 rounds)
-- ✅ Validación de email único en base de datos
-- ✅ Validación de formato de email (regex)
-- ✅ Longitud mínima de contraseña (8 caracteres)
-- ✅ Confirmación de contraseña
-- ✅ PasswordHash nunca enviado al cliente
-- ✅ JWT para manejo de sesiones
-- ✅ HttpOnly cookies para tokens
-- ✅ CSRF protection mediante NextAuth
+**Reference this** to understand how components interact.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+### 5. **SUPABASE_STORAGE_SETUP.md** 📦
+**Storage configuration guide**
 
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **Autenticación**: NextAuth (v4.24.11)
-- **Base de datos**: PostgreSQL + Prisma ORM
-- **Password hashing**: bcryptjs
-- **Estilos**: Tailwind CSS
-- **Animaciones**: Framer Motion
-- **Iconos**: Lucide React
+Setup guide for Supabase Storage (existing file):
+- Bucket creation
+- RLS policies
+- Environment variables
+- Upload testing
 
----
-
-## 📁 Estructura de Archivos del Sistema
-
-```
-likethem/
-├── app/
-│   ├── auth/
-│   │   ├── signin/
-│   │   │   └── page.tsx          # Página de inicio de sesión
-│   │   └── signup/
-│   │       └── page.tsx          # Página de registro ⭐
-│   └── api/
-│       └── auth/
-│           ├── signup/
-│           │   └── route.ts      # API de registro ⭐
-│           ├── register/
-│           │   └── route.ts      # API alternativa de registro
-│           └── [...nextauth]/
-│               └── route.ts      # NextAuth handler
-├── lib/
-│   └── auth.ts                   # Configuración NextAuth ⭐
-├── prisma/
-│   └── schema.prisma             # Esquema de base de datos ⭐
-└── docs/
-    ├── SUMMARY.md                # Este es tu punto de partida
-    ├── REGISTRO_USUARIO.md       # Documentación técnica
-    ├── TESTING_REGISTRO.md       # Guía de pruebas
-    └── VISUAL_GUIDE.md           # Guía visual de UX
-
-⭐ = Archivos clave para la funcionalidad de registro
-```
+**Use this** when setting up image storage.
 
 ---
 
-## 🚀 Quick Start
+## 🎯 Quick Navigation
 
-### Para probar localmente:
+### For New Developers
+1. Start with `REPOSITORY_OVERVIEW.md` to understand the codebase
+2. Review `ARCHITECTURE_DIAGRAM.md` to visualize the system
+3. Check `SUPABASE_STORAGE_SETUP.md` for storage configuration
 
+### For Feature Implementation
+1. Read `QUICK_START_PAYMENT_FEATURE.md` for overview
+2. Follow `PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md` for detailed steps
+3. Reference `ARCHITECTURE_DIAGRAM.md` while coding
+
+### For Troubleshooting
+1. Check "Common Issues" in `QUICK_START_PAYMENT_FEATURE.md`
+2. Review API structure in `REPOSITORY_OVERVIEW.md`
+3. Verify setup in `SUPABASE_STORAGE_SETUP.md`
+
+---
+
+## 📋 Feature Status
+
+| Feature | Status | Documentation |
+|---------|--------|---------------|
+| User Authentication | ✅ Complete | REPOSITORY_OVERVIEW.md |
+| Curator Management | ✅ Complete | REPOSITORY_OVERVIEW.md |
+| Product Management | ✅ Complete | REPOSITORY_OVERVIEW.md |
+| Shopping Cart | ✅ Complete | REPOSITORY_OVERVIEW.md |
+| Checkout UI | ✅ Complete | REPOSITORY_OVERVIEW.md |
+| File Uploads | ✅ Complete | SUPABASE_STORAGE_SETUP.md |
+| **Payment Config** | ❌ To Implement | **All payment docs** |
+| Order Management | ⚠️ Partial | REPOSITORY_OVERVIEW.md |
+| Admin Dashboard | ✅ Complete | REPOSITORY_OVERVIEW.md |
+
+---
+
+## 🛠️ Development Workflow
+
+### Phase 1: Setup
 ```bash
-# 1. Instalar dependencias
+# Clone and install
+git clone [repo-url]
+cd likethem
 npm install
 
-# 2. Configurar variables de entorno
+# Setup environment
 cp .env.example .env
-# Editar .env con tus valores
+# Edit .env with your credentials
 
-# 3. Generar Prisma Client
+# Setup database
 npx prisma generate
+npx prisma db push
+```
 
-# 4. Ejecutar migraciones de DB
-npx prisma migrate deploy
-
-# 5. Iniciar servidor de desarrollo
+### Phase 2: Development
+```bash
+# Start dev server
 npm run dev
 
-# 6. Acceder al formulario de registro
-# http://localhost:3000/auth/signup
+# Open Prisma Studio (optional)
+npx prisma studio
+
+# Run verification
+npm run verify:storage
+```
+
+### Phase 3: Implementation
+Follow guides in this order:
+1. `QUICK_START_PAYMENT_FEATURE.md` - Overview
+2. `PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md` - Step-by-step
+3. `ARCHITECTURE_DIAGRAM.md` - Reference
+
+### Phase 4: Testing
+```bash
+# Manual testing
+curl http://localhost:3000/api/payment-methods
+
+# Check admin access
+# Navigate to: http://localhost:3000/admin/settings
+
+# Test checkout flow
+# Navigate to: http://localhost:3000/checkout
 ```
 
 ---
 
-## 📞 Contacto y Soporte
+## 📞 Getting Help
 
-Si tienes preguntas sobre esta documentación o la funcionalidad:
+### Documentation Order
+1. **Quick Question?** → Check `QUICK_START_PAYMENT_FEATURE.md`
+2. **Implementation Details?** → See `PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md`
+3. **Architecture Clarity?** → Review `ARCHITECTURE_DIAGRAM.md`
+4. **Codebase Reference?** → Search `REPOSITORY_OVERVIEW.md`
 
-1. Revisa primero la documentación correspondiente
-2. Verifica los casos de prueba en TESTING_REGISTRO.md
-3. Consulta el código fuente con los comentarios incluidos
+### Common Searches
 
----
+**"Where is X implemented?"**
+→ `REPOSITORY_OVERVIEW.md` (Section: Project Structure)
 
-## 📝 Historial de Cambios
+**"How do I implement payment methods?"**
+→ `PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md` (Full guide)
 
-### 2026-01-28
-- ✅ Verificación completa de implementación existente
-- ✅ Mejora UX: Link de signup en signin page
-- ✅ Creación de documentación completa
-- ✅ Creación de guías de testing
-- ✅ Creación de guía visual
+**"What's the data flow?"**
+→ `ARCHITECTURE_DIAGRAM.md` (Visual diagrams)
 
-### Estado Actual
-✅ **Funcionalidad 100% implementada**
-✅ **Documentación completa**
-✅ **Listo para producción**
+**"How long will it take?"**
+→ `QUICK_START_PAYMENT_FEATURE.md` (Section: Estimated Timeline)
 
----
+**"What's the current checkout code?"**
+→ `REPOSITORY_OVERVIEW.md` (Section: Checkout Flow)
 
-## 🎓 Glosario
-
-- **BUYER**: Rol de usuario comprador (por defecto)
-- **CURATOR**: Rol de usuario vendedor/curador
-- **NextAuth**: Librería de autenticación para Next.js
-- **Prisma**: ORM (Object-Relational Mapping) para base de datos
-- **bcrypt**: Algoritmo de hash para contraseñas
-- **JWT**: JSON Web Token para sesiones
-- **CSRF**: Cross-Site Request Forgery (protección implementada)
+**"How do file uploads work?"**
+→ `SUPABASE_STORAGE_SETUP.md` + `REPOSITORY_OVERVIEW.md` (Section: File Upload System)
 
 ---
 
-## ✅ Checklist de Implementación
+## 🗂️ File Organization
 
-### Funcionalidad Core
-- [x] Formulario de registro con campos requeridos
-- [x] Validaciones del lado del cliente
-- [x] Validaciones del lado del servidor
-- [x] API de registro funcional
-- [x] Hash de contraseñas
-- [x] Almacenamiento en base de datos
-- [x] Auto-login después de registro
-- [x] Manejo de errores
-
-### Seguridad
-- [x] Hash de passwords con bcrypt
-- [x] Validación de email único
-- [x] Validación de formato de email
-- [x] Longitud mínima de password
-- [x] Confirmación de password
-- [x] CSRF protection
-- [x] HttpOnly cookies
-- [x] JWT sessions
-
-### Experiencia de Usuario
-- [x] Diseño responsivo
-- [x] Animaciones suaves
-- [x] Estados de carga
-- [x] Mensajes de error claros
-- [x] Toggle de visibilidad de password
-- [x] Navegación entre signin/signup
-- [x] Redirección después de registro
-
-### Documentación
-- [x] Resumen ejecutivo (SUMMARY.md)
-- [x] Documentación técnica (REGISTRO_USUARIO.md)
-- [x] Guía de testing (TESTING_REGISTRO.md)
-- [x] Guía visual (VISUAL_GUIDE.md)
-- [x] README índice (este archivo)
+```
+docs/
+├── README.md                               # This file (navigation hub)
+├── REPOSITORY_OVERVIEW.md                  # Complete codebase reference
+├── PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md # Feature implementation
+├── QUICK_START_PAYMENT_FEATURE.md          # Fast-track guide
+├── ARCHITECTURE_DIAGRAM.md                 # Visual architecture
+└── SUPABASE_STORAGE_SETUP.md              # Storage configuration
+```
 
 ---
 
-**Última actualización**: 2026-01-28  
-**Estado del proyecto**: ✅ Completado  
-**Mantenedor**: GitHub Copilot Agent (likethem-creator)
+## 🔄 Documentation Updates
+
+These docs were generated to provide comprehensive guidance for implementing the payment methods configuration feature. They reflect the state of the codebase as of:
+
+**Date**: January 30, 2025  
+**Version**: 1.0.0  
+**Branch**: main
+
+### When to Update
+- After implementing payment methods feature
+- When adding new major features
+- When architecture changes significantly
+- When APIs are added/modified
+
+### How to Update
+1. Modify relevant documentation file(s)
+2. Update version number at bottom of each file
+3. Update this README if new docs are added
+4. Commit with clear message
+
+---
+
+## 🎓 Learning Path
+
+### Beginner (New to Project)
+1. Read: `README.md` (root) - Project overview
+2. Read: `REPOSITORY_OVERVIEW.md` - Understand structure
+3. Setup: Follow development workflow above
+4. Explore: Open Prisma Studio, browse code
+
+### Intermediate (Ready to Code)
+1. Review: `ARCHITECTURE_DIAGRAM.md` - System design
+2. Read: `QUICK_START_PAYMENT_FEATURE.md` - Feature overview
+3. Code: Follow implementation checklist
+4. Test: Use testing commands
+
+### Advanced (Feature Complete)
+1. Optimize: Review performance considerations
+2. Secure: Check security layers in architecture
+3. Scale: Consider multi-tenant improvements
+4. Document: Update docs with learnings
+
+---
+
+## ✅ Pre-Implementation Checklist
+
+Before starting the payment methods feature implementation:
+
+- [ ] Read `REPOSITORY_OVERVIEW.md` completely
+- [ ] Understand database models (Section: Database Models)
+- [ ] Review existing checkout implementation (Section: Checkout Flow)
+- [ ] Verify Supabase Storage is configured
+- [ ] Confirm admin access to `/admin/settings`
+- [ ] Check Prisma Client is up to date (`npx prisma generate`)
+- [ ] Review `ARCHITECTURE_DIAGRAM.md` data flow
+- [ ] Read `QUICK_START_PAYMENT_FEATURE.md` checklist
+- [ ] Clone or bookmark `PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md`
+
+---
+
+## 🚀 Quick Links
+
+| Task | Documentation |
+|------|---------------|
+| Understand codebase | [REPOSITORY_OVERVIEW.md](./REPOSITORY_OVERVIEW.md) |
+| Implement feature | [PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md](./PAYMENT_METHODS_IMPLEMENTATION_GUIDE.md) |
+| Quick reference | [QUICK_START_PAYMENT_FEATURE.md](./QUICK_START_PAYMENT_FEATURE.md) |
+| Visual architecture | [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) |
+| Setup storage | [SUPABASE_STORAGE_SETUP.md](./SUPABASE_STORAGE_SETUP.md) |
+
+---
+
+## 📝 Notes
+
+- All code examples use TypeScript
+- API routes follow Next.js 14 App Router conventions
+- Database operations use Prisma ORM
+- File uploads use Supabase Storage
+- Authentication uses NextAuth.js v4
+
+---
+
+**Happy coding! 🎉**
+
+If you have questions or find issues, please update the relevant documentation file.
