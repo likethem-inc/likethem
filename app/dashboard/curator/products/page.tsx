@@ -19,6 +19,8 @@ import {
 
 interface Product {
   id: string
+  slug: string
+  curatorSlug: string
   title: string
   price: number
   images: Array<{
@@ -339,7 +341,7 @@ export default function ProductsPage() {
                   {/* Actions */}
                   <div className="flex items-center space-x-2">
                     <Link
-                      href={`/product/${product.id}`}
+                      href={`/curator/${product.curatorSlug}/product/${product.slug}`}
                       className="flex-1 flex items-center justify-center space-x-1 py-2 px-3 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
                     >
                       <Eye className="w-4 h-4" />

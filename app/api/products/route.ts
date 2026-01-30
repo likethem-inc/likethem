@@ -40,7 +40,12 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
-    return createApiSuccessResponse(products)
+    const productsWithCurator = products.map((product) => ({
+      ...product,
+      curatorSlug: curatorProfile.slug
+    }))
+
+    return createApiSuccessResponse(productsWithCurator)
   } catch (error) {
     console.error('Error fetching products:', error)
     if (error instanceof Error) {
