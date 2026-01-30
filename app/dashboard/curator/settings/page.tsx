@@ -29,7 +29,8 @@ import {
   Package,
   DollarSign,
   Globe,
-  Camera
+  Camera,
+  CreditCard
 } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
@@ -62,12 +63,24 @@ interface CuratorSettings {
   }
 }
 
+interface PaymentMethod {
+  enabled: boolean
+  phoneNumber: string
+  qrCodeUrl: string
+  instructions: string
+}
+
+interface PaymentSettings {
+  yape: PaymentMethod
+  plin: PaymentMethod
+}
+
 const DEFAULT_BANNER = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
 
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'store' | 'notifications' | 'security' | 'privacy' | 'danger'>('store')
+  const [activeTab, setActiveTab] = useState<'store' | 'notifications' | 'security' | 'privacy' | 'payments' | 'danger'>('store')
   const [settings, setSettings] = useState<CuratorSettings>({
     storeName: '',
     slug: '',
@@ -181,6 +194,26 @@ export default function SettingsPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Payment settings state
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
+    yape: {
+      enabled: false,
+      phoneNumber: '',
+      qrCodeUrl: '',
+      instructions: ''
+    },
+    plin: {
+      enabled: false,
+      phoneNumber: '',
+      qrCodeUrl: '',
+      instructions: ''
+    }
+  })
+  const [isLoadingPayments, setIsLoadingPayments] = useState(false)
+  const [isSavingPayments, setIsSavingPayments] = useState(false)
+  const [isUploadingQR, setIsUploadingQR] = useState<{ yape: boolean; plin: boolean }>({ yape: false, plin: false })
+  const [qrPreviews, setQrPreviews] = useState<{ yape: string | null; plin: string | null }>({ yape: null, plin: null })
+
   // General states
   const [isSaving, setIsSaving] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
@@ -191,6 +224,7 @@ export default function SettingsPage() {
     { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
     { id: 'security', label: 'Security', icon: <Shield className="w-4 h-4" /> },
     { id: 'privacy', label: 'Privacy', icon: <Eye className="w-4 h-4" /> },
+    { id: 'payments', label: 'Métodos de Pago', icon: <CreditCard className="w-4 h-4" /> },
     { id: 'danger', label: 'Danger Zone', icon: <AlertTriangle className="w-4 h-4" /> }
   ]
 
@@ -488,6 +522,130 @@ export default function SettingsPage() {
     
     // Redirect to homepage after deletion
     window.location.href = '/'
+  }
+
+  // Fetch payment settings
+  useEffect(() => {
+    if (activeTab === 'payments' && !isLoadingPayments) {
+      fetchPaymentSettings()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
+
+  const fetchPaymentSettings = async () => {
+    setIsLoadingPayments(true)
+    
+    try {
+      const response = await fetch('/api/curator/payment-settings', {
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setPaymentSettings(data)
+      }
+    } catch (error) {
+      console.error('Error fetching payment settings:', error)
+    } finally {
+      setIsLoadingPayments(false)
+    }
+  }
+
+  const handlePaymentMethodChange = (method: 'yape' | 'plin', field: keyof PaymentMethod, value: any) => {
+    setPaymentSettings(prev => ({
+      ...prev,
+      [method]: {
+        ...prev[method],
+        [field]: value
+      }
+    }))
+  }
+
+  const handleQRUpload = async (event: React.ChangeEvent<HTMLInputElement>, method: 'yape' | 'plin') => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('El archivo debe ser menor a 5MB')
+      return
+    }
+
+    // Validate file type
+    if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
+      alert('Por favor sube un archivo JPG o PNG')
+      return
+    }
+
+    setIsUploadingQR(prev => ({ ...prev, [method]: true }))
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('paymentMethod', method)
+
+      const response = await fetch('/api/curator/payment-settings/upload-qr', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error('Error al subir el código QR')
+      }
+
+      const data = await response.json()
+      
+      // Update the QR URL in payment settings
+      setPaymentSettings(prev => ({
+        ...prev,
+        [method]: {
+          ...prev[method],
+          qrCodeUrl: data.url
+        }
+      }))
+
+      // Set preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setQrPreviews(prev => ({ ...prev, [method]: e.target?.result as string }))
+      }
+      reader.readAsDataURL(file)
+
+      setShowSuccessToast(true)
+      setTimeout(() => setShowSuccessToast(false), 3000)
+    } catch (error) {
+      console.error('Error uploading QR:', error)
+      alert(error instanceof Error ? error.message : 'Error al subir el código QR')
+    } finally {
+      setIsUploadingQR(prev => ({ ...prev, [method]: false }))
+    }
+  }
+
+  const savePaymentSettings = async () => {
+    setIsSavingPayments(true)
+    
+    try {
+      const response = await fetch('/api/curator/payment-settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(paymentSettings)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al guardar la configuración de pago')
+      }
+
+      setShowSuccessToast(true)
+      setTimeout(() => setShowSuccessToast(false), 3000)
+    } catch (error) {
+      console.error('Error saving payment settings:', error)
+      alert(error instanceof Error ? error.message : 'Error al guardar la configuración de pago')
+    } finally {
+      setIsSavingPayments(false)
+    }
   }
 
   if (isLoadingProfile) {
@@ -1038,6 +1196,242 @@ export default function SettingsPage() {
                       </button>
                     </div>
                   </div>
+                </motion.div>
+              )}
+
+              {/* Payment Methods Tab */}
+              {activeTab === 'payments' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <h2 className="text-2xl font-light mb-6">Métodos de Pago</h2>
+                  
+                  {isLoadingPayments ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="w-8 h-8 border-4 border-gray-200 border-t-carbon rounded-full animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      {/* Yape Section */}
+                      <div className="border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                              <CreditCard className="w-6 h-6 text-purple-600" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-medium text-carbon">Yape</h3>
+                              <p className="text-sm text-gray-600">Configura tu cuenta de Yape</p>
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={paymentSettings.yape.enabled}
+                              onChange={(e) => handlePaymentMethodChange('yape', 'enabled', e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                          </label>
+                        </div>
+
+                        {paymentSettings.yape.enabled && (
+                          <div className="space-y-4 mt-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Número de Teléfono
+                              </label>
+                              <input
+                                type="tel"
+                                value={paymentSettings.yape.phoneNumber}
+                                onChange={(e) => handlePaymentMethodChange('yape', 'phoneNumber', e.target.value)}
+                                placeholder="Ej: 999 999 999"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Código QR
+                              </label>
+                              <div className="flex items-start space-x-4">
+                                {(qrPreviews.yape || paymentSettings.yape.qrCodeUrl) && (
+                                  <div className="relative w-32 h-32">
+                                    <Image
+                                      src={qrPreviews.yape || safeSrc(paymentSettings.yape.qrCodeUrl)}
+                                      alt="Yape QR"
+                                      fill
+                                      sizes="128px"
+                                      className="rounded-lg object-cover border-2 border-gray-200"
+                                    />
+                                  </div>
+                                )}
+                                <div className="flex-1">
+                                  <label className="flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-colors">
+                                    {isUploadingQR.yape ? (
+                                      <>
+                                        <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mr-2" />
+                                        <span className="text-sm text-gray-600">Subiendo...</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Upload className="w-5 h-5 text-gray-400 mr-2" />
+                                        <span className="text-sm text-gray-600">
+                                          {paymentSettings.yape.qrCodeUrl ? 'Cambiar QR' : 'Subir código QR'}
+                                        </span>
+                                      </>
+                                    )}
+                                    <input
+                                      type="file"
+                                      accept="image/jpeg,image/jpg,image/png"
+                                      onChange={(e) => handleQRUpload(e, 'yape')}
+                                      className="hidden"
+                                      disabled={isUploadingQR.yape}
+                                    />
+                                  </label>
+                                  <p className="text-xs text-gray-500 mt-2">JPG o PNG, máx. 5MB</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Instrucciones para el Cliente (Opcional)
+                              </label>
+                              <textarea
+                                value={paymentSettings.yape.instructions}
+                                onChange={(e) => handlePaymentMethodChange('yape', 'instructions', e.target.value)}
+                                placeholder="Ej: Después de yapear, envía una captura de pantalla..."
+                                rows={3}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 resize-none"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Plin Section */}
+                      <div className="border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <CreditCard className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-medium text-carbon">Plin</h3>
+                              <p className="text-sm text-gray-600">Configura tu cuenta de Plin</p>
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={paymentSettings.plin.enabled}
+                              onChange={(e) => handlePaymentMethodChange('plin', 'enabled', e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          </label>
+                        </div>
+
+                        {paymentSettings.plin.enabled && (
+                          <div className="space-y-4 mt-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Número de Teléfono
+                              </label>
+                              <input
+                                type="tel"
+                                value={paymentSettings.plin.phoneNumber}
+                                onChange={(e) => handlePaymentMethodChange('plin', 'phoneNumber', e.target.value)}
+                                placeholder="Ej: 999 999 999"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Código QR
+                              </label>
+                              <div className="flex items-start space-x-4">
+                                {(qrPreviews.plin || paymentSettings.plin.qrCodeUrl) && (
+                                  <div className="relative w-32 h-32">
+                                    <Image
+                                      src={qrPreviews.plin || safeSrc(paymentSettings.plin.qrCodeUrl)}
+                                      alt="Plin QR"
+                                      fill
+                                      sizes="128px"
+                                      className="rounded-lg object-cover border-2 border-gray-200"
+                                    />
+                                  </div>
+                                )}
+                                <div className="flex-1">
+                                  <label className="flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                                    {isUploadingQR.plin ? (
+                                      <>
+                                        <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
+                                        <span className="text-sm text-gray-600">Subiendo...</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Upload className="w-5 h-5 text-gray-400 mr-2" />
+                                        <span className="text-sm text-gray-600">
+                                          {paymentSettings.plin.qrCodeUrl ? 'Cambiar QR' : 'Subir código QR'}
+                                        </span>
+                                      </>
+                                    )}
+                                    <input
+                                      type="file"
+                                      accept="image/jpeg,image/jpg,image/png"
+                                      onChange={(e) => handleQRUpload(e, 'plin')}
+                                      className="hidden"
+                                      disabled={isUploadingQR.plin}
+                                    />
+                                  </label>
+                                  <p className="text-xs text-gray-500 mt-2">JPG o PNG, máx. 5MB</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Instrucciones para el Cliente (Opcional)
+                              </label>
+                              <textarea
+                                value={paymentSettings.plin.instructions}
+                                onChange={(e) => handlePaymentMethodChange('plin', 'instructions', e.target.value)}
+                                placeholder="Ej: Después de hacer el plin, envía una captura de pantalla..."
+                                rows={3}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 resize-none"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Save Button */}
+                      <div className="flex justify-end">
+                        <button
+                          onClick={savePaymentSettings}
+                          disabled={isSavingPayments}
+                          className="px-6 py-3 bg-carbon text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                        >
+                          {isSavingPayments ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              <span>Guardando...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4" />
+                              <span>Guardar Configuración</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
