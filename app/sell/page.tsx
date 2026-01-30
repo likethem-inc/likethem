@@ -28,6 +28,7 @@ export default function BecomeCurator() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [previewSlug, setPreviewSlug] = useState('')
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)
 
   // Check authentication
   useEffect(() => {
@@ -67,25 +68,51 @@ export default function BecomeCurator() {
     }
   }, [form.storeName])
 
+  useEffect(() => {
+    if (!form.bannerImage) {
+      setBannerPreviewUrl(null)
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(form.bannerImage)
+    setBannerPreviewUrl(objectUrl)
+
+    return () => {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }, [form.bannerImage])
+
   const handleInputChange = (field: keyof CuratorForm, value: string | File | null) => {
     setForm(prev => ({ ...prev, [field]: value }))
     setError(null)
   }
 
+  const handleSelectedFile = (file: File | null) => {
+    if (!file) return
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      setError('Image size must be less than 5MB')
+      return
+    }
+
+    handleInputChange('bannerImage', file)
+  }
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null
-    if (file) {
-      // Validate file type and size
-      if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file')
-        return
-      }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        setError('Image size must be less than 5MB')
-        return
-      }
-      handleInputChange('bannerImage', file)
-    }
+    handleSelectedFile(file)
+  }
+
+  const handleBannerDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const file = event.dataTransfer.files?.[0] || null
+    handleSelectedFile(file)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -268,29 +295,41 @@ export default function BecomeCurator() {
               <label htmlFor="bannerImage" className="block text-sm font-medium text-gray-700 mb-2">
                 Banner Image (optional)
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <label
+                className="mt-1 flex cursor-pointer justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors"
+                onDragOver={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                }}
+                onDrop={handleBannerDrop}
+              >
+                <div className="space-y-3 text-center">
+                  {bannerPreviewUrl ? (
+                    <img
+                      src={bannerPreviewUrl}
+                      alt="Banner preview"
+                      className="mx-auto h-32 w-full max-w-md rounded-md object-cover"
+                    />
+                  ) : (
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  )}
                   <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="bannerImage"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-black hover:text-gray-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-black"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="bannerImage"
-                        name="bannerImage"
-                        type="file"
-                        accept="image/*"
-                        className="sr-only"
-                        onChange={handleImageUpload}
-                      />
-                    </label>
+                    <span className="relative bg-white rounded-md font-medium text-black hover:text-gray-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-black">
+                      Upload a file
+                    </span>
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                 </div>
-              </div>
+                <input
+                  id="bannerImage"
+                  name="bannerImage"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={handleImageUpload}
+                />
+              </label>
               {form.bannerImage && (
                 <p className="mt-2 text-sm text-gray-600">
                   Selected: {form.bannerImage.name}
