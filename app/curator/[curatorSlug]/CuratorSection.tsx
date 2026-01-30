@@ -64,7 +64,7 @@ export default function CuratorSection({
           <div className="text-center py-12">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Active Drop</h3>
             <p className="text-gray-500 mb-4">
-              {curatorName} doesn't have an active drop right now.
+              {curatorName} doesn&apos;t have an active drop right now.
             </p>
             <p className="text-sm text-gray-400">
               Follow them to be notified when they launch their next drop!

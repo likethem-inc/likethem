@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Paperclip, Image as ImageIcon, Loader2 } from 'lucide-react'
+import Image from 'next/image'
 
 interface ChatMessage {
   id: string
@@ -210,11 +211,15 @@ export default function NigelChatModal({ isOpen, onClose, productData }: NigelCh
                   >
                     {message.image && (
                       <div className="mb-3">
-                        <img
-                          src={message.image}
-                          alt="Uploaded image"
-                          className="w-32 h-32 object-cover rounded-lg"
-                        />
+                        <div className="relative w-32 h-32">
+                          <Image
+                            src={message.image}
+                            alt="Uploaded image"
+                            fill
+                            sizes="128px"
+                            className="object-cover rounded-lg"
+                          />
+                        </div>
                       </div>
                     )}
                     <p className="text-sm leading-relaxed">{message.content}</p>
@@ -264,11 +269,15 @@ export default function NigelChatModal({ isOpen, onClose, productData }: NigelCh
             {imagePreview && (
               <div className="px-6 pb-4">
                 <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-20 h-20 object-cover rounded-lg"
-                  />
+                  <div className="relative w-20 h-20">
+                    <Image
+                      src={imagePreview}
+                      alt="Preview"
+                      fill
+                      sizes="80px"
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
                   <button
                     onClick={removeImage}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"

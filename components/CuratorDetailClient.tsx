@@ -144,7 +144,7 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
               </div>
               {curator.isEditorsPick && (
                 <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                  Editor's Pick
+                  Editor&apos;s Pick
                 </div>
               )}
             </div>
@@ -221,7 +221,7 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">This curator hasn't added any items yet</h3>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">This curator hasn&apos;t added any items yet</h3>
               <p className="text-gray-500 mb-6">
                 {curator.storeName} is carefully curating their collection. Check back soon for amazing fashion finds!
               </p>

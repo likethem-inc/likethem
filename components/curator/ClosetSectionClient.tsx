@@ -57,6 +57,14 @@ export default function ClosetSectionClient({
   totalCount
 }: ClosetSectionClientProps) {
   const t = useT();
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
+  useEffect(() => {
+    if (tier !== 'INNER') return;
+    const unlockKey = curatorSlug ? `innerUnlocked:${curatorSlug}` : `innerUnlocked:${curatorId}`;
+    const unlocked = localStorage.getItem(unlockKey) === 'true';
+    setIsUnlocked(unlocked);
+  }, [tier, curatorSlug, curatorId]);
   // Show DropHero for DROP tier if there's an active drop
   if (tier === 'DROP' && activeDrop) {
     return (
@@ -105,15 +113,6 @@ export default function ClosetSectionClient({
   // For INNER tier - always show locked products unless unlocked in localStorage
   // This overrides server-side hasAccess check for UI purposes
   if (tier === 'INNER') {
-    const [isUnlocked, setIsUnlocked] = useState(false);
-
-    useEffect(() => {
-      // Check localStorage for unlock state keyed by curator slug or ID
-      const unlockKey = curatorSlug ? `innerUnlocked:${curatorSlug}` : `innerUnlocked:${curatorId}`;
-      const unlocked = localStorage.getItem(unlockKey) === 'true';
-      setIsUnlocked(unlocked);
-    }, [curatorSlug, curatorId]);
-
     // Force locked state for Inner - ALL Inner products are locked until localStorage says unlocked
     // This ensures consistent UX: Inner tab always shows locked cards until user unlocks
     const forceLocked = !isUnlocked;

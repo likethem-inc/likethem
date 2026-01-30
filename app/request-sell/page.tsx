@@ -43,15 +43,15 @@ export default function RequestSellPage() {
               Application Submitted
             </h1>
             <p className="text-lg text-warm-gray font-light mb-8 max-w-md mx-auto">
-              Thank you for your interest in becoming a LikeThem curator. We'll be in touch within 7 days if your application is shortlisted.
+              Thank you for your interest in becoming a LikeThem curator. We&apos;ll be in touch within 7 days if your application is shortlisted.
             </p>
             <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
               <h3 className="font-serif text-lg font-light mb-2">What happens next?</h3>
               <ul className="text-sm text-gray-600 space-y-2 text-left">
                 <li>• Our editorial team will review your application</li>
-                <li>• We'll assess your community and aesthetic alignment</li>
+                <li>• We&apos;ll assess your community and aesthetic alignment</li>
                 <li>• Shortlisted candidates will receive an invitation</li>
-                <li>• You'll get access to our curator onboarding process</li>
+                <li>• You&apos;ll get access to our curator onboarding process</li>
               </ul>
             </div>
           </motion.div>

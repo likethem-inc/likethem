@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { 
   BarChart3, 
   ShoppingBag, 
@@ -137,15 +138,17 @@ export default function CuratorDashboard({ curator }: CuratorDashboardProps) {
                 Curator Dashboard
               </h1>
               <p className="text-lg text-gray-600">
-                Welcome back, {curator.name}. Here's what's happening with your store.
+                Welcome back, {curator.name}. Here&apos;s what&apos;s happening with your store.
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <img
+              <div className="relative w-16 h-16">
+                <Image
                   src={avatarSrc}
                   alt={curator.name}
-                  className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-lg"
+                  fill
+                  sizes="64px"
+                  className="rounded-full object-cover border-4 border-white shadow-lg"
                 />
                 {curator.isEditorPick && (
                   <div className="absolute -top-2 -right-2 bg-yellow-400 text-white rounded-full p-1">
@@ -239,7 +242,7 @@ export default function CuratorDashboard({ curator }: CuratorDashboardProps) {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">New order received</p>
-                  <p className="text-sm text-gray-500">Order #1234 for "Vintage Leather Jacket"</p>
+                  <p className="text-sm text-gray-500">Order #1234 for &ldquo;Vintage Leather Jacket&rdquo;</p>
                 </div>
                 <span className="text-sm text-gray-500">2 hours ago</span>
               </div>
@@ -249,7 +252,7 @@ export default function CuratorDashboard({ curator }: CuratorDashboardProps) {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">Product favorited</p>
-                  <p className="text-sm text-gray-500">"Minimalist Watch" was added to favorites</p>
+                  <p className="text-sm text-gray-500">&ldquo;Minimalist Watch&rdquo; was added to favorites</p>
                 </div>
                 <span className="text-sm text-gray-500">4 hours ago</span>
               </div>
@@ -259,7 +262,7 @@ export default function CuratorDashboard({ curator }: CuratorDashboardProps) {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">New review</p>
-                  <p className="text-sm text-gray-500">5-star review for "Classic Denim Jacket"</p>
+                  <p className="text-sm text-gray-500">5-star review for &ldquo;Classic Denim Jacket&rdquo;</p>
                 </div>
                 <span className="text-sm text-gray-500">1 day ago</span>
               </div>

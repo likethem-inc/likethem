@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { 
   Save, 
   Upload, 
@@ -403,7 +404,7 @@ export default function StorePage() {
           {profile.isEditorPick && (
             <div className="mt-4 flex items-center space-x-2">
               <Star className="w-5 h-5 text-yellow-500" />
-              <span className="text-sm font-medium text-yellow-700">Editor's Pick</span>
+              <span className="text-sm font-medium text-yellow-700">Editor&apos;s Pick</span>
             </div>
           )}
         </motion.div>
@@ -589,7 +590,7 @@ export default function StorePage() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900">Editor's Pick</h3>
+                    <h3 className="font-medium text-gray-900">Editor&apos;s Pick</h3>
                     <p className="text-sm text-gray-600">
                       Featured curator status (admin controlled)
                     </p>
@@ -620,10 +621,12 @@ export default function StorePage() {
               
               <div className="space-y-4">
                 <div className="relative mx-auto w-32 h-32">
-                  <img
+                  <Image
                     src={avatarPreview || profile.avatar}
                     alt="Profile"
-                    className="w-full h-full object-cover rounded-full"
+                    fill
+                    sizes="128px"
+                    className="object-cover rounded-full"
                   />
                   <label className="absolute bottom-0 right-0 w-8 h-8 bg-carbon text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors">
                     <Upload className="w-4 h-4" />
@@ -653,10 +656,12 @@ export default function StorePage() {
               
               <div className="space-y-4">
                 <div className="relative w-full h-32">
-                  <img
+                  <Image
                     src={bannerPreview || profile.banner}
                     alt="Banner"
-                    className="w-full h-full object-cover rounded-lg"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover rounded-lg"
                   />
                   <label className="absolute bottom-2 right-2 w-8 h-8 bg-carbon text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors">
                     <Upload className="w-4 h-4" />

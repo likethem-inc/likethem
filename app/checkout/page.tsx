@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
@@ -525,10 +526,12 @@ export default function CheckoutPage() {
                     
                     {/* QR Code */}
                     <div className="text-center mb-6">
-                      <img
+                      <Image
                         src={`/payment-qr/${paymentMethod}-qr.svg`}
                         alt={`${paymentMethod} QR Code`}
-                        className="w-48 h-48 mx-auto border border-gray-200 rounded-lg"
+                        width={192}
+                        height={192}
+                        className="mx-auto border border-gray-200 rounded-lg"
                       />
                       <p className="text-sm text-gray-600 mt-2">
                         Scan this QR code with your {paymentMethod === 'yape' ? 'Yape' : 'Plin'} app
@@ -691,9 +694,11 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center space-x-3">
                     <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.name}
+                        width={48}
+                        height={64}
                         className="w-full h-full object-cover"
                       />
                     </div>

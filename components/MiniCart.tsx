@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import { X, Trash2, ShoppingBag, ChevronRight } from 'lucide-react'
 
 interface CartItem {
@@ -104,11 +105,13 @@ export default function MiniCart({ isOpen, onClose, items, onRemoveItem, onUpdat
                       className="flex items-start space-x-3 group"
                     >
                       {/* Product Image */}
-                      <div className="w-16 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                        <img
+                      <div className="relative w-16 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                        <Image
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="64px"
+                          className="object-cover"
                         />
                       </div>
 

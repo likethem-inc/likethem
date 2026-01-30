@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle, Clock, AlertCircle, ArrowRight, Package, CreditCard, QrCode } from 'lucide-react'
 
@@ -18,13 +19,7 @@ export default function OrderConfirmationPage() {
   const [order, setOrder] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (orderId) {
-      fetchOrder()
-    }
-  }, [orderId])
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
@@ -39,7 +34,13 @@ export default function OrderConfirmationPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId])
+
+  useEffect(() => {
+    if (orderId) {
+      fetchOrder()
+    }
+  }, [orderId, fetchOrder])
 
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -156,11 +157,13 @@ export default function OrderConfirmationPage() {
                 <div className="space-y-4">
                   {order.items.map((item: any) => (
                     <div key={item.id} className="flex items-center space-x-4 p-4 bg-white rounded-lg">
-                      <div className="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                        <img
+                      <div className="relative w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                        <Image
                           src={item.product.images[0]?.url || '/placeholder-product.jpg'}
                           alt={item.product.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="64px"
+                          className="object-cover"
                         />
                       </div>
                       <div className="flex-1">
@@ -191,19 +194,19 @@ export default function OrderConfirmationPage() {
                 <h3 className="font-medium text-blue-800 mb-3">Next Steps</h3>
                 <div className="text-sm text-blue-700 space-y-2">
                   <p>1. Complete your payment using the method you selected</p>
-                  <p>2. Upload payment proof if you haven't already</p>
+                  <p>2. Upload payment proof if you haven&apos;t already</p>
                   <p>3. Wait for payment verification (usually within 24 hours)</p>
-                  <p>4. You'll receive an email confirmation once payment is verified</p>
+                  <p>4. You&apos;ll receive an email confirmation once payment is verified</p>
                 </div>
               </div>
             )}
 
             {status === 'PAID' && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="font-medium text-green-800 mb-3">What's Next?</h3>
+                <h3 className="font-medium text-green-800 mb-3">What&apos;s Next?</h3>
                 <div className="text-sm text-green-700 space-y-2">
                   <p>1. Your order is being prepared for shipment</p>
-                  <p>2. You'll receive tracking information via email</p>
+                  <p>2. You&apos;ll receive tracking information via email</p>
                   <p>3. Expected delivery: 3-5 business days</p>
                 </div>
               </div>

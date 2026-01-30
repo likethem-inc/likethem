@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { 
   ArrowLeft,
   Save,
@@ -586,11 +587,13 @@ export default function SettingsPage() {
                           Profile Image
                         </label>
                         <div className="flex items-center space-x-4">
-                          <div className="relative">
-                            <img
+                          <div className="relative w-20 h-20">
+                            <Image
                               src={profilePreview || safeSrc(settings.profileImage)}
                               alt="Profile"
-                              className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                              fill
+                              sizes="80px"
+                              className="rounded-full object-cover border-2 border-gray-200"
                             />
                             <label className="absolute bottom-0 right-0 bg-carbon text-white p-1 rounded-full cursor-pointer hover:bg-gray-800 transition-colors">
                               <Camera className="w-3 h-3" />
@@ -615,11 +618,13 @@ export default function SettingsPage() {
                           Banner Image
                         </label>
                         <div className="space-y-3">
-                          <div className="relative">
-                            <img
+                          <div className="relative w-full h-20">
+                            <Image
                               src={bannerPreview || settings.bannerImage || DEFAULT_BANNER}
                               alt="Banner"
-                              className="w-full h-20 rounded-lg object-cover border-2 border-gray-200"
+                              fill
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              className="rounded-lg object-cover border-2 border-gray-200"
                             />
                             <label className="absolute bottom-2 right-2 bg-carbon text-white p-1 rounded-full cursor-pointer hover:bg-gray-800 transition-colors">
                               <Camera className="w-3 h-3" />

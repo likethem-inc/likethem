@@ -108,7 +108,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
                 <p className="text-gray-900">{user.curatorProfile.isPublic ? 'Yes' : 'No'}</p>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-1">Editor's Pick</h4>
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Editor&apos;s Pick</h4>
                 <p className="text-gray-900">{user.curatorProfile.isEditorsPick ? 'Yes' : 'No'}</p>
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface CuratorGridProps {
   searchQuery?: string
@@ -109,14 +110,18 @@ export default function CuratorGrid({ searchQuery = '' }: CuratorGridProps) {
           >
             <Link href={`/curator/${curator.slug ?? curator.id}`}>
               <div className="relative overflow-hidden bg-stone">
-                <img
-                  src={curator.image}
-                  alt={curator.name}
-                  className="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                <div className="relative w-full h-80">
+                  <Image
+                    src={curator.image}
+                    alt={curator.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
                 {curator.isEditorPick && (
                   <div className="absolute top-4 left-4 bg-carbon text-white px-2 py-1 text-xs font-medium">
-                    Editor's Pick
+                    Editor&apos;s Pick
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>

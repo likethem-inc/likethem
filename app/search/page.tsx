@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Search, Filter, Grid, List } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface SearchResult {
   id: string
@@ -75,7 +76,7 @@ export default function SearchResultsPage() {
         <div className="container-custom">
           <div className="text-center py-16">
             <div className="w-8 h-8 border-2 border-carbon border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Searching for "{query}"...</p>
+            <p className="text-gray-600">Searching for &quot;{query}&quot;...</p>
           </div>
         </div>
       </div>
@@ -115,8 +116,8 @@ export default function SearchResultsPage() {
           </h1>
           <p className="text-lg text-warm-gray font-light mb-8">
             {results.length > 0 
-              ? `Found ${results.length} results for "${query}"`
-              : `No results found for "${query}"`
+              ? `Found ${results.length} results for “${query}”`
+              : `No results found for “${query}”`
             }
           </p>
 
@@ -235,10 +236,12 @@ export default function SearchResultsPage() {
                     {/* Image */}
                     <div className={viewMode === 'grid' ? 'relative overflow-hidden bg-gray-100 rounded-lg aspect-square' : 'w-24 h-24 flex-shrink-0'}>
                       {result.image ? (
-                        <img
+                        <Image
                           src={result.image}
                           alt={result.title}
-                          className={viewMode === 'grid' ? 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' : 'w-full h-full object-cover rounded-lg'}
+                          fill
+                          sizes={viewMode === 'grid' ? '(max-width: 768px) 100vw, 33vw' : '96px'}
+                          className={viewMode === 'grid' ? 'object-cover group-hover:scale-105 transition-transform duration-300' : 'object-cover rounded-lg'}
                         />
                       ) : (
                         <div className={viewMode === 'grid' ? 'w-full h-full flex items-center justify-center bg-gray-100' : 'w-full h-full flex items-center justify-center bg-gray-100 rounded-lg'}>
@@ -267,7 +270,7 @@ export default function SearchResultsPage() {
                       )}
                       {result.isEditorsPick && (
                         <span className="inline-block px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded ml-2">
-                          Editor's Pick
+                          Editor&apos;s Pick
                         </span>
                       )}
                     </div>
