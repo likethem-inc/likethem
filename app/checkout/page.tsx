@@ -287,7 +287,7 @@ export default function CheckoutPage() {
         items: items.map(item => {
           const product = item.productId ? productsDetails.get(item.productId) : null
           return {
-            productId: item.id,
+            productId: item.productId, // Fixed: Use actual product ID instead of cart item ID
             quantity: item.quantity,
             size: item.size || undefined,
             color: item.color || undefined,

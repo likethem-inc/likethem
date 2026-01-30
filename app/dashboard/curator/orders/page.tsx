@@ -48,7 +48,7 @@ export default function CuratorOrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch('/api/orders?view=curator', {
         credentials: 'include'
       })
       if (response.ok) {
