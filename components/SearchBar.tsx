@@ -75,6 +75,34 @@ export default function SearchBar({
     return () => clearTimeout(timer)
   }, [query])
 
+  const handleSearch = useCallback(() => {
+    if (query.trim()) {
+      onSearch?.(query.trim())
+      setIsOpen(false)
+      setQuery('')
+      setResults([])
+    }
+  }, [onSearch, query])
+
+  const handleResultClick = useCallback((result: SearchResult) => {
+    // Navigate based on result type
+    switch (result.type) {
+      case 'product':
+        router.push(`/product/${result.id}`)
+        break
+      case 'curator':
+        router.push(`/curator/${result.id}`)
+        break
+      case 'tag':
+        // Navigate to search results page with tag filter
+        router.push(`/search?q=${encodeURIComponent(result.title)}&type=tag`)
+        break
+    }
+    setIsOpen(false)
+    setQuery('')
+    setResults([])
+  }, [router])
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -108,34 +136,6 @@ export default function SearchBar({
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, results, selectedIndex, query, handleResultClick, handleSearch])
-
-  const handleSearch = useCallback(() => {
-    if (query.trim()) {
-      onSearch?.(query.trim())
-      setIsOpen(false)
-      setQuery('')
-      setResults([])
-    }
-  }, [onSearch, query])
-
-  const handleResultClick = useCallback((result: SearchResult) => {
-    // Navigate based on result type
-    switch (result.type) {
-      case 'product':
-        router.push(`/product/${result.id}`)
-        break
-      case 'curator':
-        router.push(`/curator/${result.id}`)
-        break
-      case 'tag':
-        // Navigate to search results page with tag filter
-        router.push(`/search?q=${encodeURIComponent(result.title)}&type=tag`)
-        break
-    }
-    setIsOpen(false)
-    setQuery('')
-    setResults([])
-  }, [router])
 
   const handleSuggestionClick = (suggestion: typeof trendingSuggestions[0]) => {
     setQuery(suggestion.query)
