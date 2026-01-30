@@ -330,6 +330,28 @@ model UserAddress {
   @@map("user_addresses")
 }
 
+model PaymentSettings {
+  id                    String   @id @default(cuid())
+  yapeEnabled           Boolean  @default(false)
+  yapePhoneNumber       String?
+  yapeQRCode            String?
+  yapeInstructions      String?
+  plinEnabled           Boolean  @default(false)
+  plinPhoneNumber       String?
+  plinQRCode            String?
+  plinInstructions      String?
+  stripeEnabled         Boolean  @default(true)
+  stripePublicKey       String?
+  stripeSecretKey       String?
+  defaultPaymentMethod  String   @default("stripe")
+  commissionRate        Float    @default(0.10)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  updatedBy             String?
+
+  @@map("payment_settings")
+}
+
 enum Role {
   ADMIN
   CURATOR
