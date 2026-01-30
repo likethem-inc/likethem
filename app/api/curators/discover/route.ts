@@ -318,8 +318,8 @@ export async function GET(req: NextRequest) {
       // Get price range from batch result
       const priceRange = priceRanges.get(curator.id) || { min: null, max: null }
 
-      // Get avatar
-      const avatar = curator.user?.image || null
+      // Get avatar (store avatar first, then user image)
+      const avatar = curator.avatarImage || curator.user?.image || null
 
       // Parse style tags
       let styleTags: string[] = []

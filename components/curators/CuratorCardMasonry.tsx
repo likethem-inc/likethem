@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { safeSrc } from "@/lib/img";
 import { useT } from "@/hooks/useT";
+import { CuratorImageWithFallback } from "@/components/ImageWithFallback";
 
 type Props = {
   curator: {
@@ -73,10 +74,15 @@ export function CuratorCardMasonry({ curator, variant = "normal" }: Props) {
 
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 overflow-hidden rounded-full ring-1 ring-zinc-200/70 bg-zinc-100">
-            {(curator.image || curator.avatar) ? (
-              <Image src={safeSrc(curator.image || curator.avatar)} alt={`${curator.name} avatar`} width={36} height={36} className="h-9 w-9 object-cover" />
-            ) : null}
+          <div className="h-9 w-9 overflow-hidden rounded-full ring-1 ring-zinc-200/70 bg-zinc-100 relative">
+            <CuratorImageWithFallback
+              src={curator.image || curator.avatar}
+              alt={`${curator.name} avatar`}
+              size="avatar"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-cover"
+            />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
