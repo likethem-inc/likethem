@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getApiUser, requireApiRole, createApiErrorResponse, createApiSuccessResponse } from '@/lib/api-auth'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-const prisma = new PrismaClient()
 
 // PATCH /api/curator/products/[id]/status - Toggle product active status
 export async function PATCH(

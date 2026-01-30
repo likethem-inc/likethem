@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { MoreVertical, Eye, Edit, Trash2, Power } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface ProductDropdownMenuProps {
   productId: string
@@ -20,6 +21,7 @@ export default function ProductDropdownMenu({
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -79,7 +81,7 @@ export default function ProductDropdownMenu({
             onClick={() => setIsOpen(false)}
           >
             <Eye className="w-4 h-4" />
-            <span>Ver producto</span>
+            <span>{t('product.actions.view')}</span>
           </Link>
 
           {/* Edit */}
@@ -89,7 +91,7 @@ export default function ProductDropdownMenu({
             onClick={() => setIsOpen(false)}
           >
             <Edit className="w-4 h-4" />
-            <span>Editar</span>
+            <span>{t('product.actions.edit')}</span>
           </Link>
 
           {/* Divider */}
@@ -104,10 +106,10 @@ export default function ProductDropdownMenu({
             <Power className="w-4 h-4" />
             <span>
               {isLoading
-                ? 'Cambiando...'
+                ? t('product.status.changing')
                 : isActive
-                ? 'Cambiar a Inactivo'
-                : 'Cambiar a Activo'}
+                ? t('product.status.changeToInactive')
+                : t('product.status.changeToActive')}
             </span>
           </button>
 
@@ -120,7 +122,7 @@ export default function ProductDropdownMenu({
                 className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                <span>Eliminar</span>
+                <span>{t('product.actions.delete')}</span>
               </button>
             </>
           )}
