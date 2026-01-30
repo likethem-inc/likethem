@@ -45,6 +45,7 @@ interface ProductDetails {
   curatorId: string
   title: string
   price: number
+  stockQuantity: number
   curator: {
     id: string
     userId: string
@@ -56,7 +57,7 @@ interface ProductDetails {
 }
 
 export default function CheckoutPage() {
-  const { items, getSubtotal, clearCart } = useCart()
+  const { items, getSubtotal, clearCart, removeItem } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'yape' | 'plin'>('stripe')
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
@@ -70,6 +71,7 @@ export default function CheckoutPage() {
   const [productsDetails, setProductsDetails] = useState<Map<string, ProductDetails>>(new Map())
   const [curatorId, setCuratorId] = useState<string | null>(null)
   const [multiCuratorWarning, setMultiCuratorWarning] = useState(false)
+  const [unavailableItems, setUnavailableItems] = useState<Array<{ id: string; reason: string }>>([])
   const router = useRouter()
 
   const subtotal = getSubtotal()
@@ -166,6 +168,30 @@ export default function CheckoutPage() {
         })
         
         setProductsDetails(productsMap)
+
+        const unavailable = items
+          .map((item) => {
+            if (!item.productId) {
+              return { id: item.id, reason: 'Missing product reference' }
+            }
+
+            const product = productsMap.get(item.productId)
+            if (!product) {
+              return { id: item.id, reason: 'Product unavailable or inactive' }
+            }
+
+            if (product.stockQuantity < item.quantity) {
+              return {
+                id: item.id,
+                reason: `Insufficient stock (available: ${product.stockQuantity})`
+              }
+            }
+
+            return null
+          })
+          .filter((item): item is { id: string; reason: string } => item !== null)
+
+        setUnavailableItems(unavailable)
 
         // Step 2: Extract curator IDs and check for multi-curator scenario
         const curatorIds = new Set<string>()
@@ -277,8 +303,17 @@ export default function CheckoutPage() {
     }
   }
 
+  const handleRemoveUnavailableItems = async () => {
+    await Promise.all(unavailableItems.map(item => removeItem(item.id)))
+    setUnavailableItems([])
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (unavailableItems.length > 0) {
+      alert('Some items are unavailable or out of stock. Please remove them to continue.')
+      return
+    }
     setIsProcessing(true)
     
     try {
@@ -341,11 +376,13 @@ export default function CheckoutPage() {
         clearCart()
         setIsProcessing(false)
         
+        const firstOrder = result?.orders?.[0]
+
         // Redirect based on payment method
-        if (paymentMethod === 'stripe') {
+        if (paymentMethod === 'stripe' || !firstOrder) {
           router.push('/order-confirmation')
         } else {
-          router.push(`/order-confirmation?orderId=${result.order.id}&status=${result.order.status}`)
+          router.push(`/order-confirmation?orderId=${firstOrder.id}&status=${firstOrder.status}`)
         }
       } else {
         const error = await response.json()
@@ -608,6 +645,33 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
+                {unavailableItems.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start space-x-3">
+                      <div className="text-red-600">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm1 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="text-sm text-red-800 flex-1">
+                        <p className="font-medium">Some items are unavailable</p>
+                        <ul className="mt-2 space-y-1">
+                          {unavailableItems.map(item => (
+                            <li key={item.id}>• {item.reason}</li>
+                          ))}
+                        </ul>
+                        <button
+                          type="button"
+                          onClick={handleRemoveUnavailableItems}
+                          className="mt-3 inline-flex items-center rounded-full bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                        >
+                          Remove unavailable items
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {isLoadingPaymentMethods ? (
                   // Loading State
                   <div className="space-y-4">
@@ -849,7 +913,7 @@ export default function CheckoutPage() {
               {/* Place Order Button */}
               <button
                 type="submit"
-                disabled={isProcessing}
+                disabled={isProcessing || unavailableItems.length > 0}
                 className="w-full bg-carbon text-white py-4 px-6 font-medium text-lg hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? 'Processing...' : paymentMethod === 'stripe' ? 'Place Order' : 'Submit Order for Review'}
