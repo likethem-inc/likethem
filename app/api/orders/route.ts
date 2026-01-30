@@ -20,12 +20,12 @@ export async function GET(req: Request) {
     const view = searchParams.get("view"); // 'curator' or default (buyer)
 
     // Check if user is a curator and requesting curator view
-    let whereClause: any = {};
+    let whereClause: { buyerId?: string; curatorId?: string } = {};
     let includeBuyer = false;
     
     if (view === 'curator') {
       // Find curator profile
-      const curatorProfile = await prisma.curatorProfile.findFirst({
+      const curatorProfile = await prisma.curatorProfile.findUnique({
         where: { userId: user.id }
       });
 
