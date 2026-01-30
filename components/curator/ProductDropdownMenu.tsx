@@ -31,12 +31,20 @@ export default function ProductDropdownMenu({
       }
     }
 
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleEscapeKey)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscapeKey)
     }
   }, [isOpen])
 
@@ -47,6 +55,8 @@ export default function ProductDropdownMenu({
       setIsOpen(false)
     } catch (error) {
       console.error('Error toggling status:', error)
+      // Keep menu open on error so user can retry
+      // Parent component will show error message
     } finally {
       setIsLoading(false)
     }
@@ -66,14 +76,20 @@ export default function ProductDropdownMenu({
         onClick={() => setIsOpen(!isOpen)}
         className="p-1 text-gray-400 hover:text-carbon transition-colors"
         disabled={isLoading}
-        aria-label="Product actions menu"
+        aria-label={t('product.actions.menu')}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
         <MoreVertical className="w-4 h-4" />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        <div 
+          className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+          role="menu"
+          aria-label={t('product.actions.menu')}
+        >
           {/* View */}
           <Link
             href={`/product/${productId}`}
