@@ -198,5 +198,15 @@
   "apply.form.submitting": "Submitting...",
   "apply.form.success": "Application submitted successfully! We'll get back to you by email.",
   "apply.form.terms": "By submitting, you agree to be contacted by LikeThem. We don't share your data with third parties.",
-  "apply.signInRequired": "Please sign in to submit your application."
+  "apply.signInRequired": "Please sign in to submit your application.",
+  "product.status.changeToActive": "Change to Active",
+  "product.status.changeToInactive": "Change to Inactive",
+  "product.status.statusChanged": "Status changed successfully",
+  "product.status.active": "Active",
+  "product.status.inactive": "Inactive",
+  "product.status.changing": "Changing...",
+  "product.actions.view": "View product",
+  "product.actions.edit": "Edit",
+  "product.actions.delete": "Delete",
+  "product.actions.menu": "Product actions menu"
 }

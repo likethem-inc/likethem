@@ -16,6 +16,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react'
+import ProductDropdownMenu from '@/components/curator/ProductDropdownMenu'
 
 interface Product {
   id: string
@@ -133,9 +134,34 @@ export default function ProductsPage() {
     return status === 'active' ? 'text-green-600' : 'text-red-600'
   }
 
-  const toggleProductStatus = (productId: string) => {
-    // TODO: Implement status toggle
-    console.log('Toggle status for product:', productId)
+  const toggleProductStatus = async (productId: string) => {
+    try {
+      const response = await fetch(`/api/curator/products/${productId}/status`, {
+        method: 'PATCH',
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update product status')
+      }
+
+      const data = await response.json()
+      
+      // Update local state with the updated product
+      setProducts(prevProducts =>
+        prevProducts.map(product =>
+          product.id === productId
+            ? { ...product, isActive: data.product.isActive }
+            : product
+        )
+      )
+
+      console.log('Product status updated successfully:', data)
+    } catch (error) {
+      console.error('Error toggling product status:', error)
+      setError(error instanceof Error ? error.message : 'Failed to update product status')
+    }
   }
 
   const deleteProduct = (productId: string) => {
@@ -301,11 +327,12 @@ export default function ProductsPage() {
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-medium text-carbon line-clamp-2">{product.title}</h3>
-                    <div className="relative">
-                      <button className="p-1 text-gray-400 hover:text-carbon">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <ProductDropdownMenu
+                      productId={product.id}
+                      isActive={product.isActive}
+                      onStatusChange={toggleProductStatus}
+                      onDelete={deleteProduct}
+                    />
                   </div>
                   
                   <p className="font-serif text-lg font-light text-carbon mb-3">

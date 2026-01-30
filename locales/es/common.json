@@ -198,5 +198,15 @@
   "apply.form.submitting": "Enviando...",
   "apply.form.success": "Solicitud enviada exitosamente. Te contactaremos por correo.",
   "apply.form.terms": "Al enviar, aceptas ser contactado por LikeThem. No compartimos tus datos con terceros.",
-  "apply.signInRequired": "Por favor inicia sesión para enviar tu solicitud."
+  "apply.signInRequired": "Por favor inicia sesión para enviar tu solicitud.",
+  "product.status.changeToActive": "Cambiar a Activo",
+  "product.status.changeToInactive": "Cambiar a Inactivo",
+  "product.status.statusChanged": "Estado cambiado exitosamente",
+  "product.status.active": "Activo",
+  "product.status.inactive": "Inactivo",
+  "product.status.changing": "Cambiando...",
+  "product.actions.view": "Ver producto",
+  "product.actions.edit": "Editar",
+  "product.actions.delete": "Eliminar",
+  "product.actions.menu": "Menú de acciones del producto"
 }
