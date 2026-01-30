@@ -205,7 +205,7 @@ export async function POST(req: Request) {
     const createdOrders = await prisma.$transaction(async (tx) => {
       const orders = [];
 
-      for (const [curatorId, curatorItems] of itemsByCurator.entries()) {
+      for (const [curatorId, curatorItems] of Array.from(itemsByCurator.entries())) {
         // Calculate totals for this curator's items
         let subtotal = 0;
         for (const item of curatorItems) {
@@ -225,7 +225,7 @@ export async function POST(req: Request) {
         // Create order
         const order = await tx.order.create({
           data: {
-            buyerId: user.id,
+            buyerId: user.id!,
             curatorId: curatorId,
             status: orderStatus,
             totalAmount: subtotal,

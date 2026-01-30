@@ -529,6 +529,7 @@ export default function SettingsPage() {
     if (activeTab === 'payments' && !isLoadingPayments) {
       fetchPaymentSettings()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
   const fetchPaymentSettings = async () => {
