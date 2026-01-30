@@ -4,14 +4,22 @@ import { prisma } from '@/lib/prisma'
 // IMPORTANT: Prisma requires Node.js runtime
 export const runtime = 'nodejs'
 
-// GET /api/payment-methods - Get enabled payment methods (public)
+// GET /api/payment-methods?curatorId=xxx - Get enabled payment methods for a curator (public)
 export async function GET(request: NextRequest) {
   try {
-    // Get payment settings
-    const settings = await prisma.paymentSettings.findFirst({
-      orderBy: {
-        createdAt: 'desc'
-      }
+    const { searchParams } = new URL(request.url)
+    const curatorId = searchParams.get('curatorId')
+
+    if (!curatorId) {
+      return NextResponse.json(
+        { error: 'curatorId parameter is required' },
+        { status: 400 }
+      )
+    }
+
+    // Get payment settings for this curator
+    const settings = await prisma.paymentSettings.findUnique({
+      where: { curatorId }
     })
 
     // If no settings exist, return default configuration
