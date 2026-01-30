@@ -1,11 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
-import { ArrowLeft, Lock, CreditCard, MapPin, User, Mail, Phone, QrCode, Upload, FileText } from 'lucide-react'
+import { ArrowLeft, Lock, CreditCard, MapPin, User, Mail, Phone, QrCode, Upload, FileText, Check } from 'lucide-react'
+
+interface SavedAddress {
+  id: string
+  userId: string
+  name: string
+  phone: string | null
+  address: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+  isDefault: boolean
+  createdAt: Date
+  updatedAt: Date
+}
 
 export default function CheckoutPage() {
   const { items, getSubtotal, clearCart } = useCart()
@@ -13,6 +28,9 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'yape' | 'plin'>('stripe')
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
   const [transactionCode, setTransactionCode] = useState('')
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+  const [useNewAddress, setUseNewAddress] = useState(true)
   const router = useRouter()
 
   const subtotal = getSubtotal()
@@ -44,6 +62,67 @@ export default function CheckoutPage() {
     billingZipCode: '',
     billingCountry: 'United States'
   })
+
+  // Fetch saved addresses on mount
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const response = await fetch('/api/account/addresses')
+        if (response.ok) {
+          const data = await response.json()
+          setSavedAddresses(data.addresses)
+          
+          // Auto-select default address if available
+          const defaultAddress = data.addresses.find((addr: SavedAddress) => addr.isDefault)
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.id)
+            setUseNewAddress(false)
+            loadAddressToForm(defaultAddress)
+          }
+        }
+      } catch (error) {
+        console.error('[checkout] Failed to fetch addresses:', error)
+      }
+    }
+    fetchAddresses()
+  }, [])
+
+  const loadAddressToForm = (address: SavedAddress) => {
+    setFormData(prev => ({
+      ...prev,
+      name: address.name,
+      phone: address.phone || '',
+      address: address.address,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode,
+      country: address.country
+    }))
+  }
+
+  const handleAddressSelect = (addressId: string) => {
+    setSelectedAddressId(addressId)
+    setUseNewAddress(false)
+    const address = savedAddresses.find(addr => addr.id === addressId)
+    if (address) {
+      loadAddressToForm(address)
+    }
+  }
+
+  const handleUseNewAddress = () => {
+    setUseNewAddress(true)
+    setSelectedAddressId(null)
+    setFormData(prev => ({
+      ...prev,
+      name: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'United States'
+    }))
+  }
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -216,6 +295,71 @@ export default function CheckoutPage() {
                   <MapPin className="w-5 h-5 text-carbon" />
                   <h2 className="font-serif text-2xl font-light">Shipping Information</h2>
                 </div>
+
+                {/* Saved Addresses Selection */}
+                {savedAddresses.length > 0 && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-3">Select a saved address</label>
+                    <div className="space-y-2">
+                      {savedAddresses.map((address) => (
+                        <label
+                          key={address.id}
+                          className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
+                            selectedAddressId === address.id
+                              ? 'border-carbon bg-gray-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="savedAddress"
+                            checked={selectedAddressId === address.id}
+                            onChange={() => handleAddressSelect(address.id)}
+                            className="mt-1 text-carbon"
+                          />
+                          <div className="ml-3 flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium">{address.name}</span>
+                              {address.isDefault && (
+                                <span className="text-xs bg-carbon text-white px-2 py-0.5 rounded">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {address.address}, {address.city}, {address.state} {address.zipCode}, {address.country}
+                            </p>
+                            {address.phone && (
+                              <p className="text-sm text-gray-500 mt-1">{address.phone}</p>
+                            )}
+                          </div>
+                          {selectedAddressId === address.id && (
+                            <Check className="w-5 h-5 text-carbon ml-2" />
+                          )}
+                        </label>
+                      ))}
+                      <label
+                        className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
+                          useNewAddress
+                            ? 'border-carbon bg-gray-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="savedAddress"
+                          checked={useNewAddress}
+                          onChange={handleUseNewAddress}
+                          className="text-carbon"
+                        />
+                        <span className="ml-3 font-medium">Use a new address</span>
+                        {useNewAddress && (
+                          <Check className="w-5 h-5 text-carbon ml-auto" />
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>

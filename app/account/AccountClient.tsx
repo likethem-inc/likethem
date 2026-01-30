@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronDown, ChevronUp, Edit, Plus, Trash2, User, MapPin, CreditCard, Palette, Heart } from 'lucide-react'
+import { ChevronDown, ChevronUp, Edit, Plus, Trash2, User, MapPin, CreditCard, Palette, Heart, Check, X } from 'lucide-react'
 import SavedItems from '@/components/account/SavedItems'
 
 interface User {
@@ -15,6 +15,21 @@ interface User {
   phone: string | null
   role: string
   passwordHash: string | null
+}
+
+interface Address {
+  id: string
+  userId: string
+  name: string
+  phone: string | null
+  address: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+  isDefault: boolean
+  createdAt: Date
+  updatedAt: Date
 }
 
 import type { Session } from 'next-auth'
@@ -392,37 +407,388 @@ function PersonalDetails({
 }
 
 function ShippingAddress({ displayName }: { displayName: string }) {
+  const [addresses, setAddresses] = useState<Address[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAdding, setIsAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  
+  const [formData, setFormData] = useState({
+    name: displayName,
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'United States',
+    isDefault: false
+  })
+
+  // Fetch addresses on mount
+  useEffect(() => {
+    fetchAddresses()
+  }, [])
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await fetch('/api/account/addresses')
+      if (response.ok) {
+        const data = await response.json()
+        setAddresses(data.addresses)
+      }
+    } catch (error) {
+      console.error('[addresses] Fetch error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const resetForm = () => {
+    setFormData({
+      name: displayName,
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'United States',
+      isDefault: false
+    })
+    setIsAdding(false)
+    setEditingId(null)
+  }
+
+  const handleAdd = () => {
+    resetForm()
+    setIsAdding(true)
+  }
+
+  const handleEdit = (address: Address) => {
+    setFormData({
+      name: address.name,
+      phone: address.phone || '',
+      address: address.address,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode,
+      country: address.country,
+      isDefault: address.isDefault
+    })
+    setEditingId(address.id)
+    setIsAdding(false)
+  }
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.address || !formData.city || !formData.state || !formData.zipCode || !formData.country) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const url = '/api/account/addresses'
+      const method = editingId ? 'PUT' : 'POST'
+      const body = editingId 
+        ? { id: editingId, ...formData }
+        : formData
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      })
+
+      if (response.ok) {
+        await fetchAddresses()
+        resetForm()
+      } else {
+        const error = await response.json()
+        alert(`Failed to save address: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('[addresses] Save error:', error)
+      alert('Failed to save address. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/account/addresses?id=${id}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        await fetchAddresses()
+        setDeleteConfirmId(null)
+      } else {
+        const error = await response.json()
+        alert(`Failed to delete address: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('[addresses] Delete error:', error)
+      alert('Failed to delete address. Please try again.')
+    }
+  }
+
+  const handleSetDefault = async (address: Address) => {
+    if (address.isDefault) return
+
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/account/addresses', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: address.id,
+          name: address.name,
+          phone: address.phone,
+          address: address.address,
+          city: address.city,
+          state: address.state,
+          zipCode: address.zipCode,
+          country: address.country,
+          isDefault: true
+        }),
+      })
+
+      if (response.ok) {
+        await fetchAddresses()
+      } else {
+        const error = await response.json()
+        alert(`Failed to set default address: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('[addresses] Set default error:', error)
+      alert('Failed to set default address. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-lg font-light">Shipping Addresses</h3>
-        <button className="flex items-center space-x-2 text-carbon hover:text-black transition-colors">
-          <Plus className="w-4 h-4" />
-          <span className="text-sm">Add New Address</span>
-        </button>
+        {!isAdding && !editingId && (
+          <button 
+            onClick={handleAdd}
+            className="flex items-center space-x-2 text-carbon hover:text-black transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-sm">Add New Address</span>
+          </button>
+        )}
       </div>
 
-      <div className="space-y-4">
-        <div className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h4 className="font-medium mb-2">Primary Address</h4>
-              <p className="text-sm text-gray-600 mb-1">{displayName || 'No name provided'}</p>
-              <p className="text-sm text-gray-600 mb-1">Calle Gran Vía 123</p>
-              <p className="text-sm text-gray-600 mb-1">Madrid, 28013</p>
-              <p className="text-sm text-gray-600">Spain</p>
+      {/* Add/Edit Form */}
+      {(isAdding || editingId) && (
+        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+          <h4 className="font-medium mb-4">
+            {editingId ? 'Edit Address' : 'Add New Address'}
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Full Name *</label>
+              <input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
             </div>
-            <div className="flex space-x-2">
-              <button className="text-carbon hover:text-black transition-colors">
-                <Edit className="w-4 h-4" />
-              </button>
-              <button className="text-red-500 hover:text-red-700 transition-colors">
-                <Trash2 className="w-4 h-4" />
-              </button>
+            <div>
+              <label className="block text-sm font-medium mb-2">Phone (Optional)</label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2">Address *</label>
+              <input
+                type="text"
+                required
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">City *</label>
+              <input
+                type="text"
+                required
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">State/Province *</label>
+              <input
+                type="text"
+                required
+                value={formData.state}
+                onChange={(e) => handleInputChange('state', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">ZIP Code *</label>
+              <input
+                type="text"
+                required
+                value={formData.zipCode}
+                onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Country *</label>
+              <select
+                required
+                value={formData.country}
+                onChange={(e) => handleInputChange('country', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+              >
+                <option value="United States">United States</option>
+                <option value="Canada">Canada</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="France">France</option>
+                <option value="Germany">Germany</option>
+                <option value="Spain">Spain</option>
+                <option value="Italy">Italy</option>
+                <option value="Peru">Peru</option>
+              </select>
             </div>
           </div>
+
+          <div className="mt-4">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isDefault}
+                onChange={(e) => handleInputChange('isDefault', e.target.checked)}
+                className="w-4 h-4 text-carbon border-gray-300 focus:ring-carbon"
+              />
+              <span className="text-sm">Set as default address</span>
+            </label>
+          </div>
+
+          <div className="flex justify-end space-x-4 mt-6">
+            <button
+              onClick={resetForm}
+              disabled={isSaving}
+              className="px-6 py-2 border border-carbon text-carbon hover:bg-carbon hover:text-white transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleSave}
+              disabled={isSaving}
+              className="px-6 py-2 bg-carbon text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {isSaving ? 'Saving...' : 'Save Address'}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Address List */}
+      {isLoading ? (
+        <div className="text-center py-8 text-gray-500">Loading addresses...</div>
+      ) : addresses.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          No addresses saved yet. Add your first address above.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {addresses.map((address) => (
+            <div 
+              key={address.id} 
+              className={`border rounded-lg p-4 ${address.isDefault ? 'border-carbon bg-gray-50' : 'border-gray-200'}`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h4 className="font-medium">{address.name}</h4>
+                    {address.isDefault && (
+                      <span className="text-xs bg-carbon text-white px-2 py-1 rounded">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  {address.phone && (
+                    <p className="text-sm text-gray-600 mb-1">{address.phone}</p>
+                  )}
+                  <p className="text-sm text-gray-600 mb-1">{address.address}</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {address.city}, {address.state} {address.zipCode}
+                  </p>
+                  <p className="text-sm text-gray-600">{address.country}</p>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  {!address.isDefault && (
+                    <button 
+                      onClick={() => handleSetDefault(address)}
+                      disabled={isSaving}
+                      className="text-xs text-carbon hover:text-black transition-colors disabled:opacity-50"
+                    >
+                      Set as Default
+                    </button>
+                  )}
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleEdit(address)}
+                      className="text-carbon hover:text-black transition-colors"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    {deleteConfirmId === address.id ? (
+                      <div className="flex space-x-1">
+                        <button 
+                          onClick={() => handleDelete(address.id)}
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setDeleteConfirmId(null)}
+                          className="text-gray-500 hover:text-gray-700 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => setDeleteConfirmId(address.id)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
