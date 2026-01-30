@@ -29,6 +29,7 @@ model User {
   sellerApplication SellerApplication?
   sessions          Session[]
   wishlistItems     WishlistItem[]
+  addresses         UserAddress[]
 
   @@map("users")
 }
@@ -309,6 +310,24 @@ model WishlistItem {
 
   @@unique([userId, productId])
   @@map("wishlist_items")
+}
+
+model UserAddress {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  phone     String?
+  address   String
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_addresses")
 }
 
 enum Role {
