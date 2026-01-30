@@ -118,10 +118,10 @@ export default function Feed() {
     return () => io.disconnect();
   }, [hasMore, loading, data, fetchPage]);
 
-  if (error) {
+  if (error && items.length === 0) {
     return (
-      <div className="pb-24 text-center text-sm text-red-500">
-        {t('common.error')}: {error}
+      <div className="pb-24 text-center text-sm text-zinc-500">
+        {t('explore.noResults')}
       </div>
     );
   }
