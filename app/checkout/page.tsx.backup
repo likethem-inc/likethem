@@ -687,107 +687,105 @@ export default function CheckoutPage() {
                 )}
 
                 {/* Manual Payment Instructions */}
-                {(paymentMethod === 'yape' || paymentMethod === 'plin') && (() => {
-                  const selectedMethod = paymentMethods.find(m => m.type === paymentMethod)
-                  if (!selectedMethod) return null
-                  
-                  return (
-                    <div className="mt-6">
-                      {/* QR Code */}
-                      {selectedMethod.qrCode && (
-                        <div className="text-center mb-6">
-                          <Image
-                            src={selectedMethod.qrCode}
-                            alt={`${paymentMethod} QR Code`}
-                            width={192}
-                            height={192}
-                            className="mx-auto border border-gray-200 rounded-lg"
-                          />
-                          <p className="text-sm text-gray-600 mt-2">
-                            Scan this QR code with your {paymentMethod === 'yape' ? 'Yape' : 'Plin'} app
-                          </p>
-                        </div>
-                      )}
+                {(paymentMethod === 'yape' || paymentMethod === 'plin') && (
+                  (() => {
+                    const selectedMethod = paymentMethods.find(m => m.type === paymentMethod)
+                    if (!selectedMethod) return null
+                    
+                    {/* QR Code */}
+                    <div className="text-center mb-6">
+                      <Image
+                        src={`/payment-qr/${paymentMethod}-qr.svg`}
+                        alt={`${paymentMethod} QR Code`}
+                        width={192}
+                        height={192}
+                        className="mx-auto border border-gray-200 rounded-lg"
+                      />
+                      <p className="text-sm text-gray-600 mt-2">
+                        Scan this QR code with your {paymentMethod === 'yape' ? 'Yape' : 'Plin'} app
+                      </p>
+                    </div>
 
-                      {/* Phone Number */}
-                      {selectedMethod.phoneNumber && (
+                        {/* Phone Number */}
+                        {selectedMethod.phoneNumber && (
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium mb-2">
+                              Send payment to this number:
+                            </label>
+                            <div className="flex items-center space-x-2 p-3 bg-white border border-gray-200 rounded">
+                              <Phone className="w-4 h-4 text-gray-500" />
+                              <span className="font-mono">{selectedMethod.phoneNumber}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Transaction Code */}
                         <div className="mb-6">
                           <label className="block text-sm font-medium mb-2">
-                            Send payment to this number:
+                            Transaction Code or Payment Notes (Optional)
                           </label>
-                          <div className="flex items-center space-x-2 p-3 bg-white border border-gray-200 rounded">
-                            <Phone className="w-4 h-4 text-gray-500" />
-                            <span className="font-mono">{selectedMethod.phoneNumber}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Transaction Code */}
-                      <div className="mb-6">
-                        <label className="block text-sm font-medium mb-2">
-                          Transaction Code or Payment Notes (Optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={transactionCode}
-                          onChange={(e) => setTransactionCode(e.target.value)}
-                          placeholder="Enter transaction code or any notes"
-                          className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                        />
-                      </div>
-
-                      {/* Payment Proof Upload */}
-                      <div className="mb-6">
-                        <label className="block text-sm font-medium mb-2">
-                          Upload Payment Proof (Optional)
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-carbon transition-colors">
                           <input
-                            type="file"
-                            accept=".jpg,.jpeg,.png,.pdf"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                            id="payment-proof"
+                            type="text"
+                            value={transactionCode}
+                            onChange={(e) => setTransactionCode(e.target.value)}
+                            placeholder="Enter transaction code or any notes"
+                            className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
                           />
-                          <label htmlFor="payment-proof" className="cursor-pointer">
-                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <div className="text-sm text-gray-600">
-                              {paymentProof ? (
-                                <div>
-                                  <FileText className="w-4 h-4 inline mr-1" />
-                                  {paymentProof.name}
-                                </div>
-                              ) : (
-                                <div>
-                                  Click to upload screenshot or PDF<br />
-                                  <span className="text-xs">JPG, PNG, or PDF (max 5MB)</span>
-                                </div>
-                              )}
-                            </div>
-                          </label>
                         </div>
-                      </div>
 
-                      {/* Instructions */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-start space-x-3">
-                          <div className="text-blue-600">
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
+                        {/* Payment Proof Upload */}
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium mb-2">
+                            Upload Payment Proof (Optional)
+                          </label>
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-carbon transition-colors">
+                            <input
+                              type="file"
+                              accept=".jpg,.jpeg,.png,.pdf"
+                              onChange={handleFileUpload}
+                              className="hidden"
+                              id="payment-proof"
+                            />
+                            <label htmlFor="payment-proof" className="cursor-pointer">
+                              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                              <div className="text-sm text-gray-600">
+                                {paymentProof ? (
+                                  <div>
+                                    <FileText className="w-4 h-4 inline mr-1" />
+                                    {paymentProof.name}
+                                  </div>
+                                ) : (
+                                  <div>
+                                    Click to upload screenshot or PDF<br />
+                                    <span className="text-xs">JPG, PNG, or PDF (max 5MB)</span>
+                                  </div>
+                                )}
+                              </div>
+                            </label>
                           </div>
-                          <div className="text-sm text-blue-800">
-                            <p className="font-medium">Important:</p>
-                            <p>
-                              {selectedMethod.instructions || 
-                                'After making the payment, please upload a screenshot of the transaction confirmation. Your order will be reviewed and confirmed once payment is verified.'}
-                            </p>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="text-blue-600">
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div className="text-sm text-blue-800">
+                              <p className="font-medium">Important:</p>
+                              <p>
+                                {selectedMethod.instructions || 
+                                  'After making the payment, please upload a screenshot of the transaction confirmation. Your order will be reviewed and confirmed once payment is verified.'}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })()}
+                    )
+                  })()
+                )}
 
                 {/* Stripe Payment Form */}
                 {paymentMethod === 'stripe' && (
