@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs';
-
-const prisma = new PrismaClient()
 
 // DELETE /api/curator/store/delete - Delete curator store
 export async function DELETE(request: NextRequest) {
@@ -91,7 +89,5 @@ export async function DELETE(request: NextRequest) {
       { error: 'Failed to delete store' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

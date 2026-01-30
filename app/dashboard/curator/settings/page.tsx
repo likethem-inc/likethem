@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { 
@@ -261,6 +261,8 @@ export default function SettingsPage() {
   // General states
   const [isSaving, setIsSaving] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
+  const [showErrorToast, setShowErrorToast] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const tabs = [
@@ -547,7 +549,7 @@ export default function SettingsPage() {
     }
   }
 
-  const checkDeletion = async () => {
+  const checkDeletion = useCallback(async () => {
     setIsCheckingDeletion(true)
     setDeletionError(null)
 
@@ -569,16 +571,20 @@ export default function SettingsPage() {
     } finally {
       setIsCheckingDeletion(false)
     }
-  }
+  }, [])
 
   const deleteAccount = async () => {
     if (deleteConfirmation !== 'DELETE') {
-      alert('Please type DELETE to confirm store deletion')
+      setErrorMessage('Please type DELETE to confirm store deletion')
+      setShowErrorToast(true)
+      setTimeout(() => setShowErrorToast(false), 3000)
       return
     }
 
     if (!deletionCheckData?.canDelete) {
-      alert('Store cannot be deleted due to existing orders or collaborations')
+      setErrorMessage('Store cannot be deleted due to existing orders or collaborations')
+      setShowErrorToast(true)
+      setTimeout(() => setShowErrorToast(false), 3000)
       return
     }
 
@@ -598,7 +604,9 @@ export default function SettingsPage() {
       // Success - redirect to homepage
       window.location.href = '/'
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to delete store')
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to delete store')
+      setShowErrorToast(true)
+      setTimeout(() => setShowErrorToast(false), 3000)
       setIsDeleting(false)
     }
   }
@@ -608,7 +616,7 @@ export default function SettingsPage() {
     if (showDeleteModal) {
       checkDeletion()
     }
-  }, [showDeleteModal])
+  }, [showDeleteModal, checkDeletion])
 
   // Fetch payment settings
   useEffect(() => {
@@ -1568,6 +1576,27 @@ export default function SettingsPage() {
               <span>Settings updated successfully!</span>
               <button
                 onClick={() => setShowSuccessToast(false)}
+                className="ml-4"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Error Toast */}
+        <AnimatePresence>
+          {showErrorToast && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed bottom-8 right-8 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 z-50"
+            >
+              <AlertTriangle className="w-5 h-5" />
+              <span>{errorMessage}</span>
+              <button
+                onClick={() => setShowErrorToast(false)}
                 className="ml-4"
               >
                 <X className="w-4 h-4" />

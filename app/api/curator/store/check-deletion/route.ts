@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs';
-
-const prisma = new PrismaClient()
 
 // GET /api/curator/store/check-deletion - Check if store can be deleted
 export async function GET(request: NextRequest) {
@@ -77,7 +75,5 @@ export async function GET(request: NextRequest) {
       { error: 'Failed to check store deletion status' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }
