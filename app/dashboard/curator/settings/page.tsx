@@ -75,6 +75,21 @@ interface PaymentSettings {
   plin: PaymentMethod
 }
 
+const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
+  yape: {
+    enabled: false,
+    phoneNumber: '',
+    qrCodeUrl: '',
+    instructions: ''
+  },
+  plin: {
+    enabled: false,
+    phoneNumber: '',
+    qrCodeUrl: '',
+    instructions: ''
+  }
+}
+
 const DEFAULT_BANNER = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
 
 export default function SettingsPage() {
@@ -195,20 +210,7 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false)
 
   // Payment settings state
-  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
-    yape: {
-      enabled: false,
-      phoneNumber: '',
-      qrCodeUrl: '',
-      instructions: ''
-    },
-    plin: {
-      enabled: false,
-      phoneNumber: '',
-      qrCodeUrl: '',
-      instructions: ''
-    }
-  })
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>(DEFAULT_PAYMENT_SETTINGS)
   const [isLoadingPayments, setIsLoadingPayments] = useState(false)
   const [isSavingPayments, setIsSavingPayments] = useState(false)
   const [isUploadingQR, setIsUploadingQR] = useState<{ yape: boolean; plin: boolean }>({ yape: false, plin: false })
@@ -542,7 +544,19 @@ export default function SettingsPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setPaymentSettings(data)
+        const normalized: PaymentSettings = {
+          ...DEFAULT_PAYMENT_SETTINGS,
+          ...data,
+          yape: {
+            ...DEFAULT_PAYMENT_SETTINGS.yape,
+            ...(data?.yape ?? {})
+          },
+          plin: {
+            ...DEFAULT_PAYMENT_SETTINGS.plin,
+            ...(data?.plin ?? {})
+          }
+        }
+        setPaymentSettings(normalized)
       }
     } catch (error) {
       console.error('Error fetching payment settings:', error)
@@ -1218,8 +1232,8 @@ export default function SettingsPage() {
                       <div className="border border-gray-200 rounded-lg p-6">
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                              <CreditCard className="w-6 h-6 text-purple-600" />
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                              <CreditCard className="w-6 h-6 text-black" />
                             </div>
                             <div>
                               <h3 className="text-lg font-medium text-carbon">Yape</h3>
@@ -1233,7 +1247,7 @@ export default function SettingsPage() {
                               onChange={(e) => handlePaymentMethodChange('yape', 'enabled', e.target.checked)}
                               className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                           </label>
                         </div>
 
@@ -1316,8 +1330,8 @@ export default function SettingsPage() {
                       <div className="border border-gray-200 rounded-lg p-6">
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <CreditCard className="w-6 h-6 text-blue-600" />
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                              <CreditCard className="w-6 h-6 text-black" />
                             </div>
                             <div>
                               <h3 className="text-lg font-medium text-carbon">Plin</h3>
@@ -1331,7 +1345,7 @@ export default function SettingsPage() {
                               onChange={(e) => handlePaymentMethodChange('plin', 'enabled', e.target.checked)}
                               className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                           </label>
                         </div>
 
