@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
-import { ArrowLeft, Lock, CreditCard, MapPin, User, Mail, Phone, QrCode, Upload, FileText, Check } from 'lucide-react'
+import { ArrowLeft, Lock, CreditCard, MapPin, User, Mail, Phone, QrCode, Upload, FileText, Check, Smartphone } from 'lucide-react'
 
 interface SavedAddress {
   id: string
@@ -22,6 +22,23 @@ interface SavedAddress {
   updatedAt: Date
 }
 
+interface PaymentMethod {
+  id: string
+  name: string
+  type: 'stripe' | 'yape' | 'plin'
+  enabled: boolean
+  phoneNumber?: string
+  qrCode?: string
+  instructions?: string
+  icon: string
+}
+
+interface PaymentMethodsResponse {
+  methods: PaymentMethod[]
+  defaultMethod: string
+  commissionRate: number
+}
+
 export default function CheckoutPage() {
   const { items, getSubtotal, clearCart } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -31,6 +48,9 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [useNewAddress, setUseNewAddress] = useState(true)
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [isLoadingPaymentMethods, setIsLoadingPaymentMethods] = useState(true)
+  const [paymentMethodsError, setPaymentMethodsError] = useState<string | null>(null)
   const router = useRouter()
 
   const subtotal = getSubtotal()
@@ -85,6 +105,37 @@ export default function CheckoutPage() {
       }
     }
     fetchAddresses()
+  }, [])
+
+  // Fetch payment methods on mount
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        setIsLoadingPaymentMethods(true)
+        setPaymentMethodsError(null)
+        
+        const response = await fetch('/api/payment-methods')
+        if (!response.ok) {
+          throw new Error('Failed to fetch payment methods')
+        }
+        
+        const data: PaymentMethodsResponse = await response.json()
+        setPaymentMethods(data.methods)
+        
+        // Auto-select default method or first enabled method
+        if (data.methods.length > 0) {
+          const defaultMethod = data.methods.find(m => m.id === data.defaultMethod)
+          const methodToSelect = defaultMethod || data.methods[0]
+          setPaymentMethod(methodToSelect.type)
+        }
+      } catch (error) {
+        console.error('[checkout] Failed to fetch payment methods:', error)
+        setPaymentMethodsError('Unable to load payment methods. Please refresh the page.')
+      } finally {
+        setIsLoadingPaymentMethods(false)
+      }
+    }
+    fetchPaymentMethods()
   }, [])
 
   const loadAddressToForm = (address: SavedAddress) => {
@@ -459,153 +510,187 @@ export default function CheckoutPage() {
                   <h2 className="font-serif text-2xl font-light">Payment Method</h2>
                 </div>
 
-                <div className="space-y-4">
-                  {/* Stripe Option */}
-                  <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-carbon transition-colors">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="stripe"
-                      checked={paymentMethod === 'stripe'}
-                      onChange={(e) => setPaymentMethod(e.target.value as 'stripe')}
-                      className="text-carbon"
-                    />
-                    <div className="flex items-center space-x-3">
-                      <CreditCard className="w-5 h-5 text-carbon" />
-                      <div>
-                        <div className="font-medium">Credit Card</div>
-                        <div className="text-sm text-gray-500">Secure payment via Stripe</div>
+                {isLoadingPaymentMethods ? (
+                  // Loading State
+                  <div className="space-y-4">
+                    <div className="p-4 border border-gray-200 rounded-lg animate-pulse">
+                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
+                    </div>
+                    <div className="p-4 border border-gray-200 rounded-lg animate-pulse">
+                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
+                    </div>
+                  </div>
+                ) : paymentMethodsError ? (
+                  // Error State
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="text-red-600">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
                       </div>
-                    </div>
-                  </label>
-
-                  {/* Yape Option */}
-                  <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-carbon transition-colors">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="yape"
-                      checked={paymentMethod === 'yape'}
-                      onChange={(e) => setPaymentMethod(e.target.value as 'yape')}
-                      className="text-carbon"
-                    />
-                    <div className="flex items-center space-x-3">
-                      <QrCode className="w-5 h-5 text-carbon" />
-                      <div>
-                        <div className="font-medium">Yape</div>
-                        <div className="text-sm text-gray-500">Pay with Yape mobile wallet</div>
-                      </div>
-                    </div>
-                  </label>
-
-                  {/* Plin Option */}
-                  <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-carbon transition-colors">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="plin"
-                      checked={paymentMethod === 'plin'}
-                      onChange={(e) => setPaymentMethod(e.target.value as 'plin')}
-                      className="text-carbon"
-                    />
-                    <div className="flex items-center space-x-3">
-                      <QrCode className="w-5 h-5 text-carbon" />
-                      <div>
-                        <div className="font-medium">Plin</div>
-                        <div className="text-sm text-gray-500">Pay with Plin mobile wallet</div>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-
-                {/* Manual Payment Instructions */}
-                {(paymentMethod === 'yape' || paymentMethod === 'plin') && (
-                  <div className="mt-6 p-6 bg-gray-50 rounded-lg">
-                    <h3 className="font-medium mb-4">Pay with {paymentMethod === 'yape' ? 'Yape' : 'Plin'}</h3>
-                    
-                    {/* QR Code */}
-                    <div className="text-center mb-6">
-                      <img
-                        src={`/payment-qr/${paymentMethod}-qr.svg`}
-                        alt={`${paymentMethod} QR Code`}
-                        className="w-48 h-48 mx-auto border border-gray-200 rounded-lg"
-                      />
-                      <p className="text-sm text-gray-600 mt-2">
-                        Scan this QR code with your {paymentMethod === 'yape' ? 'Yape' : 'Plin'} app
-                      </p>
-                    </div>
-
-                    {/* Phone Number */}
-                    <div className="mb-6">
-                      <label className="block text-sm font-medium mb-2">
-                        Send payment to this number:
-                      </label>
-                      <div className="flex items-center space-x-2 p-3 bg-white border border-gray-200 rounded">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span className="font-mono">+51 999 888 777</span>
-                      </div>
-                    </div>
-
-                    {/* Transaction Code */}
-                    <div className="mb-6">
-                      <label className="block text-sm font-medium mb-2">
-                        Transaction Code or Payment Notes (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        value={transactionCode}
-                        onChange={(e) => setTransactionCode(e.target.value)}
-                        placeholder="Enter transaction code or any notes"
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                      />
-                    </div>
-
-                    {/* Payment Proof Upload */}
-                    <div className="mb-6">
-                      <label className="block text-sm font-medium mb-2">
-                        Upload Payment Proof (Optional)
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-carbon transition-colors">
-                        <input
-                          type="file"
-                          accept=".jpg,.jpeg,.png,.pdf"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                          id="payment-proof"
-                        />
-                        <label htmlFor="payment-proof" className="cursor-pointer">
-                          <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                          <div className="text-sm text-gray-600">
-                            {paymentProof ? (
-                              <div>
-                                <FileText className="w-4 h-4 inline mr-1" />
-                                {paymentProof.name}
-                              </div>
-                            ) : (
-                              <div>
-                                Click to upload screenshot or PDF<br />
-                                <span className="text-xs">JPG, PNG, or PDF (max 5MB)</span>
-                              </div>
-                            )}
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="text-blue-600">
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="text-sm text-blue-800">
-                          <p className="font-medium">Important:</p>
-                          <p>After making the payment, please upload a screenshot of the transaction confirmation. Your order will be reviewed and confirmed once payment is verified.</p>
-                        </div>
+                      <div className="text-sm text-red-800">
+                        <p className="font-medium">{paymentMethodsError}</p>
                       </div>
                     </div>
                   </div>
+                ) : paymentMethods.length === 0 ? (
+                  // No Payment Methods Available
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="text-yellow-600">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="text-sm text-yellow-800">
+                        <p className="font-medium">No payment methods available</p>
+                        <p>Please contact support to complete your order.</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Payment Methods List
+                  <div className="space-y-4">
+                    {paymentMethods.map((method) => {
+                      const IconComponent = method.icon === 'CreditCard' ? CreditCard : 
+                                           method.icon === 'Smartphone' ? Smartphone : QrCode
+                      
+                      return (
+                        <label 
+                          key={method.id}
+                          className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-carbon transition-colors"
+                        >
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            value={method.type}
+                            checked={paymentMethod === method.type}
+                            onChange={(e) => setPaymentMethod(e.target.value as 'stripe' | 'yape' | 'plin')}
+                            className="text-carbon"
+                          />
+                          <div className="flex items-center space-x-3">
+                            <IconComponent className="w-5 h-5 text-carbon" />
+                            <div>
+                              <div className="font-medium">{method.name}</div>
+                              <div className="text-sm text-gray-500">
+                                {method.type === 'stripe' && 'Secure payment via Stripe'}
+                                {method.type === 'yape' && 'Pay with Yape mobile wallet'}
+                                {method.type === 'plin' && 'Pay with Plin mobile wallet'}
+                              </div>
+                            </div>
+                          </div>
+                        </label>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Manual Payment Instructions */}
+                {(paymentMethod === 'yape' || paymentMethod === 'plin') && (
+                  (() => {
+                    const selectedMethod = paymentMethods.find(m => m.type === paymentMethod)
+                    if (!selectedMethod) return null
+                    
+                    return (
+                      <div className="mt-6 p-6 bg-gray-50 rounded-lg">
+                        <h3 className="font-medium mb-4">Pay with {selectedMethod.name}</h3>
+                        
+                        {/* QR Code */}
+                        {selectedMethod.qrCode && (
+                          <div className="text-center mb-6">
+                            <img
+                              src={selectedMethod.qrCode}
+                              alt={`${selectedMethod.name} QR Code`}
+                              className="w-48 h-48 mx-auto border border-gray-200 rounded-lg object-contain"
+                            />
+                            <p className="text-sm text-gray-600 mt-2">
+                              Scan this QR code with your {selectedMethod.name} app
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Phone Number */}
+                        {selectedMethod.phoneNumber && (
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium mb-2">
+                              Send payment to this number:
+                            </label>
+                            <div className="flex items-center space-x-2 p-3 bg-white border border-gray-200 rounded">
+                              <Phone className="w-4 h-4 text-gray-500" />
+                              <span className="font-mono">{selectedMethod.phoneNumber}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Transaction Code */}
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium mb-2">
+                            Transaction Code or Payment Notes (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={transactionCode}
+                            onChange={(e) => setTransactionCode(e.target.value)}
+                            placeholder="Enter transaction code or any notes"
+                            className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                          />
+                        </div>
+
+                        {/* Payment Proof Upload */}
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium mb-2">
+                            Upload Payment Proof (Optional)
+                          </label>
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-carbon transition-colors">
+                            <input
+                              type="file"
+                              accept=".jpg,.jpeg,.png,.pdf"
+                              onChange={handleFileUpload}
+                              className="hidden"
+                              id="payment-proof"
+                            />
+                            <label htmlFor="payment-proof" className="cursor-pointer">
+                              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                              <div className="text-sm text-gray-600">
+                                {paymentProof ? (
+                                  <div>
+                                    <FileText className="w-4 h-4 inline mr-1" />
+                                    {paymentProof.name}
+                                  </div>
+                                ) : (
+                                  <div>
+                                    Click to upload screenshot or PDF<br />
+                                    <span className="text-xs">JPG, PNG, or PDF (max 5MB)</span>
+                                  </div>
+                                )}
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="text-blue-600">
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div className="text-sm text-blue-800">
+                              <p className="font-medium">Important:</p>
+                              <p>
+                                {selectedMethod.instructions || 
+                                  'After making the payment, please upload a screenshot of the transaction confirmation. Your order will be reviewed and confirmed once payment is verified.'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()
                 )}
 
                 {/* Stripe Payment Form */}
