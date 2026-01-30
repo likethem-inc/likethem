@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 
 const prisma = new PrismaClient();
 
-// GET - Fetch user's orders
+// GET - Fetch user's orders (buyer view) or curator's orders (curator view)
 export async function GET(req: Request) {
   try {
     const user = await getCurrentUser();
@@ -17,10 +17,35 @@ export async function GET(req: Request) {
     const page = Number(searchParams.get("page") ?? "1");
     const limit = Number(searchParams.get("limit") ?? "10");
     const skip = (page - 1) * limit;
+    const view = searchParams.get("view"); // 'curator' or default (buyer)
+
+    // Check if user is a curator and requesting curator view
+    let whereClause: any = {};
+    let includeBuyer = false;
+    
+    if (view === 'curator') {
+      // Find curator profile
+      const curatorProfile = await prisma.curatorProfile.findFirst({
+        where: { userId: user.id }
+      });
+
+      if (!curatorProfile) {
+        return NextResponse.json({ 
+          error: "Curator profile not found" 
+        }, { status: 403 });
+      }
+
+      // Return curator's orders
+      whereClause = { curatorId: curatorProfile.id };
+      includeBuyer = true; // Include buyer info for curator view
+    } else {
+      // Return buyer's orders
+      whereClause = { buyerId: user.id };
+    }
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
-        where: { buyerId: user.id },
+        where: whereClause,
         orderBy: { createdAt: "desc" },
         skip, 
         take: limit,
@@ -41,9 +66,18 @@ export async function GET(req: Request) {
             },
           },
           shippingAddress: true,
+          ...(includeBuyer && {
+            buyer: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          })
         },
       }),
-      prisma.order.count({ where: { buyerId: user.id } }),
+      prisma.order.count({ where: whereClause }),
     ]);
 
     return NextResponse.json({
