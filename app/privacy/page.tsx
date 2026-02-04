@@ -128,7 +128,7 @@ export default function PrivacyPage() {
                   If you have any questions about this privacy policy or our privacy practices, please contact us at:
                 </p>
                 <p className="text-warm-gray">
-                  Email: <a href="mailto:privacy@likethem.io" className="text-carbon hover:underline">privacy@likethem.io</a>
+                  Email: <a href="mailto:help@likethem.io" className="text-carbon hover:underline">help@likethem.io</a>
                 </p>
               </section>
             </div>
