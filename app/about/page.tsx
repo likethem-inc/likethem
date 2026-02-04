@@ -5,10 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Footer from '@/components/Footer'
 import CTAButton from '@/components/ui/CTAButton'
-import { useTranslation } from '@/hooks/useTranslation'
+import { useT } from '@/hooks/useT'
 
 export default function AboutPage() {
-  const { t } = useTranslation()
+  const t = useT()
 
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
