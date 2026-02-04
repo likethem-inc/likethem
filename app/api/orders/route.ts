@@ -201,7 +201,7 @@ export async function POST(req: Request) {
     // Create a map for easy lookup
     const productMap = new Map(products.map(p => [p.id, p]));
 
-    // Validate stock for each item
+    // Validate stock for each item using variant-based inventory
     for (const item of items) {
       const product = productMap.get(item.productId);
       if (!product) {
@@ -211,9 +211,35 @@ export async function POST(req: Request) {
         );
       }
 
-      if (product.stockQuantity < item.quantity) {
+      // Validate that size and color are provided
+      if (!item.size || !item.color) {
         return NextResponse.json(
-          { error: `Insufficient stock for product: ${product.title}. Available: ${product.stockQuantity}` },
+          { error: `Size and color are required for product: ${product.title}` },
+          { status: 400 }
+        );
+      }
+
+      // Check variant stock
+      const variant = await prisma.productVariant.findUnique({
+        where: {
+          productId_size_color: {
+            productId: item.productId,
+            size: item.size,
+            color: item.color
+          }
+        }
+      });
+
+      if (!variant) {
+        return NextResponse.json(
+          { error: `Variant not found for product: ${product.title}, size: ${item.size}, color: ${item.color}` },
+          { status: 404 }
+        );
+      }
+
+      if (variant.stockQuantity < item.quantity) {
+        return NextResponse.json(
+          { error: `Insufficient stock for ${product.title} (${item.size}, ${item.color}). Available: ${variant.stockQuantity}` },
           { status: 400 }
         );
       }
@@ -316,10 +342,16 @@ export async function POST(req: Request) {
           }
         });
 
-        // Update product stock
+        // Update variant stock (not product stock)
         for (const item of curatorItems) {
-          await tx.product.update({
-            where: { id: item.productId },
+          await tx.productVariant.update({
+            where: {
+              productId_size_color: {
+                productId: item.productId,
+                size: item.size!,
+                color: item.color!
+              }
+            },
             data: {
               stockQuantity: {
                 decrement: item.quantity
