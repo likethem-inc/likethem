@@ -357,13 +357,13 @@ export default function SignUpPage() {
             <div className="text-center text-xs text-gray-500">
               <p>
                 {t('auth.signUp.terms')}{' '}
-                <a href="#" className="text-black hover:underline">
+                <Link href="/terms-of-service" className="text-black hover:underline">
                   {t('auth.signUp.termsOfService')}
-                </a>{' '}
+                </Link>{' '}
                 {t('auth.signUp.and')}{' '}
-                <a href="#" className="text-black hover:underline">
+                <Link href="/privacy" className="text-black hover:underline">
                   {t('auth.signUp.privacyPolicy')}
-                </a>
+                </Link>
               </p>
             </div>
           </form>
