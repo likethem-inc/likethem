@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      const [productSlug, size, color, stockStr, sku] = parts.map(p => p.trim())
+      const [productSlug, size, color, stockStr, sku] = parts.map((p: string) => p.trim())
 
       // Validate required fields
       if (!productSlug || !size || !color || !stockStr) {
@@ -172,7 +172,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get all product slugs
-    const productSlugs = [...new Set(variantsToUpdate.map(v => v.productSlug))]
+    const uniqueSlugs = new Set(variantsToUpdate.map(v => v.productSlug))
+    const productSlugs = Array.from(uniqueSlugs)
 
     // Fetch all products in one query
     const products = await prisma.product.findMany({
