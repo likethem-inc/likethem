@@ -362,7 +362,7 @@ export default function BecomeCurator() {
                 Terms of Service
               </a>{' '}
               and{' '}
-              <a href="#" className="text-black hover:underline">
+              <a href="/privacy" className="text-black hover:underline">
                 Privacy Policy
               </a>
             </p>
