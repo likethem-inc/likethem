@@ -70,7 +70,7 @@ export default function ContactPage() {
                 className="text-lg md:text-xl text-warm-gray font-light max-w-2xl mx-auto mb-16"
               >
                 Have questions about curating your store or need assistance? 
-                We'd love to hear from you.
+                We&apos;d love to hear from you.
               </motion.p>
 
               {/* Contact Methods Grid */}
