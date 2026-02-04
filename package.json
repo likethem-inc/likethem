@@ -11,7 +11,8 @@
     "lint": "next lint",
     "promote:curator": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/promote-curator.ts",
     "seed:orders": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed-orders.ts",
-    "verify:storage": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/verify-storage.ts"
+    "verify:storage": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/verify-storage.ts",
+    "init:variants": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/inventory/initialize-variants.ts"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
