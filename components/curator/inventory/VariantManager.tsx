@@ -32,11 +32,19 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [productSearch, setProductSearch] = useState('')
+  const [selectedVariantIndexes, setSelectedVariantIndexes] = useState<Set<number>>(new Set())
+  const [bulkMode, setBulkMode] = useState<'add' | 'set'>('add')
+  const [bulkValue, setBulkValue] = useState('')
   const [toast, setToast] = useState<{ type: ToastType; message: string; isVisible: boolean }>({
     type: 'success',
     message: '',
     isVisible: false
   })
+
+  const showToast = (type: ToastType, message: string) => {
+    setToast({ type, message, isVisible: true })
+  }
 
   useEffect(() => {
     fetchProducts()
@@ -54,14 +62,21 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/curator/products')
-      const data = await response.json()
+      const response = await fetch('/api/products')
+      const contentType = response.headers.get('content-type') || ''
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : null
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch products')
+        throw new Error(data?.error || `Failed to fetch products (${response.status})`)
       }
 
-      setProducts(data.products || [])
+      const productsPayload = Array.isArray(data)
+        ? data
+        : data?.products || data?.data || []
+
+      setProducts(productsPayload)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -91,6 +106,20 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
     return []
   }
 
+  const buildSku = (product: Product, size: string, color: string) => {
+    const normalize = (value: string) =>
+      value
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+
+    const sizePart = normalize(size) || 'SIZE'
+    const colorPart = normalize(color) || 'COLOR'
+
+    return `${product.id}-${sizePart}-${colorPart}`
+  }
+
   const selectProduct = (product: Product) => {
     setSelectedProduct(product)
     
@@ -107,7 +136,7 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
         size: sizes[0] || 'One Size',
         color: colors[0] || 'Default',
         stockQuantity: 0,
-        sku: `${product.id.slice(0, 8)}-${sizes[0] || 'OS'}-${colors[0] || 'DEF'}`
+        sku: buildSku(product, sizes[0] || 'One Size', colors[0] || 'Default')
       })
     } else {
       // Create all size/color combinations
@@ -117,14 +146,69 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
             size,
             color,
             stockQuantity: 0,
-            sku: `${product.id.slice(0, 8)}-${size}-${color.slice(0, 3).toUpperCase()}`
+            sku: buildSku(product, size, color)
           })
         }
       }
     }
     
     setVariants(generatedVariants)
+    setSelectedVariantIndexes(new Set())
+    setBulkValue('')
+
+    loadExistingVariants(product.id, generatedVariants)
   }
+
+  const loadExistingVariants = async (productId: string, baseVariants: Variant[]) => {
+    try {
+      const response = await fetch(`/api/curator/inventory?productId=${productId}`)
+      const contentType = response.headers.get('content-type') || ''
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : null
+
+      if (!response.ok) {
+        throw new Error(data?.error || `Failed to load inventory (${response.status})`)
+      }
+
+      const payload = data?.data ?? data
+      const existingVariants = payload?.variants || []
+
+      if (existingVariants.length === 0) {
+        return
+      }
+
+      const existingMap = new Map(
+        existingVariants.map((variant: any) => [
+          `${variant.size}::${variant.color}`,
+          variant
+        ])
+      )
+
+      setVariants(prev => {
+        const source = prev.length > 0 ? prev : baseVariants
+        return source.map(variant => {
+          const existing = existingMap.get(`${variant.size}::${variant.color}`)
+          if (!existing) {
+            return variant
+          }
+
+          return {
+            ...variant,
+            stockQuantity: existing.stockQuantity ?? variant.stockQuantity,
+            sku: existing.sku ?? variant.sku
+          }
+        })
+      })
+    } catch (err) {
+      console.error('Error loading existing variants:', err)
+      showToast('error', err instanceof Error ? err.message : 'Failed to load inventory')
+    }
+  }
+
+  const filteredProducts = products.filter(product =>
+    product.title.toLowerCase().includes(productSearch.toLowerCase())
+  )
 
   const updateVariant = (index: number, field: keyof Variant, value: string | number) => {
     setVariants(prev => 
@@ -134,6 +218,7 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
 
   const removeVariant = (index: number) => {
     setVariants(prev => prev.filter((_, i) => i !== index))
+    setSelectedVariantIndexes(new Set())
   }
 
   const addCustomVariant = () => {
@@ -143,6 +228,56 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
       stockQuantity: 0,
       sku: ''
     }])
+  }
+
+  const toggleVariantSelection = (index: number) => {
+    setSelectedVariantIndexes(prev => {
+      const next = new Set(prev)
+      if (next.has(index)) {
+        next.delete(index)
+      } else {
+        next.add(index)
+      }
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedVariantIndexes.size === variants.length) {
+      setSelectedVariantIndexes(new Set())
+    } else {
+      setSelectedVariantIndexes(new Set(variants.map((_, index) => index)))
+    }
+  }
+
+  const applyBulkStock = () => {
+    if (selectedVariantIndexes.size === 0) {
+      showToast('error', 'Select at least one variant to update')
+      return
+    }
+
+    const amount = Number(bulkValue)
+    if (!Number.isFinite(amount) || amount < 0) {
+      showToast('error', 'Enter a valid stock quantity')
+      return
+    }
+
+    setVariants(prev =>
+      prev.map((variant, index) => {
+        if (!selectedVariantIndexes.has(index)) {
+          return variant
+        }
+
+        const nextStock = bulkMode === 'add'
+          ? variant.stockQuantity + amount
+          : amount
+
+        return {
+          ...variant,
+          stockQuantity: nextStock
+        }
+      })
+    )
   }
 
   const handleSave = async () => {
@@ -241,14 +376,16 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
       {!selectedProduct ? (
         /* Product Selection */
         <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-            <Package className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-blue-900">Choose a Product</p>
-              <p className="text-sm text-blue-800 mt-1">
-                Select a product below to generate and manage its variants
-              </p>
-            </div>
+          <div className="relative">
+            <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={productSearch}
+              onChange={(event) => setProductSearch(event.target.value)}
+              placeholder="Search products by name..."
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Search products by name"
+            />
           </div>
 
           {products.length === 0 ? (
@@ -259,26 +396,38 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
                 Create a product first before managing variants
               </p>
             </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">No products match your search</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Try a different name or clear the search
+              </p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map((product) => (
+            <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-200">
+              {filteredProducts.map((product) => (
                 <button
                   key={product.id}
                   onClick={() => selectProduct(product)}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all text-left"
+                  className="w-full flex items-center gap-4 p-4 text-left hover:bg-gray-50 transition-colors"
                 >
-                  {product.images[0] && (
+                  {product.images[0] ? (
                     <img
                       src={product.images[0].url}
                       alt={product.title}
-                      className="w-full h-32 object-cover rounded-lg mb-3"
+                      className="w-20 h-14 object-cover rounded-md"
                     />
+                  ) : (
+                    <div className="w-20 h-14 bg-gray-100 rounded-md" />
                   )}
-                  <h3 className="font-medium text-gray-900 line-clamp-2">{product.title}</h3>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                    <span>Sizes: {parseArrayField(product.sizes).length || 0}</span>
-                    <span>•</span>
-                    <span>Colors: {parseArrayField(product.colors).length || 0}</span>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900 line-clamp-1">{product.title}</h3>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                      <span>Sizes: {parseArrayField(product.sizes).length || 0}</span>
+                      <span>•</span>
+                      <span>Colors: {parseArrayField(product.colors).length || 0}</span>
+                    </div>
                   </div>
                 </button>
               ))}
@@ -316,10 +465,51 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
 
           {/* Variants Table */}
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div className="flex flex-col gap-3 border-b border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={variants.length > 0 && selectedVariantIndexes.size === variants.length}
+                  onChange={toggleSelectAll}
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  aria-label="Select all variants"
+                />
+                <span>{selectedVariantIndexes.size} selected</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={bulkMode}
+                  onChange={(event) => setBulkMode(event.target.value as 'add' | 'set')}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Bulk stock mode"
+                >
+                  <option value="add">Add</option>
+                  <option value="set">Set</option>
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  value={bulkValue}
+                  onChange={(event) => setBulkValue(event.target.value)}
+                  placeholder="Quantity"
+                  className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Bulk stock quantity"
+                />
+                <button
+                  onClick={applyBulkStock}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Select
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Size
                     </th>
@@ -340,6 +530,15 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
                 <tbody className="bg-white divide-y divide-gray-200">
                   {variants.map((variant, index) => (
                     <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedVariantIndexes.has(index)}
+                          onChange={() => toggleVariantSelection(index)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          aria-label={`Select variant ${index + 1}`}
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="text"

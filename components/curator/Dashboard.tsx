@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { KpiCard } from "./KpiCard";
 import { ActionCard } from "./ActionCard";
 import { RecentActivity } from "./RecentActivity";
-import { DollarSign, Eye, Heart, Package, Plus, Edit, BarChart3, Box } from "lucide-react";
+import { DollarSign, Eye, Heart, Package, Edit, BarChart3 } from "lucide-react";
 
 type StatsData = {
   storeVisits: number;
@@ -80,16 +80,10 @@ export function CuratorDashboard({ user }: { user: { name?: string } }) {
       {/* Quick actions */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <ActionCard 
-          title="Add New Product" 
-          description="Upload a new item to your store" 
-          href="/dashboard/curator/products/new" 
-          icon={<Plus className="w-5 h-5" />}
-        />
-        <ActionCard 
-          title="Manage Inventory" 
-          description="Track stock and manage variants" 
-          href="/dashboard/curator/inventory" 
-          icon={<Box className="w-5 h-5" />}
+          title="Manage Products" 
+          description="Add products and manage inventory" 
+          href="/dashboard/curator/products" 
+          icon={<Package className="w-5 h-5" />}
         />
         <ActionCard 
           title="Edit Store Profile" 
