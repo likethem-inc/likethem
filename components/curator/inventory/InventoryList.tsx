@@ -102,12 +102,37 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
     }
   }
 
-  const filteredVariants = variants.filter(variant =>
-    variant.product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    variant.size.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    variant.color.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (variant.sku && variant.sku.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  const tokens = searchTerm
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(token => token.length > 0)
+
+  const matchesTokens = (variant: ProductVariant) => {
+    if (tokens.length === 0) return true
+
+    const fields = [
+      variant.product.title,
+      variant.size,
+      variant.color,
+      variant.sku || ''
+    ].map(value => value.toLowerCase())
+
+    return tokens.every(token => fields.some(field => field.includes(token)))
+  }
+
+  const getStockRank = (stockQuantity: number) => {
+    if (stockQuantity <= 0) return 0
+    if (stockQuantity < 5) return 1
+    return 2
+  }
+
+  const filteredVariants = variants
+    .filter(matchesTokens)
+    .sort((a, b) => {
+      const rankDiff = getStockRank(a.stockQuantity) - getStockRank(b.stockQuantity)
+      if (rankDiff !== 0) return rankDiff
+      return a.product.title.localeCompare(b.product.title)
+    })
 
   if (loading) {
     return (
@@ -248,24 +273,8 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
                         type="number"
                         min="0"
                         value={variant.stockQuantity}
-                        onChange={(e) => {
-                          const newValue = parseInt(e.target.value)
-                          if (!isNaN(newValue)) {
-                            // Update local state immediately for better UX
-                            setVariants(prev =>
-                              prev.map(v =>
-                                v.id === variant.id ? { ...v, stockQuantity: newValue } : v
-                              )
-                            )
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const newValue = parseInt(e.target.value)
-                          if (!isNaN(newValue) && newValue !== variant.stockQuantity) {
-                            updateVariantStock(variant.id, newValue)
-                          }
-                        }}
-                        disabled={updatingStock[variant.id]}
+                        readOnly
+                        disabled
                         className={`w-20 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           variant.stockQuantity <= 0
                             ? 'border-red-300 bg-red-50'
