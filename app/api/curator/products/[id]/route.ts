@@ -179,6 +179,8 @@ export async function PUT(
       )
 
       // Delete existing variants to reinitialize with new sizes/colors
+      // Note: This will reset any manually adjusted stock levels for individual variants.
+      // The stock will be redistributed evenly based on the total stockQuantity.
       await tx.productVariant.deleteMany({
         where: { productId: params.id }
       })

@@ -51,7 +51,7 @@ function simulateVariantGeneration(sizes, colors, totalStock) {
 }
 
 // Test Case 1: Normal product with sizes and colors
-console.log('=' .repeat(60))
+console.log('='.repeat(60))
 console.log('Test Case 1: Product with multiple sizes and colors')
 console.log('=' .repeat(60))
 simulateVariantGeneration('S,M,L,XL', 'Red,Blue,Black', 100)
