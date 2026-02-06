@@ -14,6 +14,7 @@ import {
   Edit, 
   Trash2, 
   ShoppingBag,
+  Package,
   CheckCircle,
   XCircle
 } from 'lucide-react'
@@ -235,13 +236,22 @@ export default function ProductsPage() {
                 Manage your curated collection ({products.length} products)
               </p>
             </div>
-            <Link
-              href="/dashboard/curator/products/new"
-              className="flex items-center space-x-2 bg-carbon text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add Product</span>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/dashboard/curator/inventory"
+                className="flex items-center space-x-2 border border-gray-300 bg-white text-gray-700 px-5 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Package className="w-5 h-5" />
+                <span>Manage Inventory</span>
+              </Link>
+              <Link
+                href="/dashboard/curator/products/new"
+                className="flex items-center space-x-2 bg-carbon text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add Product</span>
+              </Link>
+            </div>
           </div>
 
           {/* Filters */}
@@ -295,9 +305,9 @@ export default function ProductsPage() {
             const parsedTags = parseTags(product.tags)
             
             return (
-              <div key={product.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+              <div key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 {/* Product Image */}
-                <div className="relative h-48 bg-gray-100">
+                <div className="relative h-48 bg-gray-100 rounded-t-lg overflow-hidden">
                   {product.images.length > 0 ? (
                     <Image
                       src={product.images[0].url}
@@ -368,29 +378,6 @@ export default function ProductsPage() {
                     <span>{new Date(product.createdAt).toLocaleDateString()}</span>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2">
-                    <Link
-                      href={`/curator/${product.curatorSlug}/product/${product.slug}`}
-                      className="flex-1 flex items-center justify-center space-x-1 py-2 px-3 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>View</span>
-                    </Link>
-                    <Link
-                      href={`/dashboard/curator/products/${product.id}/edit`}
-                      className="flex-1 flex items-center justify-center space-x-1 py-2 px-3 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-                    >
-                      <Edit className="w-4 h-4" />
-                      <span>Edit</span>
-                    </Link>
-                    <button
-                      onClick={() => deleteProduct(product.id)}
-                      className="p-2 border border-gray-300 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
                 </div>
               </div>
             )

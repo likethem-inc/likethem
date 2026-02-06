@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import Toast, { ToastType } from '@/components/Toast'
 
 interface ProductVariant {
   id: string
@@ -30,7 +31,15 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [updatingStock, setUpdatingStock] = useState<{ [key: string]: boolean }>({})
+  const [toast, setToast] = useState<{ type: ToastType; message: string; isVisible: boolean }>({
+    type: 'success',
+    message: '',
+    isVisible: false
+  })
 
+  const showToast = (type: ToastType, message: string) => {
+    setToast({ type, message, isVisible: true })
+  }
   useEffect(() => {
     fetchInventory()
   }, [])
@@ -45,7 +54,8 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
         throw new Error(data.error || 'Failed to fetch inventory')
       }
 
-      setVariants(data.data.variants || [])
+      const payload = data?.data ?? data
+      setVariants(payload.variants || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -55,7 +65,7 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
 
   const updateVariantStock = async (variantId: string, newStock: number) => {
     if (newStock < 0) {
-      alert('Stock quantity cannot be negative')
+      showToast('error', 'Stock quantity cannot be negative')
       return
     }
 
@@ -84,9 +94,9 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
       )
 
       // Show success message
-      alert('Stock updated successfully')
+      showToast('success', 'Stock updated successfully')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update stock')
+      showToast('error', err instanceof Error ? err.message : 'Failed to update stock')
     } finally {
       setUpdatingStock(prev => ({ ...prev, [variantId]: false }))
     }
@@ -101,8 +111,9 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-label="Loading inventory">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <span className="sr-only">Loading inventory...</span>
       </div>
     )
   }
@@ -142,12 +153,33 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
 
       {/* Inventory table */}
       {filteredVariants.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">
-            {searchTerm ? 'No variants match your search' : 'No inventory found'}
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            {!searchTerm && 'Add products and variants to get started'}
+        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <svg
+            className="mx-auto h-12 w-12 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            {searchTerm ? 'No variants match your search' : 'No inventory variants found'}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {!searchTerm ? (
+              <>
+                Get started by creating variants for your products.<br />
+                Go to the <strong>"Manage Variants"</strong> tab to set up size and color combinations.
+              </>
+            ) : (
+              'Try adjusting your search terms'
+            )}
           </p>
         </div>
       ) : (
@@ -276,6 +308,14 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
           <span>In stock</span>
         </div>
       </div>
+
+      {/* Toast notification */}
+      <Toast
+        type={toast.type}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+      />
     </div>
   )
 }

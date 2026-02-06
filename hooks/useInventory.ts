@@ -54,7 +54,8 @@ export function useInventory() {
         throw new Error(data.error || 'Failed to fetch inventory')
       }
 
-      return data.data.variants as ProductVariant[]
+      const payload = data?.data ?? data
+      return payload.variants as ProductVariant[]
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred'
       setError(errorMessage)
@@ -87,7 +88,8 @@ export function useInventory() {
           throw new Error(data.error || 'Failed to create/update variants')
         }
 
-        return data.data.variants as ProductVariant[]
+        const payload = data?.data ?? data
+        return payload.variants as ProductVariant[]
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An error occurred'
         setError(errorMessage)
@@ -121,7 +123,8 @@ export function useInventory() {
         throw new Error(data.error || 'Failed to update variant')
       }
 
-      return data.data.variant as ProductVariant
+      const payload = data?.data ?? data
+      return payload.variant as ProductVariant
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred'
       setError(errorMessage)

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getApiUser, requireApiRole, createApiErrorResponse, createApiSuccessResponse } from '@/lib/api-auth'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 
 // IMPORTANT: Prisma requires Node.js runtime
 export const runtime = 'nodejs';
-
-const prisma = new PrismaClient()
 
 // GET /api/curator/inventory - Get all product variants with inventory
 export async function GET(request: NextRequest) {
@@ -79,8 +77,6 @@ export async function GET(request: NextRequest) {
       return createApiErrorResponse(error.message, 500)
     }
     return createApiErrorResponse('Internal server error', 500)
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -182,7 +178,5 @@ export async function POST(request: NextRequest) {
       return createApiErrorResponse(error.message, 500)
     }
     return createApiErrorResponse('Internal server error', 500)
-  } finally {
-    await prisma.$disconnect()
   }
 }
