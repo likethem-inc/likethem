@@ -45,7 +45,8 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
         throw new Error(data.error || 'Failed to fetch inventory')
       }
 
-      setVariants(data.data.variants || [])
+      const payload = data?.data ?? data
+      setVariants(payload.variants || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
