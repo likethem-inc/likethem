@@ -143,12 +143,33 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
 
       {/* Inventory table */}
       {filteredVariants.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">
-            {searchTerm ? 'No variants match your search' : 'No inventory found'}
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            {!searchTerm && 'Add products and variants to get started'}
+        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <svg
+            className="mx-auto h-12 w-12 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            {searchTerm ? 'No variants match your search' : 'No inventory variants found'}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {!searchTerm ? (
+              <>
+                Get started by creating variants for your products.<br />
+                Go to the <strong>"Manage Variants"</strong> tab to set up size and color combinations.
+              </>
+            ) : (
+              'Try adjusting your search terms'
+            )}
           </p>
         </div>
       ) : (

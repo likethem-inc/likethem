@@ -4,13 +4,21 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import InventoryList from '@/components/curator/inventory/InventoryList'
 import CSVImportExport from '@/components/curator/inventory/CSVImportExport'
+import VariantManager from '@/components/curator/inventory/VariantManager'
 
 export default function InventoryPage() {
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState<'list' | 'import'>('list')
+  const [activeTab, setActiveTab] = useState<'list' | 'variants' | 'import'>('list')
   const [refreshKey, setRefreshKey] = useState(0)
 
   const handleImportSuccess = () => {
+    // Refresh the inventory list
+    setRefreshKey(prev => prev + 1)
+    // Switch to list view to see the changes
+    setActiveTab('list')
+  }
+
+  const handleVariantsSuccess = () => {
     // Refresh the inventory list
     setRefreshKey(prev => prev + 1)
     // Switch to list view to see the changes
@@ -42,6 +50,16 @@ export default function InventoryPage() {
               Inventory List
             </button>
             <button
+              onClick={() => setActiveTab('variants')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'variants'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Manage Variants
+            </button>
+            <button
               onClick={() => setActiveTab('import')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'import'
@@ -58,6 +76,8 @@ export default function InventoryPage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           {activeTab === 'list' ? (
             <InventoryList key={refreshKey} />
+          ) : activeTab === 'variants' ? (
+            <VariantManager onSuccess={handleVariantsSuccess} />
           ) : (
             <CSVImportExport onImportSuccess={handleImportSuccess} />
           )}
@@ -74,7 +94,7 @@ export default function InventoryPage() {
                 1
               </div>
               <div>
-                <strong>Variant-Based Tracking:</strong> Inventory is tracked for each unique combination of size and color. This ensures accurate stock levels for specific variants.
+                <strong>Create Variants First:</strong> Before products appear in inventory, you need to create variants for each size/color combination. Use the "Manage Variants" tab to generate variants for your products.
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -82,7 +102,7 @@ export default function InventoryPage() {
                 2
               </div>
               <div>
-                <strong>Stock Reservation:</strong> Stock is only reduced when an order is paid for, not when items are added to cart. This prevents overselling.
+                <strong>Variant-Based Tracking:</strong> Inventory is tracked for each unique combination of size and color. This ensures accurate stock levels for specific variants.
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -90,12 +110,20 @@ export default function InventoryPage() {
                 3
               </div>
               <div>
-                <strong>Bulk Management:</strong> Use CSV import/export for managing large inventories efficiently. Perfect for updating stock across multiple products at once.
+                <strong>Stock Reservation:</strong> Stock is only reduced when an order is paid for, not when items are added to cart. This prevents overselling.
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                 4
+              </div>
+              <div>
+                <strong>Bulk Management:</strong> Use CSV import/export for managing large inventories efficiently. Perfect for updating stock across multiple products at once.
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                5
               </div>
               <div>
                 <strong>Real-time Updates:</strong> Changes to stock levels are reflected immediately. Customers will see accurate availability when browsing.
