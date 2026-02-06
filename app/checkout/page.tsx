@@ -530,95 +530,97 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Full Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    />
+                {(useNewAddress || savedAddresses.length === 0) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Full Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Email Address *</label>
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Phone (Optional)</label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Country *</label>
+                      <select
+                        required
+                        value={formData.country}
+                        onChange={(e) => handleInputChange('country', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      >
+                        <option value="United States">United States</option>
+                        <option value="Canada">Canada</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="France">France</option>
+                        <option value="Germany">Germany</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Peru">Peru</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium mb-2">Address *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">City *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">State/Province *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.state}
+                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">ZIP Code *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.zipCode}
+                        onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Email Address *</label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Phone (Optional)</label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Country *</label>
-                    <select
-                      required
-                      value={formData.country}
-                      onChange={(e) => handleInputChange('country', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    >
-                      <option value="United States">United States</option>
-                      <option value="Canada">Canada</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="France">France</option>
-                      <option value="Germany">Germany</option>
-                      <option value="Spain">Spain</option>
-                      <option value="Italy">Italy</option>
-                      <option value="Peru">Peru</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2">Address *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">City *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.city}
-                      onChange={(e) => handleInputChange('city', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">State/Province *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.state}
-                      onChange={(e) => handleInputChange('state', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">ZIP Code *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.zipCode}
-                      onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Payment Method Selection */}
