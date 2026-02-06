@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getApiUser, requireApiRole, createApiErrorResponse, createApiSuccessResponse, ensureCuratorOwnership } from '@/lib/api-auth'
 import { PrismaClient } from '@prisma/client'
 import { generateUniqueSlug } from '@/lib/slugify'
+import { initializeProductVariants } from '@/lib/inventory/variants'
 
 // IMPORTANT: Prisma requires Node.js runtime
 export const runtime = 'nodejs';
@@ -130,6 +131,15 @@ export async function PUT(
       slug = await generateUniqueSlug(title, 'product')
     }
 
+    // Parse sizes and colors from comma-separated strings to arrays
+    const sizesArray = sizes ? sizes.split(',').map((s: string) => s.trim()).filter(Boolean) : []
+    const colorsArray = colors ? colors.split(',').map((c: string) => c.trim()).filter(Boolean) : []
+    
+    // Calculate stock per variant
+    const totalStock = parseInt(stockQuantity) || 0
+    const variantCount = sizesArray.length * colorsArray.length
+    const stockPerVariant = variantCount > 0 ? Math.floor(totalStock / variantCount) : totalStock
+
     // Update product with transaction
     const product = await prisma.$transaction(async (tx: any) => {
       // Update product
@@ -167,6 +177,21 @@ export async function PUT(
           })
         )
       )
+
+      // Delete existing variants to reinitialize with new sizes/colors
+      await tx.productVariant.deleteMany({
+        where: { productId: params.id }
+      })
+
+      // Initialize product variants if sizes and colors are provided
+      if (sizesArray.length > 0 && colorsArray.length > 0) {
+        await initializeProductVariants(
+          params.id,
+          sizesArray,
+          colorsArray,
+          stockPerVariant
+        )
+      }
 
       return {
         ...updatedProduct,
