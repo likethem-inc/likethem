@@ -111,8 +111,9 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-label="Loading inventory">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <span className="sr-only">Loading inventory...</span>
       </div>
     )
   }
