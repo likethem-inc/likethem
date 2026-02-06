@@ -151,7 +151,7 @@ export default function CSVImportExport({ onImportSuccess }: CSVImportExportProp
             <button
               onClick={handleDownloadInventory}
               disabled={downloading}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {downloading ? 'Downloading...' : 'Download Inventory CSV'}
             </button>
@@ -174,7 +174,7 @@ export default function CSVImportExport({ onImportSuccess }: CSVImportExportProp
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              className="w-full px-4 py-2 border border-black text-black rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {uploading ? 'Uploading...' : 'Upload Inventory CSV'}
             </button>

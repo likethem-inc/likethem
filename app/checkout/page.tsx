@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useCart } from '@/contexts/CartContext'
 import { ArrowLeft, Lock, CreditCard, MapPin, User, Mail, Phone, QrCode, Upload, FileText, Check, Smartphone } from 'lucide-react'
 
@@ -57,6 +58,7 @@ interface ProductDetails {
 }
 
 export default function CheckoutPage() {
+  const { data: session } = useSession()
   const { items, getSubtotal, clearCart, removeItem } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'yape' | 'plin'>('stripe')
@@ -65,6 +67,7 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [useNewAddress, setUseNewAddress] = useState(true)
+  const [saveNewAddress, setSaveNewAddress] = useState(false)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [isLoadingPaymentMethods, setIsLoadingPaymentMethods] = useState(true)
   const [paymentMethodsError, setPaymentMethodsError] = useState<string | null>(null)
@@ -103,6 +106,15 @@ export default function CheckoutPage() {
     billingZipCode: '',
     billingCountry: 'United States'
   })
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      setFormData(prev => {
+        if (prev.email) return prev
+        return { ...prev, email: session.user.email ?? '' }
+      })
+    }
+  }, [session?.user?.email])
 
   // Fetch saved addresses on mount
   useEffect(() => {
@@ -317,6 +329,39 @@ export default function CheckoutPage() {
     setIsProcessing(true)
     
     try {
+      const selectedAddress = (!useNewAddress && selectedAddressId)
+        ? savedAddresses.find(address => address.id === selectedAddressId)
+        : null
+
+      const email = formData.email || session?.user?.email || ''
+      if (!email) {
+        alert('Please provide an email address for shipping updates.')
+        setIsProcessing(false)
+        return
+      }
+
+      const shippingAddress = selectedAddress
+        ? {
+            name: selectedAddress.name,
+            email,
+            phone: selectedAddress.phone || '',
+            address: selectedAddress.address,
+            city: selectedAddress.city,
+            state: selectedAddress.state,
+            zipCode: selectedAddress.zipCode,
+            country: selectedAddress.country
+          }
+        : {
+            name: formData.name,
+            email,
+            phone: formData.phone,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country
+          }
+
       // Prepare order data
       const orderData = {
         items: items.map(item => {
@@ -329,16 +374,7 @@ export default function CheckoutPage() {
             curatorId: product?.curatorId || curatorId || 'default' // Use product's curator or fallback
           }
         }),
-        shippingAddress: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          country: formData.country
-        },
+        shippingAddress,
         paymentMethod,
         transactionCode: transactionCode || undefined,
         paymentProof: null // Will be handled separately
@@ -373,6 +409,29 @@ export default function CheckoutPage() {
 
       if (response.ok) {
         const result = await response.json()
+
+        if (useNewAddress && saveNewAddress) {
+          fetch('/api/account/addresses', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: formData.name,
+              phone: formData.phone || null,
+              address: formData.address,
+              city: formData.city,
+              state: formData.state,
+              zipCode: formData.zipCode,
+              country: formData.country,
+              isDefault: false
+            }),
+            credentials: 'include'
+          }).catch(error => {
+            console.error('[checkout] Failed to save address:', error)
+          })
+        }
+
         clearCart()
         setIsProcessing(false)
         
@@ -618,6 +677,17 @@ export default function CheckoutPage() {
                         onChange={(e) => handleInputChange('zipCode', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
                       />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={saveNewAddress}
+                          onChange={(e) => setSaveNewAddress(e.target.checked)}
+                          className="text-carbon"
+                        />
+                        Save this address for future purchases
+                      </label>
                     </div>
                   </div>
                 )}
