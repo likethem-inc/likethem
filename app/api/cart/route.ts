@@ -281,7 +281,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - Remove item from cart
+// DELETE - Remove item from cart or clear cart
 export async function DELETE(request: NextRequest) {
   try {
     const user = await getApiUser(request)
@@ -296,20 +296,29 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const itemId = searchParams.get('itemId')
 
-    if (!itemId) {
-      return createApiErrorResponse('Item ID is required', 400)
+    if (itemId) {
+      await prisma.cartItem.delete({
+        where: {
+          id: itemId,
+          userId: user.id // Ensure user owns the item
+        }
+      })
+
+      return createApiSuccessResponse({
+        success: true,
+        message: 'Item removed from cart'
+      })
     }
 
-    await prisma.cartItem.delete({
+    await prisma.cartItem.deleteMany({
       where: {
-        id: itemId,
-        userId: user.id // Ensure user owns the item
+        userId: user.id
       }
     })
 
     return createApiSuccessResponse({
       success: true,
-      message: 'Item removed from cart'
+      message: 'Cart cleared'
     })
 
   } catch (error) {
