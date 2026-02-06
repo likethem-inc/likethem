@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Plus, Save, AlertCircle, Package } from 'lucide-react'
+import Toast, { ToastType } from '@/components/Toast'
 
 interface Product {
   id: string
@@ -31,6 +32,11 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ type: ToastType; message: string; isVisible: boolean }>({
+    type: 'success',
+    message: '',
+    isVisible: false
+  })
 
   useEffect(() => {
     fetchProducts()
@@ -145,7 +151,7 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
     // Validate variants
     for (const variant of variants) {
       if (!variant.size || !variant.color) {
-        alert('All variants must have size and color specified')
+        showToast('error', 'All variants must have size and color specified')
         return
       }
     }
@@ -176,7 +182,7 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
         throw new Error(data.error || 'Failed to save variants')
       }
       
-      alert('Variants saved successfully!')
+      showToast('success', 'Variants saved successfully!')
       
       if (onSuccess) {
         onSuccess()
@@ -414,6 +420,14 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
           </div>
         </div>
       )}
+
+      {/* Toast notification */}
+      <Toast
+        type={toast.type}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+      />
     </div>
   )
 }

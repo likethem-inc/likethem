@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import Toast, { ToastType } from '@/components/Toast'
 
 interface ProductVariant {
   id: string
@@ -30,7 +31,15 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [updatingStock, setUpdatingStock] = useState<{ [key: string]: boolean }>({})
+  const [toast, setToast] = useState<{ type: ToastType; message: string; isVisible: boolean }>({
+    type: 'success',
+    message: '',
+    isVisible: false
+  })
 
+  const showToast = (type: ToastType, message: string) => {
+    setToast({ type, message, isVisible: true })
+  }
   useEffect(() => {
     fetchInventory()
   }, [])
@@ -56,7 +65,7 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
 
   const updateVariantStock = async (variantId: string, newStock: number) => {
     if (newStock < 0) {
-      alert('Stock quantity cannot be negative')
+      showToast('error', 'Stock quantity cannot be negative')
       return
     }
 
@@ -85,9 +94,9 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
       )
 
       // Show success message
-      alert('Stock updated successfully')
+      showToast('success', 'Stock updated successfully')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update stock')
+      showToast('error', err instanceof Error ? err.message : 'Failed to update stock')
     } finally {
       setUpdatingStock(prev => ({ ...prev, [variantId]: false }))
     }
@@ -298,6 +307,14 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
           <span>In stock</span>
         </div>
       </div>
+
+      {/* Toast notification */}
+      <Toast
+        type={toast.type}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+      />
     </div>
   )
 }
