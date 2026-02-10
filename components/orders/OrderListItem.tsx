@@ -3,8 +3,9 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { safeSrc } from "@/lib/img";
+import { t } from "@/lib/i18n/t";
 
-export function OrderListItem({ order }: { order: any }) {
+export function OrderListItem({ order, locale }: { order: any; locale: string }) {
   const date = new Date(order.createdAt).toLocaleDateString();
   const total = Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(order.totalAmount ?? 0);
   const thumbs = order.items?.slice(0, 4) ?? [];
@@ -30,15 +31,19 @@ export function OrderListItem({ order }: { order: any }) {
               ))}
             </div>
             <div>
-              <div className="font-medium">Order #{order.id.slice(-8)}</div>
-              <div className="text-sm text-muted-foreground">{date} · {order.items?.length ?? 0} items</div>
+              <div className="font-medium">{t(locale, "order.detail.title", { id: order.id.slice(-8) })}</div>
+              <div className="text-sm text-muted-foreground">
+                {date} · {order.items?.length === 1
+                  ? t(locale, "orders.itemsCountSingular", { count: order.items?.length ?? 0 })
+                  : t(locale, "orders.itemsCount", { count: order.items?.length ?? 0 })}
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <OrderStatusBadge status={order.status} />
+            <OrderStatusBadge status={order.status} locale={locale} />
             <div className="text-right">
-              <div className="text-sm text-muted-foreground">Total</div>
+              <div className="text-sm text-muted-foreground">{t(locale, "order.detail.totalLabel")}</div>
               <div className="font-semibold">{total}</div>
             </div>
           </div>

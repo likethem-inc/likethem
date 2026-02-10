@@ -1,19 +1,21 @@
 import { Badge } from "@/components/ui/badge";
+import { t } from "@/lib/i18n/t";
 
 const MAP: Record<string, string> = {
-  PENDING_PAYMENT: "Pending Payment",
-  PAID: "Paid",
-  REJECTED: "Rejected",
-  PROCESSING: "Processing",
-  SHIPPED: "Shipped",
-  DELIVERED: "Delivered",
-  FAILED_ATTEMPT: "Failed Attempt",
-  CANCELLED: "Cancelled",
-  REFUNDED: "Refunded",
+  PENDING_PAYMENT: "order.status.pendingPayment",
+  PAID: "order.status.paid",
+  REJECTED: "order.status.rejected",
+  PROCESSING: "order.status.processing",
+  SHIPPED: "order.status.shipped",
+  DELIVERED: "order.status.delivered",
+  FAILED_ATTEMPT: "order.status.failedAttempt",
+  CANCELLED: "order.status.cancelled",
+  REFUNDED: "order.status.refunded",
 };
 
-export function OrderStatusBadge({ status }: { status: string }) {
-  const label = MAP[status] ?? status;
+export function OrderStatusBadge({ status, locale }: { status: string; locale: string }) {
+  const labelKey = MAP[status];
+  const label = labelKey ? t(locale, labelKey) : status;
   const tone =
     status === "DELIVERED" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
     status === "SHIPPED" ? "bg-blue-50 text-blue-700 border-blue-200" :

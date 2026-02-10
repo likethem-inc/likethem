@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { OrderListItem } from "@/components/orders/OrderListItem";
 import { EmptyOrders } from "@/components/orders/EmptyOrders";
 import { PrismaClient } from "@prisma/client";
+import { getLocale } from "@/lib/i18n/getLocale";
+import { t } from "@/lib/i18n/t";
 
 const prisma = new PrismaClient();
 
@@ -53,6 +55,8 @@ export default async function OrdersPage({ searchParams }: { searchParams: { pag
   const user = await getCurrentUser();
   if (!user) redirect("/auth/signin");
 
+  const locale = await getLocale();
+
   const page = Number(searchParams?.page ?? "1");
   
   // Get orders directly from database for this user
@@ -99,14 +103,16 @@ export default async function OrdersPage({ searchParams }: { searchParams: { pag
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      <h1 className="text-3xl font-semibold tracking-tight">Your Orders</h1>
-      <p className="mt-1 text-muted-foreground">Track your purchases and view order details.</p>
+      <h1 className="text-3xl font-semibold tracking-tight">{t(locale, "orders.title")}</h1>
+      <p className="mt-1 text-muted-foreground">{t(locale, "orders.subtitle")}</p>
 
       <div className="mt-6 grid gap-4">
         {data.orders.length === 0 ? (
-          <EmptyOrders />
+          <EmptyOrders locale={locale} />
         ) : (
-          data.orders.map((o: any) => <OrderListItem key={o.id} order={o} />)
+          data.orders.map((o: any) => (
+            <OrderListItem key={o.id} order={o} locale={locale} />
+          ))
         )}
       </div>
 
@@ -116,14 +122,14 @@ export default async function OrdersPage({ searchParams }: { searchParams: { pag
           <a
             href={`/orders?page=${Math.max(1, page - 1)}`}
             className={`rounded-lg border px-3 py-1.5 ${page === 1 ? "pointer-events-none opacity-50" : ""}`}
-          >Previous</a>
+          >{t(locale, "orders.previous")}</a>
           <div className="text-muted-foreground">
-            Page {page} of {data.pages}
+            {t(locale, "orders.pageOf", { page, pages: data.pages })}
           </div>
           <a
             href={`/orders?page=${Math.min(data.pages, page + 1)}`}
             className={`rounded-lg border px-3 py-1.5 ${page === data.pages ? "pointer-events-none opacity-50" : ""}`}
-          >Next</a>
+          >{t(locale, "orders.next")}</a>
         </div>
       )}
     </div>
