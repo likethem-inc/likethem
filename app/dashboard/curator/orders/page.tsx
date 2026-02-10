@@ -40,6 +40,32 @@ interface Order {
   }>
 }
 
+// Helper function to get status translation key
+const getStatusTranslationKey = (status: string): any => {
+  const statusMap: Record<string, any> = {
+    'all': 'dashboard.orders.filter.all',
+    'PENDING_PAYMENT': 'dashboard.orders.status.pendingPayment',
+    'pending_payment': 'dashboard.orders.status.pendingPayment',
+    'PAID': 'dashboard.orders.status.paid',
+    'paid': 'dashboard.orders.status.paid',
+    'REJECTED': 'dashboard.orders.status.rejected',
+    'rejected': 'dashboard.orders.status.rejected',
+    'PROCESSING': 'dashboard.orders.status.processing',
+    'processing': 'dashboard.orders.status.processing',
+    'SHIPPED': 'dashboard.orders.status.shipped',
+    'shipped': 'dashboard.orders.status.shipped',
+    'DELIVERED': 'dashboard.orders.status.delivered',
+    'delivered': 'dashboard.orders.status.delivered',
+    'FAILED_ATTEMPT': 'dashboard.orders.status.failed_attempt',
+    'failed_attempt': 'dashboard.orders.status.failed_attempt',
+    'CANCELLED': 'dashboard.orders.status.cancelled',
+    'cancelled': 'dashboard.orders.status.cancelled',
+    'REFUNDED': 'dashboard.orders.status.refunded',
+    'refunded': 'dashboard.orders.status.refunded',
+  }
+  return statusMap[status] || status
+}
+
 export default function CuratorOrdersPage() {
   const t = useT()
   const [orders, setOrders] = useState<Order[]>([])
@@ -279,7 +305,7 @@ export default function CuratorOrdersPage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {status === 'all' ? t('dashboard.orders.filter.all') : t(`dashboard.orders.status.${status.toLowerCase()}`)}
+                {t(getStatusTranslationKey(status))}
               </button>
             ))}
           </div>
@@ -401,7 +427,7 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                     >
                       <AlertTriangle className="w-4 h-4" />
-                      <span>{t('dashboard.orders.status.failedAttempt')}</span>
+                      <span>{t('dashboard.orders.status.failed_attempt')}</span>
                     </button>
                   </div>
                 )}
@@ -683,7 +709,7 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                     >
                       <AlertTriangle className="w-4 h-4" />
-                      <span>{t('dashboard.orders.status.failedAttempt')}</span>
+                      <span>{t('dashboard.orders.status.failed_attempt')}</span>
                     </button>
                   </div>
                 )}
