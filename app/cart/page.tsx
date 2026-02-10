@@ -20,6 +20,13 @@ export default function CartPage() {
   const subtotal = getSubtotal()
   const shipping = 0 // Will be calculated at checkout
   const total = subtotal + shipping
+  
+  // Check if any items are out of stock or exceed available quantity
+  const hasOutOfStockItems = items.some(item => item.isOutOfStock)
+  const hasStockIssues = items.some(item => 
+    item.isOutOfStock || 
+    (item.availableStock !== undefined && item.quantity > item.availableStock)
+  )
 
   if (items.length === 0) {
     return (
@@ -121,6 +128,28 @@ export default function CartPage() {
                       </p>
                     )}
 
+                    {/* Stock Warning */}
+                    {item.isOutOfStock && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-800 font-medium">
+                          Out of Stock
+                        </p>
+                        <p className="text-xs text-red-600 mt-1">
+                          This item is no longer available. Please remove it from your cart.
+                        </p>
+                      </div>
+                    )}
+                    {!item.isOutOfStock && item.availableStock !== undefined && item.quantity > item.availableStock && (
+                      <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-sm text-amber-800 font-medium">
+                          Limited Stock
+                        </p>
+                        <p className="text-xs text-amber-600 mt-1">
+                          Only {item.availableStock} items available. Please adjust quantity.
+                        </p>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
@@ -129,8 +158,12 @@ export default function CartPage() {
                             value={item.quantity}
                             onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value))}
                             className="text-sm border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-carbon"
+                            disabled={item.isOutOfStock}
                           >
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                            {Array.from(
+                              { length: Math.min(item.availableStock || 10, 10) },
+                              (_, i) => i + 1
+                            ).map((num) => (
                               <option key={num} value={num}>
                                 {num}
                               </option>
@@ -206,18 +239,39 @@ export default function CartPage() {
 
               {/* CTA Buttons */}
               <div className="space-y-3">
+                {hasStockIssues && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-800 font-medium">
+                      Cannot proceed to checkout
+                    </p>
+                    <p className="text-xs text-red-600 mt-1">
+                      {hasOutOfStockItems 
+                        ? 'Please remove out of stock items from your cart.'
+                        : 'Please adjust quantities to available stock.'}
+                    </p>
+                  </div>
+                )}
                 <Link
                   href="/explore"
                   className="block w-full border border-carbon text-carbon py-3 px-4 font-medium text-center hover:bg-carbon hover:text-white transition-colors duration-200"
                 >
                   Continue Shopping
                 </Link>
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-carbon text-white py-3 px-4 font-medium text-center hover:bg-gray-800 transition-colors duration-200"
-                >
-                  Proceed to Checkout
-                </Link>
+                {hasStockIssues ? (
+                  <button
+                    disabled
+                    className="block w-full bg-gray-400 text-white py-3 px-4 font-medium text-center cursor-not-allowed opacity-60"
+                  >
+                    Proceed to Checkout
+                  </button>
+                ) : (
+                  <Link
+                    href="/checkout"
+                    className="block w-full bg-carbon text-white py-3 px-4 font-medium text-center hover:bg-gray-800 transition-colors duration-200"
+                  >
+                    Proceed to Checkout
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>
