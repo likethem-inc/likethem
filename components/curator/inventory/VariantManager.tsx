@@ -180,7 +180,7 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
         return
       }
 
-      const existingMap = new Map(
+      const existingMap = new Map<string, any>(
         existingVariants.map((variant: any) => [
           `${variant.size}::${variant.color}`,
           variant
@@ -190,7 +190,7 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
       setVariants(prev => {
         const source = prev.length > 0 ? prev : baseVariants
         return source.map(variant => {
-          const existing = existingMap.get(`${variant.size}::${variant.color}`)
+          const existing = existingMap.get(`${variant.size}::${variant.color}`) as any
           if (!existing) {
             return variant
           }

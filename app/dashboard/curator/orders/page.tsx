@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { CheckCircle, XCircle, Clock, Package, Eye, DollarSign, User, Mail, Truck, AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react'
+import { useT } from '@/hooks/useT'
 
 interface Order {
   id: string
@@ -39,7 +40,34 @@ interface Order {
   }>
 }
 
+// Helper function to get status translation key
+const getStatusTranslationKey = (status: string): any => {
+  const statusMap: Record<string, any> = {
+    'all': 'dashboard.orders.filter.all',
+    'PENDING_PAYMENT': 'dashboard.orders.status.pendingPayment',
+    'pending_payment': 'dashboard.orders.status.pendingPayment',
+    'PAID': 'dashboard.orders.status.paid',
+    'paid': 'dashboard.orders.status.paid',
+    'REJECTED': 'dashboard.orders.status.rejected',
+    'rejected': 'dashboard.orders.status.rejected',
+    'PROCESSING': 'dashboard.orders.status.processing',
+    'processing': 'dashboard.orders.status.processing',
+    'SHIPPED': 'dashboard.orders.status.shipped',
+    'shipped': 'dashboard.orders.status.shipped',
+    'DELIVERED': 'dashboard.orders.status.delivered',
+    'delivered': 'dashboard.orders.status.delivered',
+    'FAILED_ATTEMPT': 'dashboard.orders.status.failed_attempt',
+    'failed_attempt': 'dashboard.orders.status.failed_attempt',
+    'CANCELLED': 'dashboard.orders.status.cancelled',
+    'cancelled': 'dashboard.orders.status.cancelled',
+    'REFUNDED': 'dashboard.orders.status.refunded',
+    'refunded': 'dashboard.orders.status.refunded',
+  }
+  return statusMap[status] || status
+}
+
 export default function CuratorOrdersPage() {
+  const t = useT()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('all')
@@ -113,7 +141,7 @@ export default function CuratorOrdersPage() {
     if (!selectedOrder) return
     
     if (!shippingInfo.courier) {
-      setError('Please enter a courier name')
+      setError(t('dashboard.orders.shippingForm.courierPlaceholder'))
       return
     }
     
@@ -203,10 +231,10 @@ export default function CuratorOrdersPage() {
           className="mb-8"
         >
           <h1 className="font-serif text-4xl md:text-5xl font-light mb-4">
-            Orders
+            {t('dashboard.orders.title')}
           </h1>
           <p className="text-lg text-warm-gray font-light">
-            Manage your store orders and payment confirmations
+            {t('dashboard.orders.subtitle')}
           </p>
         </motion.div>
 
@@ -221,7 +249,7 @@ export default function CuratorOrdersPage() {
               <Clock className="w-8 h-8 text-yellow-600" />
               <div>
                 <p className="text-2xl font-light">{orders.filter(o => o.status === 'PENDING_PAYMENT').length}</p>
-                <p className="text-sm text-gray-600">Pending Payment</p>
+                <p className="text-sm text-gray-600">{t('dashboard.orders.filter.pendingPayment')}</p>
               </div>
             </div>
           </div>
@@ -231,7 +259,7 @@ export default function CuratorOrdersPage() {
               <CheckCircle className="w-8 h-8 text-green-600" />
               <div>
                 <p className="text-2xl font-light">{orders.filter(o => o.status === 'PAID').length}</p>
-                <p className="text-sm text-gray-600">Paid</p>
+                <p className="text-sm text-gray-600">{t('dashboard.orders.filter.paid')}</p>
               </div>
             </div>
           </div>
@@ -241,7 +269,7 @@ export default function CuratorOrdersPage() {
               <Package className="w-8 h-8 text-blue-600" />
               <div>
                 <p className="text-2xl font-light">{orders.filter(o => o.status === 'PROCESSING').length}</p>
-                <p className="text-sm text-gray-600">Processing</p>
+                <p className="text-sm text-gray-600">{t('dashboard.orders.filter.processing')}</p>
               </div>
             </div>
           </div>
@@ -253,7 +281,7 @@ export default function CuratorOrdersPage() {
                 <p className="text-2xl font-light">
                   ${orders.reduce((total, order) => total + order.totalAmount, 0).toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-600">Total Revenue</p>
+                <p className="text-sm text-gray-600">{t('dashboard.analytics.metrics.totalRevenue')}</p>
               </div>
             </div>
           </div>
@@ -277,7 +305,7 @@ export default function CuratorOrdersPage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {status === 'all' ? 'All Orders' : status.replace(/_/g, ' ')}
+                {t(getStatusTranslationKey(status))}
               </button>
             ))}
           </div>
@@ -293,7 +321,7 @@ export default function CuratorOrdersPage() {
           {filteredOrders.length === 0 ? (
             <div className="text-center py-12">
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No orders found</p>
+              <p className="text-gray-500">{t('dashboard.orders.noOrders')}</p>
             </div>
           ) : (
             filteredOrders.map((order) => (
@@ -349,14 +377,14 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      <span>Mark as Paid</span>
+                      <span>{t('dashboard.orders.actions.approvePayment')}</span>
                     </button>
                     <button
                       onClick={() => updateOrderStatus(order.id, 'REJECTED')}
                       className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       <XCircle className="w-4 h-4" />
-                      <span>Reject Payment</span>
+                      <span>{t('dashboard.orders.actions.rejectPayment')}</span>
                     </button>
                   </div>
                 )}
@@ -368,7 +396,7 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       <Package className="w-4 h-4" />
-                      <span>Start Processing</span>
+                      <span>{t('dashboard.orders.filter.processing')}</span>
                     </button>
                   </div>
                 )}
@@ -380,7 +408,7 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                     >
                       <Truck className="w-4 h-4" />
-                      <span>Mark as Shipped</span>
+                      <span>{t('dashboard.orders.actions.addShipping')}</span>
                     </button>
                   </div>
                 )}
@@ -392,14 +420,14 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      <span>Mark as Delivered</span>
+                      <span>{t('dashboard.orders.actions.markDelivered')}</span>
                     </button>
                     <button
                       onClick={() => updateOrderStatus(order.id, 'FAILED_ATTEMPT')}
                       className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                     >
                       <AlertTriangle className="w-4 h-4" />
-                      <span>Failed Attempt</span>
+                      <span>{t('dashboard.orders.status.failed_attempt')}</span>
                     </button>
                   </div>
                 )}
@@ -411,7 +439,7 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                     >
                       <RefreshCw className="w-4 h-4" />
-                      <span>Retry Shipping</span>
+                      <span>{t('dashboard.orders.shippingForm.save')}</span>
                     </button>
                   </div>
                 )}
@@ -431,7 +459,7 @@ export default function CuratorOrdersPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-serif text-2xl font-light">
-                    Order Details
+                    {t('orderConfirmation.orderDetails.title')}
                   </h2>
                   <button
                     onClick={() => {
@@ -446,29 +474,29 @@ export default function CuratorOrdersPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <h3 className="font-medium mb-3">Order Information</h3>
+                    <h3 className="font-medium mb-3">{t('orderConfirmation.orderInfo.title')}</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Order ID:</span>
+                        <span className="text-gray-600">{t('dashboard.orders.card.orderId')}</span>
                         <span className="font-mono">{selectedOrder.id}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Date:</span>
+                        <span className="text-gray-600">{t('dashboard.orders.card.date')}</span>
                         <span>{new Date(selectedOrder.createdAt).toLocaleDateString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Status:</span>
+                        <span className="text-gray-600">{t('orderConfirmation.orderInfo.status')}</span>
                         <span className={`capitalize px-2 py-1 rounded text-xs ${getStatusColor(selectedOrder.status)}`}>
                           {selectedOrder.status.replace(/_/g, ' ')}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="text-gray-600">{t('dashboard.orders.card.paymentMethod')}</span>
                         <span className="capitalize">{selectedOrder.paymentMethod}</span>
                       </div>
                       {selectedOrder.transactionCode && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Transaction Code:</span>
+                          <span className="text-gray-600">{t('dashboard.orders.card.transactionCode')}</span>
                           <span className="font-mono">{selectedOrder.transactionCode}</span>
                         </div>
                       )}
@@ -476,7 +504,7 @@ export default function CuratorOrdersPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-medium mb-3">Shipping Address</h3>
+                    <h3 className="font-medium mb-3">{t('orderConfirmation.shippingAddress.title')}</h3>
                     <div className="text-sm text-gray-600">
                       <p>{selectedOrder.shippingAddress.name}</p>
                       <p>{selectedOrder.shippingAddress.address}</p>
@@ -487,22 +515,22 @@ export default function CuratorOrdersPage() {
                     {/* Shipping Info */}
                     {(selectedOrder.courier || selectedOrder.trackingNumber) && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
-                        <h4 className="font-medium text-sm mb-2">Shipping Details</h4>
+                        <h4 className="font-medium text-sm mb-2">{t('dashboard.orders.card.shippingInfo')}</h4>
                         {selectedOrder.courier && (
                           <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-600">Courier:</span>
+                            <span className="text-gray-600">{t('dashboard.orders.card.courier')}</span>
                             <span>{selectedOrder.courier}</span>
                           </div>
                         )}
                         {selectedOrder.trackingNumber && (
                           <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-600">Tracking:</span>
+                            <span className="text-gray-600">{t('dashboard.orders.card.trackingNumber')}</span>
                             <span className="font-mono text-xs">{selectedOrder.trackingNumber}</span>
                           </div>
                         )}
                         {selectedOrder.estimatedDeliveryDate && (
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Est. Delivery:</span>
+                            <span className="text-gray-600">{t('dashboard.orders.card.estimatedDelivery')}</span>
                             <span>{new Date(selectedOrder.estimatedDeliveryDate).toLocaleDateString()}</span>
                           </div>
                         )}
@@ -514,11 +542,11 @@ export default function CuratorOrdersPage() {
                 {/* Payment Proof */}
                 {selectedOrder.paymentProof && (
                   <div className="mb-6">
-                    <h3 className="font-medium mb-3">Payment Proof</h3>
+                    <h3 className="font-medium mb-3">{t('dashboard.orders.card.viewProof')}</h3>
                     <div className="border border-gray-200 rounded-lg p-4">
                       <Image
                         src={selectedOrder.paymentProof}
-                        alt="Payment Proof"
+                        alt={t('dashboard.orders.card.viewProof')}
                         width={800}
                         height={600}
                         className="max-w-full h-auto rounded"
@@ -529,7 +557,7 @@ export default function CuratorOrdersPage() {
 
                 {/* Order Items */}
                 <div className="mb-6">
-                  <h3 className="font-medium mb-3">Items Ordered</h3>
+                  <h3 className="font-medium mb-3">{t('orderConfirmation.itemsOrdered.title')}</h3>
                   <div className="space-y-3">
                     {selectedOrder.items.map((item: any) => (
                       <div key={item.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
@@ -544,7 +572,7 @@ export default function CuratorOrdersPage() {
                         </div>
                         <div className="flex-1">
                           <h4 className="font-medium text-sm">{item.product.title}</h4>
-                          <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
+                          <p className="text-xs text-gray-600">{t('orderConfirmation.itemsOrdered.quantity', { quantity: item.quantity })}</p>
                         </div>
                         <div className="text-right">
                           <span className="font-medium text-sm">${(item.price * item.quantity).toFixed(2)}</span>
@@ -568,14 +596,14 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      <span>Mark as Paid</span>
+                      <span>{t('dashboard.orders.actions.approvePayment')}</span>
                     </button>
                     <button
                       onClick={() => updateOrderStatus(selectedOrder.id, 'REJECTED')}
                       className="flex items-center space-x-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       <XCircle className="w-4 h-4" />
-                      <span>Reject Payment</span>
+                      <span>{t('dashboard.orders.actions.rejectPayment')}</span>
                     </button>
                   </div>
                 )}
@@ -587,7 +615,7 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       <Package className="w-4 h-4" />
-                      <span>Start Processing</span>
+                      <span>{t('dashboard.orders.filter.processing')}</span>
                     </button>
                   </div>
                 )}
@@ -600,41 +628,41 @@ export default function CuratorOrdersPage() {
                         className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                       >
                         <Truck className="w-4 h-4" />
-                        <span>Mark as Shipped</span>
+                        <span>{t('dashboard.orders.actions.addShipping')}</span>
                       </button>
                     ) : (
                       <div className="space-y-4">
-                        <h4 className="font-medium">Shipping Information</h4>
+                        <h4 className="font-medium">{t('dashboard.orders.shippingForm.title')}</h4>
                         
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Courier <span className="text-red-500">*</span>
+                            {t('dashboard.orders.shippingForm.courier')} <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={shippingInfo.courier}
                             onChange={(e) => setShippingInfo({ ...shippingInfo, courier: e.target.value })}
-                            placeholder="e.g., FedEx, UPS, DHL"
+                            placeholder={t('dashboard.orders.shippingForm.courierPlaceholder')}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           />
                         </div>
                         
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tracking Number (optional)
+                            {t('dashboard.orders.shippingForm.trackingNumber')}
                           </label>
                           <input
                             type="text"
                             value={shippingInfo.trackingNumber}
                             onChange={(e) => setShippingInfo({ ...shippingInfo, trackingNumber: e.target.value })}
-                            placeholder="Enter tracking number"
+                            placeholder={t('dashboard.orders.shippingForm.trackingPlaceholder')}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           />
                         </div>
                         
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Estimated Delivery Date (optional)
+                            {t('dashboard.orders.shippingForm.estimatedDelivery')}
                           </label>
                           <input
                             type="date"
@@ -650,7 +678,7 @@ export default function CuratorOrdersPage() {
                             className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                           >
                             <Truck className="w-4 h-4" />
-                            <span>Confirm Shipment</span>
+                            <span>{t('dashboard.orders.shippingForm.save')}</span>
                           </button>
                           <button
                             onClick={() => {
@@ -659,7 +687,7 @@ export default function CuratorOrdersPage() {
                             }}
                             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                           >
-                            Cancel
+                            {t('dashboard.orders.shippingForm.cancel')}
                           </button>
                         </div>
                       </div>
@@ -674,14 +702,14 @@ export default function CuratorOrdersPage() {
                       className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      <span>Mark as Delivered</span>
+                      <span>{t('dashboard.orders.actions.markDelivered')}</span>
                     </button>
                     <button
                       onClick={() => updateOrderStatus(selectedOrder.id, 'FAILED_ATTEMPT')}
                       className="flex items-center space-x-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                     >
                       <AlertTriangle className="w-4 h-4" />
-                      <span>Failed Attempt</span>
+                      <span>{t('dashboard.orders.status.failed_attempt')}</span>
                     </button>
                   </div>
                 )}
@@ -704,41 +732,41 @@ export default function CuratorOrdersPage() {
                         className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                       >
                         <RefreshCw className="w-4 h-4" />
-                        <span>Retry Shipping</span>
+                        <span>{t('dashboard.orders.actions.updateShipping')}</span>
                       </button>
                     ) : (
                       <div className="space-y-4">
-                        <h4 className="font-medium">Update Shipping Information</h4>
+                        <h4 className="font-medium">{t('dashboard.orders.actions.updateShipping')}</h4>
                         
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Courier <span className="text-red-500">*</span>
+                            {t('dashboard.orders.shippingForm.courier')} <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={shippingInfo.courier}
                             onChange={(e) => setShippingInfo({ ...shippingInfo, courier: e.target.value })}
-                            placeholder="e.g., FedEx, UPS, DHL"
+                            placeholder={t('dashboard.orders.shippingForm.courierPlaceholder')}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           />
                         </div>
                         
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tracking Number (optional)
+                            {t('dashboard.orders.shippingForm.trackingNumber')}
                           </label>
                           <input
                             type="text"
                             value={shippingInfo.trackingNumber}
                             onChange={(e) => setShippingInfo({ ...shippingInfo, trackingNumber: e.target.value })}
-                            placeholder="Enter tracking number"
+                            placeholder={t('dashboard.orders.shippingForm.trackingPlaceholder')}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           />
                         </div>
                         
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Estimated Delivery Date (optional)
+                            {t('dashboard.orders.shippingForm.estimatedDelivery')}
                           </label>
                           <input
                             type="date"
@@ -752,7 +780,7 @@ export default function CuratorOrdersPage() {
                           <button
                             onClick={() => {
                               if (!shippingInfo.courier) {
-                                setError('Please enter a courier name')
+                                setError(t('dashboard.orders.shippingForm.courierPlaceholder'))
                                 return
                               }
                               updateOrderStatus(selectedOrder.id, 'SHIPPED', shippingInfo)
@@ -760,7 +788,7 @@ export default function CuratorOrdersPage() {
                             className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                           >
                             <RefreshCw className="w-4 h-4" />
-                            <span>Retry Shipment</span>
+                            <span>{t('dashboard.orders.shippingForm.save')}</span>
                           </button>
                           <button
                             onClick={() => {
@@ -769,7 +797,7 @@ export default function CuratorOrdersPage() {
                             }}
                             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                           >
-                            Cancel
+                            {t('dashboard.orders.shippingForm.cancel')}
                           </button>
                         </div>
                       </div>
