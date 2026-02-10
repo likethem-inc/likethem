@@ -509,5 +509,9 @@
   "dashboard.orders.refresh": "Refresh Orders",
   "dashboard.orders.error": "Error loading orders",
   "dashboard.orders.updateSuccess": "Order updated successfully",
-  "dashboard.orders.updateError": "Failed to update order"
+  "dashboard.orders.updateError": "Failed to update order",
+  "dashboard.orders.status.pending_payment": "Pending Payment",
+  "dashboard.orders.status.failed_attempt": "Failed Attempt",
+  "dashboard.orders.status.cancelled": "Cancelled",
+  "dashboard.orders.status.refunded": "Refunded"
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, Edit, Plus, Trash2, User, MapPin, CreditCard, Palette, Heart, Check, X } from 'lucide-react'
 import SavedItems from '@/components/account/SavedItems'
+import { useT } from '@/hooks/useT'
 
 interface User {
   id: string
@@ -40,15 +41,16 @@ interface AccountClientProps {
 }
 
 export default function AccountClient({ user, session }: AccountClientProps) {
+  const t = useT()
   const [activeSection, setActiveSection] = useState('personal')
   const [isEditing, setIsEditing] = useState(false)
 
   const sections = [
-    { id: 'personal', title: 'Personal Details', icon: User },
-    { id: 'saved', title: 'Saved Items', icon: Heart },
-    { id: 'shipping', title: 'Shipping Address', icon: MapPin },
-    { id: 'payment', title: 'Payment Methods', icon: CreditCard },
-    { id: 'style', title: 'Style Profile', icon: Palette }
+    { id: 'personal', title: t('account.sections.personalDetails'), icon: User },
+    { id: 'saved', title: t('account.sections.savedItems'), icon: Heart },
+    { id: 'shipping', title: t('account.sections.shippingAddress'), icon: MapPin },
+    { id: 'payment', title: t('account.sections.paymentMethods'), icon: CreditCard },
+    { id: 'style', title: t('account.sections.styleProfile'), icon: Palette }
   ]
 
   // Use real user data with fallbacks
@@ -67,10 +69,10 @@ export default function AccountClient({ user, session }: AccountClientProps) {
           className="mb-16"
         >
           <h1 className="font-serif text-4xl md:text-5xl font-light mb-6">
-            Account Information
+            {t('account.title')}
           </h1>
           <p className="text-lg text-warm-gray font-light">
-            Manage your personal details, preferences, and account settings
+            {t('account.subtitle')}
           </p>
         </motion.div>
 
@@ -149,6 +151,7 @@ function PersonalDetails({
   displayEmail: string
   displayPhone: string
 }) {
+  const t = useT()
   const [formData, setFormData] = useState({
     name: displayName,
     phone: displayPhone
@@ -189,11 +192,11 @@ function PersonalDetails({
         window.location.reload()
       } else {
         console.error('[account] Update failed:', await response.text())
-        alert('Failed to save changes. Please try again.')
+        alert(t('account.personal.saveError'))
       }
     } catch (error) {
       console.error('[account] Update error:', error)
-      alert('Failed to save changes. Please try again.')
+      alert(t('account.personal.saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -218,17 +221,17 @@ function PersonalDetails({
     setPasswordSuccess('')
 
     if (!passwordData.newPassword || !passwordData.confirmPassword) {
-      setPasswordError('Please fill in all password fields')
+      setPasswordError(t('account.personal.passwordError.allFields'))
       return
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('New passwords do not match')
+      setPasswordError(t('account.personal.passwordError.noMatch'))
       return
     }
 
     if (passwordData.newPassword.length < 8) {
-      setPasswordError('Password must be at least 8 characters')
+      setPasswordError(t('account.personal.passwordError.minLength'))
       return
     }
 
@@ -249,7 +252,7 @@ function PersonalDetails({
       const result = await response.json()
 
       if (response.ok) {
-        setPasswordSuccess('Password changed successfully!')
+        setPasswordSuccess(t('account.personal.passwordChangeSuccess'))
         setPasswordData({
           currentPassword: '',
           newPassword: '',
@@ -258,11 +261,11 @@ function PersonalDetails({
         setIsChangingPassword(false)
         setTimeout(() => setPasswordSuccess(''), 3000)
       } else {
-        setPasswordError(result.error || 'Failed to change password')
+        setPasswordError(result.error || t('account.personal.passwordError.generic'))
       }
     } catch (error) {
       console.error('[account] Password change error:', error)
-      setPasswordError('Failed to change password. Please try again.')
+      setPasswordError(t('account.personal.passwordError.generic'))
     } finally {
       setIsSaving(false)
     }
@@ -282,19 +285,19 @@ function PersonalDetails({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-serif text-lg font-light">Personal Information</h3>
+        <h3 className="font-serif text-lg font-light">{t('account.personal.title')}</h3>
         <button
           onClick={() => setIsEditing(!isEditing)}
           className="flex items-center space-x-2 text-carbon hover:text-black transition-colors"
         >
           <Edit className="w-4 h-4" />
-          <span className="text-sm">{isEditing ? 'Cancel' : 'Edit'}</span>
+          <span className="text-sm">{isEditing ? t('account.personal.cancel') : t('account.personal.edit')}</span>
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-2">Full Name</label>
+          <label className="block text-sm font-medium mb-2">{t('account.personal.fullName')}</label>
           <input
             type="text"
             value={formData.name}
@@ -304,7 +307,7 @@ function PersonalDetails({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Email Address</label>
+          <label className="block text-sm font-medium mb-2">{t('account.personal.email')}</label>
           <input
             type="email"
             value={displayEmail}
@@ -314,13 +317,14 @@ function PersonalDetails({
           <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Phone (Optional)</label>
+          <label className="block text-sm font-medium mb-2">{t('account.personal.phone')}</label>
           <input
             type="tel"
             value={formData.phone}
             onChange={(e) => handleInputChange('phone', e.target.value)}
             disabled={!isEditing}
             className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon disabled:bg-gray-50"
+            placeholder={t('account.personal.phonePlaceholder')}
           />
         </div>
         <div>
@@ -330,14 +334,14 @@ function PersonalDetails({
               onClick={() => setIsChangingPassword(true)}
               className="w-full px-4 py-3 border border-gray-300 text-left hover:bg-gray-50 transition-colors"
             >
-              Change Password
+              {t('account.personal.changePassword')}
             </button>
           ) : (
             <div className="space-y-3">
               {user.passwordHash && (
                 <input
                   type="password"
-                  placeholder="Current Password"
+                  placeholder={t('account.personal.currentPasswordPlaceholder')}
                   value={passwordData.currentPassword}
                   onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
@@ -345,14 +349,14 @@ function PersonalDetails({
               )}
               <input
                 type="password"
-                placeholder="New Password"
+                placeholder={t('account.personal.newPasswordPlaceholder')}
                 value={passwordData.newPassword}
                 onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
               />
               <input
                 type="password"
-                placeholder="Confirm New Password"
+                placeholder={t('account.personal.confirmNewPasswordPlaceholder')}
                 value={passwordData.confirmPassword}
                 onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon"
@@ -363,20 +367,21 @@ function PersonalDetails({
               {passwordSuccess && (
                 <p className="text-sm text-green-600">{passwordSuccess}</p>
               )}
+              <p className="text-xs text-gray-500">{t('account.personal.passwordHint')}</p>
               <div className="flex space-x-2">
                 <button
                   onClick={handleCancelPasswordChange}
                   disabled={isSaving}
                   className="flex-1 px-4 py-2 border border-gray-300 text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
-                  Cancel
+                  {t('account.personal.cancelPasswordChange')}
                 </button>
                 <button
                   onClick={handleChangePassword}
                   disabled={isSaving}
                   className="flex-1 px-4 py-2 bg-carbon text-white text-sm hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
-                  {isSaving ? 'Saving...' : 'Save Password'}
+                  {isSaving ? t('account.personal.saving') : t('account.personal.updatePassword')}
                 </button>
               </div>
             </div>
@@ -391,14 +396,14 @@ function PersonalDetails({
             disabled={isSaving}
             className="px-6 py-2 border border-carbon text-carbon hover:bg-carbon hover:text-white transition-colors disabled:opacity-50"
           >
-            Cancel
+            {t('account.personal.cancel')}
           </button>
           <button 
             onClick={handleSave}
             disabled={isSaving}
             className="px-6 py-2 bg-carbon text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? t('account.personal.saving') : t('account.personal.save')}
           </button>
         </div>
       )}
@@ -407,6 +412,7 @@ function PersonalDetails({
 }
 
 function ShippingAddress({ displayName }: { displayName: string }) {
+  const t = useT()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAdding, setIsAdding] = useState(false)
@@ -579,14 +585,14 @@ function ShippingAddress({ displayName }: { displayName: string }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-serif text-lg font-light">Shipping Addresses</h3>
+        <h3 className="font-serif text-lg font-light">{t('account.shipping.title')}</h3>
         {!isAdding && !editingId && (
           <button 
             onClick={handleAdd}
             className="flex items-center space-x-2 text-carbon hover:text-black transition-colors"
           >
             <Plus className="w-4 h-4" />
-            <span className="text-sm">Add New Address</span>
+            <span className="text-sm">{t('account.shipping.addNew')}</span>
           </button>
         )}
       </div>
@@ -595,7 +601,7 @@ function ShippingAddress({ displayName }: { displayName: string }) {
       {(isAdding || editingId) && (
         <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
           <h4 className="font-medium mb-4">
-            {editingId ? 'Edit Address' : 'Add New Address'}
+            {editingId ? t('account.shipping.edit') : t('account.shipping.addNew')}
           </h4>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -686,7 +692,7 @@ function ShippingAddress({ displayName }: { displayName: string }) {
                 onChange={(e) => handleInputChange('isDefault', e.target.checked)}
                 className="w-4 h-4 text-carbon border-gray-300 focus:ring-carbon"
               />
-              <span className="text-sm">Set as default address</span>
+              <span className="text-sm">{t('account.shipping.setDefault')}</span>
             </label>
           </div>
 
@@ -696,14 +702,14 @@ function ShippingAddress({ displayName }: { displayName: string }) {
               disabled={isSaving}
               className="px-6 py-2 border border-carbon text-carbon hover:bg-carbon hover:text-white transition-colors disabled:opacity-50"
             >
-              Cancel
+              {t('account.personal.cancel')}
             </button>
             <button 
               onClick={handleSave}
               disabled={isSaving}
               className="px-6 py-2 bg-carbon text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
-              {isSaving ? 'Saving...' : 'Save Address'}
+              {isSaving ? t('account.personal.saving') : t('account.personal.save')}
             </button>
           </div>
         </div>
@@ -714,7 +720,7 @@ function ShippingAddress({ displayName }: { displayName: string }) {
         <div className="text-center py-8 text-gray-500">Loading addresses...</div>
       ) : addresses.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          No addresses saved yet. Add your first address above.
+          {t('account.shipping.noAddresses')}
         </div>
       ) : (
         <div className="space-y-4">
@@ -729,7 +735,7 @@ function ShippingAddress({ displayName }: { displayName: string }) {
                     <h4 className="font-medium">{address.name}</h4>
                     {address.isDefault && (
                       <span className="text-xs bg-carbon text-white px-2 py-1 rounded">
-                        Default
+                        {t('account.shipping.default')}
                       </span>
                     )}
                   </div>
@@ -749,7 +755,7 @@ function ShippingAddress({ displayName }: { displayName: string }) {
                       disabled={isSaving}
                       className="text-xs text-carbon hover:text-black transition-colors disabled:opacity-50"
                     >
-                      Set as Default
+                      {t('account.shipping.setDefault')}
                     </button>
                   )}
                   <div className="flex space-x-2">
@@ -794,32 +800,20 @@ function ShippingAddress({ displayName }: { displayName: string }) {
 }
 
 function PaymentMethods() {
+  const t = useT()
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-serif text-lg font-light">Payment Methods</h3>
+        <h3 className="font-serif text-lg font-light">{t('account.payment.title')}</h3>
         <button className="flex items-center space-x-2 text-carbon hover:text-black transition-colors">
           <Plus className="w-4 h-4" />
-          <span className="text-sm">Add Payment Method</span>
+          <span className="text-sm">{t('account.payment.addNew')}</span>
         </button>
       </div>
 
       <div className="space-y-4">
-        <div className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-8 bg-gray-200 rounded flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-gray-600" />
-              </div>
-              <div>
-                <p className="font-medium">•••• •••• •••• 4242</p>
-                <p className="text-sm text-gray-600">Expires 12/25</p>
-              </div>
-            </div>
-            <button className="text-red-500 hover:text-red-700 transition-colors">
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
+        <div className="text-center py-8 text-gray-500">
+          {t('account.payment.comingSoon')}
         </div>
       </div>
     </div>
@@ -827,72 +821,19 @@ function PaymentMethods() {
 }
 
 function StyleProfile() {
+  const t = useT()
   const stylePreferences = ['Minimal', 'Streetwear', 'Elegant', 'Vintage', 'Contemporary']
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
   return (
     <div className="space-y-6">
-      <h3 className="font-serif text-lg font-light">Style Preferences</h3>
+      <h3 className="font-serif text-lg font-light">{t('account.style.title')}</h3>
       <p className="text-sm text-gray-600 mb-6">
-        Help Nigel curate better recommendations for you
+        {t('account.style.description')}
       </p>
 
-      <div className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium mb-3">Style Preferences</label>
-          <div className="flex flex-wrap gap-2">
-            {stylePreferences.map((style) => (
-              <button
-                key={style}
-                className="px-4 py-2 border border-gray-300 rounded-full text-sm hover:border-carbon hover:text-carbon transition-colors"
-              >
-                {style}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium mb-2">Tops</label>
-            <select className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon">
-              {sizes.map((size) => (
-                <option key={size} value={size}>{size}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Bottoms</label>
-            <select className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon">
-              {sizes.map((size) => (
-                <option key={size} value={size}>{size}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Shoes</label>
-            <select className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon">
-              {sizes.map((size) => (
-                <option key={size} value={size}>{size}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Favorite Brands or Curators</label>
-          <textarea
-            placeholder="e.g., Sofia Laurent, Acne Studios, minimal aesthetic..."
-            className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-carbon resize-none"
-            rows={3}
-          />
-        </div>
-
-        <div className="flex justify-end">
-          <button className="px-6 py-2 bg-carbon text-white hover:bg-gray-800 transition-colors">
-            Save Preferences
-          </button>
-        </div>
+      <div className="text-center py-8 text-gray-500">
+        {t('account.style.comingSoon')}
       </div>
     </div>
   )

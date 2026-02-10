@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useT } from '@/hooks/useT'
 import InventoryList from '@/components/curator/inventory/InventoryList'
 import CSVImportExport from '@/components/curator/inventory/CSVImportExport'
 import VariantManager from '@/components/curator/inventory/VariantManager'
 
 export default function InventoryPage() {
-  const { t } = useTranslation()
+  const t = useT()
   const [activeTab, setActiveTab] = useState<'list' | 'variants' | 'import'>('list')
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -30,9 +30,9 @@ export default function InventoryPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.inventory.title')}</h1>
           <p className="mt-2 text-gray-600">
-            Manage stock levels for all your product variants
+            {t('dashboard.inventory.subtitle')}
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function InventoryPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Inventory List
+              {t('dashboard.inventory.tabs.list')}
             </button>
             <button
               onClick={() => setActiveTab('variants')}
@@ -57,7 +57,7 @@ export default function InventoryPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Manage Variants
+              {t('dashboard.inventory.tabs.variants')}
             </button>
             <button
               onClick={() => setActiveTab('import')}
@@ -67,7 +67,7 @@ export default function InventoryPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Import/Export
+              {t('dashboard.inventory.tabs.importExport')}
             </button>
           </nav>
         </div>

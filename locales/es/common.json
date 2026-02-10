@@ -509,5 +509,9 @@
   "dashboard.orders.refresh": "Actualizar Pedidos",
   "dashboard.orders.error": "Error al cargar pedidos",
   "dashboard.orders.updateSuccess": "Pedido actualizado exitosamente",
-  "dashboard.orders.updateError": "Error al actualizar el pedido"
+  "dashboard.orders.updateError": "Error al actualizar el pedido",
+  "dashboard.orders.status.pending_payment": "Pago Pendiente",
+  "dashboard.orders.status.failed_attempt": "Intento Fallido",
+  "dashboard.orders.status.cancelled": "Cancelado",
+  "dashboard.orders.status.refunded": "Reembolsado"
 }

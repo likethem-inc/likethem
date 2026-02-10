@@ -16,6 +16,7 @@ import {
   Calendar,
   Filter
 } from 'lucide-react'
+import { useT } from '@/hooks/useT'
 
 interface AnalyticsMetric {
   label: string
@@ -33,33 +34,34 @@ interface TrafficData {
 }
 
 export default function AnalyticsPage() {
+  const t = useT()
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d')
   const [selectedMetric, setSelectedMetric] = useState<'views' | 'favorites' | 'sales'>('views')
 
   const metrics: AnalyticsMetric[] = [
     {
-      label: 'Total Store Visits',
+      label: t('dashboard.analytics.metrics.storeVisits'),
       value: '12,847',
       change: '+23%',
       trend: 'up',
       icon: <Eye className="w-5 h-5" />
     },
     {
-      label: 'Items Favorited',
+      label: t('dashboard.analytics.metrics.itemsFavorited'),
       value: '1,234',
       change: '+18%',
       trend: 'up',
       icon: <Heart className="w-5 h-5" />
     },
     {
-      label: 'Products Sold',
+      label: t('dashboard.analytics.metrics.productsSold'),
       value: '89',
       change: '+12%',
       trend: 'up',
       icon: <ShoppingBag className="w-5 h-5" />
     },
     {
-      label: 'Total Revenue',
+      label: t('dashboard.analytics.metrics.totalRevenue'),
       value: '$8,247',
       change: '+15%',
       trend: 'up',
@@ -150,9 +152,9 @@ export default function AnalyticsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-serif text-3xl font-light mb-2">Analytics</h1>
+              <h1 className="font-serif text-3xl font-light mb-2">{t('dashboard.analytics.title')}</h1>
               <p className="text-gray-600">
-                Track your store performance and audience insights
+                {t('dashboard.analytics.subtitle')}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -161,9 +163,9 @@ export default function AnalyticsPage() {
                 onChange={(e) => setTimeRange(e.target.value as any)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
               >
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
+                <option value="7d">{t('dashboard.analytics.timeRange.7d')}</option>
+                <option value="30d">{t('dashboard.analytics.timeRange.30d')}</option>
+                <option value="90d">{t('dashboard.analytics.timeRange.90d')}</option>
               </select>
             </div>
           </div>
@@ -212,7 +214,7 @@ export default function AnalyticsPage() {
           >
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-serif text-xl font-light">Traffic Overview</h2>
+                <h2 className="font-serif text-xl font-light">{t('dashboard.analytics.traffic.title')}</h2>
                 <div className="flex space-x-2">
                   {(['views', 'favorites', 'sales'] as const).map((metric) => (
                     <button
@@ -224,7 +226,9 @@ export default function AnalyticsPage() {
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      {metric.charAt(0).toUpperCase() + metric.slice(1)}
+                      {metric === 'views' && t('dashboard.analytics.topProducts.views')}
+                      {metric === 'favorites' && t('dashboard.analytics.topProducts.favorites')}
+                      {metric === 'sales' && t('dashboard.analytics.topProducts.sales')}
                     </button>
                   ))}
                 </div>
@@ -254,7 +258,7 @@ export default function AnalyticsPage() {
             transition={{ duration: 0.8, delay: 0.6 }}
           >
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Top Products</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('dashboard.analytics.topProducts.title')}</h2>
               
               <div className="space-y-4">
                 {topProducts.map((product, index) => (
@@ -267,9 +271,9 @@ export default function AnalyticsPage() {
                         {product.name}
                       </h3>
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
-                        <span>{product.views} views</span>
-                        <span>{product.favorites} fav</span>
-                        <span>{product.sales} sales</span>
+                        <span>{product.views} {t('dashboard.analytics.topProducts.views')}</span>
+                        <span>{product.favorites} {t('dashboard.analytics.topProducts.favorites')}</span>
+                        <span>{product.sales} {t('dashboard.analytics.topProducts.sales')}</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -296,7 +300,7 @@ export default function AnalyticsPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center space-x-2 mb-6">
                 <MapPin className="w-5 h-5 text-carbon" />
-                <h2 className="font-serif text-xl font-light">Top Cities</h2>
+                <h2 className="font-serif text-xl font-light">{t('dashboard.analytics.demographics.cities')}</h2>
               </div>
               
               <div className="space-y-4">
@@ -323,7 +327,7 @@ export default function AnalyticsPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center space-x-2 mb-6">
                 <Smartphone className="w-5 h-5 text-carbon" />
-                <h2 className="font-serif text-xl font-light">Device Usage</h2>
+                <h2 className="font-serif text-xl font-light">{t('dashboard.analytics.demographics.devices')}</h2>
               </div>
               
               <div className="space-y-4">
@@ -361,14 +365,14 @@ export default function AnalyticsPage() {
           className="mt-8"
         >
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="font-serif text-xl font-light mb-6">Conversion Funnel</h2>
+            <h2 className="font-serif text-xl font-light mb-6">{t('orderConfirmation.nextSteps.title')}</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Eye className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="font-medium text-carbon mb-1">Store Visits</h3>
+                <h3 className="font-medium text-carbon mb-1">{t('dashboard.analytics.metrics.storeVisits')}</h3>
                 <p className="text-2xl font-semibold text-carbon">12,847</p>
                 <p className="text-sm text-gray-500">100%</p>
               </div>
@@ -377,7 +381,7 @@ export default function AnalyticsPage() {
                 <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Heart className="w-6 h-6 text-yellow-600" />
                 </div>
-                <h3 className="font-medium text-carbon mb-1">Favorites</h3>
+                <h3 className="font-medium text-carbon mb-1">{t('dashboard.analytics.topProducts.favorites')}</h3>
                 <p className="text-2xl font-semibold text-carbon">1,234</p>
                 <p className="text-sm text-gray-500">9.6%</p>
               </div>
@@ -386,7 +390,7 @@ export default function AnalyticsPage() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <ShoppingBag className="w-6 h-6 text-green-600" />
                 </div>
-                <h3 className="font-medium text-carbon mb-1">Sales</h3>
+                <h3 className="font-medium text-carbon mb-1">{t('dashboard.analytics.topProducts.sales')}</h3>
                 <p className="text-2xl font-semibold text-carbon">89</p>
                 <p className="text-sm text-gray-500">0.7%</p>
               </div>
@@ -395,7 +399,7 @@ export default function AnalyticsPage() {
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <DollarSign className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="font-medium text-carbon mb-1">Revenue</h3>
+                <h3 className="font-medium text-carbon mb-1">{t('dashboard.analytics.metrics.totalRevenue')}</h3>
                 <p className="text-2xl font-semibold text-carbon">$8,247</p>
                 <p className="text-sm text-gray-500">$92.66 avg</p>
               </div>
