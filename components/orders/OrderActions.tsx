@@ -108,8 +108,10 @@ export function OrderActions({
             <div>
               <h3 className="text-lg font-medium mb-2">Cancel Order?</h3>
               <p className="text-sm text-muted-foreground">
-                Are you sure you want to cancel this order? This action cannot be undone.
-                {status === 'PAID' && ' If you have already paid, you may be eligible for a refund.'}
+                {status === 'PAID' 
+                  ? 'Are you sure you want to cancel this order? This action cannot be undone. If you have already paid, you may be eligible for a refund.'
+                  : 'Are you sure you want to cancel this order? This action cannot be undone.'
+                }
               </p>
             </div>
             <div className="flex gap-3">

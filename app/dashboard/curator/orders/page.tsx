@@ -50,6 +50,7 @@ export default function CuratorOrdersPage() {
     estimatedDeliveryDate: ''
   })
   const [showShippingForm, setShowShippingForm] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchOrders()
@@ -72,6 +73,7 @@ export default function CuratorOrdersPage() {
   }
 
   const updateOrderStatus = async (orderId: string, status: string, additionalData?: any) => {
+    setError(null)
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
@@ -98,12 +100,12 @@ export default function CuratorOrdersPage() {
         // Refresh orders to get latest data
         fetchOrders()
       } else {
-        const error = await response.json()
-        alert(error.error || 'Failed to update order status')
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to update order status')
       }
     } catch (error) {
       console.error('Error updating order status:', error)
-      alert('Failed to update order status')
+      setError('Failed to update order status')
     }
   }
 
@@ -111,7 +113,7 @@ export default function CuratorOrdersPage() {
     if (!selectedOrder) return
     
     if (!shippingInfo.courier) {
-      alert('Please enter a courier name')
+      setError('Please enter a courier name')
       return
     }
     
@@ -432,7 +434,10 @@ export default function CuratorOrdersPage() {
                     Order Details
                   </h2>
                   <button
-                    onClick={() => setSelectedOrder(null)}
+                    onClick={() => {
+                      setSelectedOrder(null)
+                      setError(null)
+                    }}
                     className="text-gray-500 hover:text-gray-700"
                   >
                     <XCircle className="w-6 h-6" />
@@ -550,6 +555,12 @@ export default function CuratorOrdersPage() {
                 </div>
 
                 {/* Action Buttons */}
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                    {error}
+                  </div>
+                )}
+                
                 {selectedOrder.status === 'PENDING_PAYMENT' && (
                   <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
                     <button
@@ -741,7 +752,7 @@ export default function CuratorOrdersPage() {
                           <button
                             onClick={() => {
                               if (!shippingInfo.courier) {
-                                alert('Please enter a courier name')
+                                setError('Please enter a courier name')
                                 return
                               }
                               updateOrderStatus(selectedOrder.id, 'SHIPPED', shippingInfo)

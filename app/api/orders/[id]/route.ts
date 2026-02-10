@@ -127,7 +127,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 
     // Prepare update data
-    const updateData: any = {
+    interface OrderUpdateData {
+      status: string;
+      updatedAt: Date;
+      courier?: string;
+      trackingNumber?: string;
+      estimatedDeliveryDate?: Date;
+    }
+
+    const updateData: OrderUpdateData = {
       status,
       updatedAt: new Date()
     };
