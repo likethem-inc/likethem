@@ -92,6 +92,8 @@ export default function CuratorOrdersPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'PENDING_VERIFICATION':
+        return <Clock className="w-4 h-4 text-orange-600" />
       case 'PENDING_PAYMENT':
         return <Clock className="w-4 h-4 text-yellow-600" />
       case 'PAID':
@@ -107,6 +109,8 @@ export default function CuratorOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'PENDING_VERIFICATION':
+        return 'bg-orange-100 text-orange-800'
       case 'PENDING_PAYMENT':
         return 'bg-yellow-100 text-yellow-800'
       case 'PAID':
@@ -217,7 +221,7 @@ export default function CuratorOrdersPage() {
           className="mb-6"
         >
           <div className="flex flex-wrap gap-2">
-            {['all', 'PENDING_PAYMENT', 'PAID', 'REJECTED', 'CONFIRMED'].map((status) => (
+            {['all', 'PENDING_VERIFICATION', 'PENDING_PAYMENT', 'PAID', 'REJECTED', 'CONFIRMED'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
