@@ -6,15 +6,13 @@
 export type PaymentMethod = 'stripe' | 'yape' | 'plin';
 
 export type OrderStatus = 
-  | 'PENDING' 
-  | 'PENDING_VERIFICATION'
   | 'PENDING_PAYMENT'
   | 'PAID'
   | 'REJECTED'
-  | 'CONFIRMED' 
   | 'PROCESSING' 
   | 'SHIPPED' 
   | 'DELIVERED' 
+  | 'FAILED_ATTEMPT'
   | 'CANCELLED'
   | 'REFUNDED';
 
@@ -79,6 +77,9 @@ export interface Order {
   paymentProof: string | null;
   stripePaymentIntentId: string | null;
   stripeTransferId: string | null;
+  courier: string | null;
+  trackingNumber: string | null;
+  estimatedDeliveryDate: Date | string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
   items: OrderItem[];

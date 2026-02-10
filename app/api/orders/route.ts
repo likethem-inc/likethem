@@ -278,9 +278,7 @@ export async function POST(req: Request) {
         const curatorAmount = subtotal - commission;
 
         // Determine order status
-        const orderStatus = paymentMethod === 'stripe' 
-          ? 'PENDING' 
-          : 'PENDING_PAYMENT';
+        const orderStatus = 'PENDING_PAYMENT';
 
         // Create order
         const order = await tx.order.create({
