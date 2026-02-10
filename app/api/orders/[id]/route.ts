@@ -67,19 +67,17 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     // Parse request body
     const body = await req.json();
-    const { status } = body;
+    const { status, courier, trackingNumber, estimatedDeliveryDate } = body;
 
     // Validate status
     const validStatuses = [
-      'PENDING',
-      'PENDING_VERIFICATION',
       'PENDING_PAYMENT',
       'PAID',
       'REJECTED',
-      'CONFIRMED',
       'PROCESSING',
       'SHIPPED',
       'DELIVERED',
+      'FAILED_ATTEMPT',
       'CANCELLED',
       'REFUNDED'
     ];
@@ -100,7 +98,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             id: true,
             userId: true
           }
-        }
+        },
+        items: true
       }
     });
 
@@ -116,13 +115,48 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       );
     }
 
+    // Status transition validation
+    const currentStatus = order.status;
+    const isValidTransition = validateStatusTransition(currentStatus, status);
+    
+    if (!isValidTransition) {
+      return NextResponse.json(
+        { error: `Cannot transition from ${currentStatus} to ${status}` },
+        { status: 400 }
+      );
+    }
+
+    // Prepare update data
+    interface OrderUpdateData {
+      status: string;
+      updatedAt: Date;
+      courier?: string;
+      trackingNumber?: string;
+      estimatedDeliveryDate?: Date;
+    }
+
+    const updateData: OrderUpdateData = {
+      status,
+      updatedAt: new Date()
+    };
+
+    // Add shipping information if transitioning to SHIPPED
+    if (status === 'SHIPPED') {
+      if (courier) updateData.courier = courier;
+      if (trackingNumber) updateData.trackingNumber = trackingNumber;
+      if (estimatedDeliveryDate) updateData.estimatedDeliveryDate = new Date(estimatedDeliveryDate);
+    }
+
+    // Handle stock restoration for CANCELLED and REJECTED orders
+    if ((status === 'CANCELLED' || status === 'REJECTED') && 
+        (currentStatus !== 'CANCELLED' && currentStatus !== 'REJECTED')) {
+      await restoreStock(order.items);
+    }
+
     // Update the order status
     const updatedOrder = await prisma.order.update({
       where: { id: params.id },
-      data: { 
-        status,
-        updatedAt: new Date()
-      },
+      data: updateData,
       include: {
         items: {
           include: {
@@ -166,5 +200,48 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   } finally {
     await prisma.$disconnect();
+  }
+}
+
+// Helper function to validate status transitions
+function validateStatusTransition(currentStatus: string, newStatus: string): boolean {
+  // Define allowed transitions
+  const transitions: Record<string, string[]> = {
+    'PENDING_PAYMENT': ['PAID', 'REJECTED', 'CANCELLED'],
+    'PAID': ['PROCESSING', 'REFUNDED', 'CANCELLED'],
+    'REJECTED': ['REFUNDED'],
+    'PROCESSING': ['SHIPPED', 'CANCELLED'],
+    'SHIPPED': ['DELIVERED', 'FAILED_ATTEMPT'],
+    'FAILED_ATTEMPT': ['SHIPPED', 'DELIVERED', 'CANCELLED'],
+    'DELIVERED': [],
+    'CANCELLED': ['REFUNDED'],
+    'REFUNDED': []
+  };
+
+  // If same status, allow (no actual change)
+  if (currentStatus === newStatus) return true;
+
+  // Check if transition is allowed
+  return transitions[currentStatus]?.includes(newStatus) || false;
+}
+
+// Helper function to restore stock for cancelled/rejected orders
+async function restoreStock(items: any[]): Promise<void> {
+  for (const item of items) {
+    if (item.size && item.color) {
+      // Restore variant stock
+      await prisma.productVariant.update({
+        where: {
+          productId_size_color: {
+            productId: item.productId,
+            size: item.size,
+            color: item.color
+          }
+        },
+        data: {
+          stockQuantity: { increment: item.quantity }
+        }
+      });
+    }
   }
 }

@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
 import Image from "next/image";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
+import { OrderActions } from "@/components/orders/OrderActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { safeSrc } from "@/lib/img";
 
@@ -121,6 +122,14 @@ export default async function OrderDetail({ params }: { params: { id: string } }
           </Card>
         </div>
       )}
+
+      <OrderActions 
+        orderId={order.id}
+        status={order.status}
+        courier={order.courier}
+        trackingNumber={order.trackingNumber}
+        estimatedDeliveryDate={order.estimatedDeliveryDate}
+      />
     </div>
   );
 }

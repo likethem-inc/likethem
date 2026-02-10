@@ -176,7 +176,7 @@ model Order {
   id                    String           @id @default(cuid())
   buyerId               String
   curatorId             String
-  status                String           @default("PENDING")
+  status                String           @default("PENDING_PAYMENT")
   totalAmount           Float
   commission            Float
   curatorAmount         Float
@@ -187,6 +187,9 @@ model Order {
   paymentMethod         String?
   paymentProof          String?
   transactionCode       String?
+  courier               String?
+  trackingNumber        String?
+  estimatedDeliveryDate DateTime?
   items                 OrderItem[]
   buyer                 User             @relation("BuyerOrders", fields: [buyerId], references: [id])
   curator               CuratorProfile   @relation("CuratorOrders", fields: [curatorId], references: [id])
