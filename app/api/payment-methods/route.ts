@@ -22,19 +22,12 @@ export async function GET(request: NextRequest) {
       where: { curatorId }
     })
 
-    // If no settings exist, return default configuration
+    // If no settings exist, return no methods (card is disabled by default)
     if (!settings) {
       return NextResponse.json({
-        methods: [
-          {
-            id: 'stripe',
-            name: 'Tarjeta de Crédito/Débito',
-            type: 'stripe',
-            enabled: true,
-            icon: 'CreditCard'
-          }
-        ],
-        defaultMethod: 'stripe'
+        methods: [],
+        defaultMethod: null,
+        commissionRate: 0.10
       })
     }
 
@@ -80,38 +73,23 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // If no methods are enabled, return Stripe as default
-    if (methods.length === 0) {
-      methods.push({
-        id: 'stripe',
-        name: 'Tarjeta de Crédito/Débito',
-        type: 'stripe',
-        enabled: true,
-        icon: 'CreditCard'
-      })
-    }
+    const resolvedDefaultMethod = methods.find(method => method.id === settings.defaultPaymentMethod)?.id
+      ?? methods[0]?.id
+      ?? null
 
     return NextResponse.json({
       methods,
-      defaultMethod: settings.defaultPaymentMethod || 'stripe',
+      defaultMethod: resolvedDefaultMethod,
       commissionRate: settings.commissionRate || 0.10
     })
 
   } catch (error) {
     console.error('Error fetching payment methods:', error)
     
-    // Return default configuration on error
+    // Return empty configuration on error
     return NextResponse.json({
-      methods: [
-        {
-          id: 'stripe',
-          name: 'Tarjeta de Crédito/Débito',
-          type: 'stripe',
-          enabled: true,
-          icon: 'CreditCard'
-        }
-      ],
-      defaultMethod: 'stripe',
+      methods: [],
+      defaultMethod: null,
       commissionRate: 0.10
     }, { status: 200 })
   }

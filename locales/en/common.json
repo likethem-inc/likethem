@@ -150,6 +150,8 @@
   "common.save": "Save",
   "common.followers": "followers",
   "common.back": "Back",
+  "payment.method.creditCard": "Credit card",
+  "payment.method.creditCardDesc": "Coming soon",
   "curator.location.cityCountry": "{city}, {country}",
   "curator.location.city": "{city}",
   "curator.location.country": "{country}",

@@ -36,6 +36,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { safeSrc } from '@/lib/img'
+import { useT } from '@/hooks/useT'
 
 interface CuratorSettings {
   storeName: string
@@ -124,6 +125,7 @@ const DEFAULT_BANNER = "https://images.unsplash.com/photo-1441986300917-64674bd6
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const t = useT()
   const [activeTab, setActiveTab] = useState<'store' | 'notifications' | 'security' | 'privacy' | 'payments' | 'danger'>('store')
   const [settings, setSettings] = useState<CuratorSettings>({
     storeName: '',
@@ -1544,6 +1546,30 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         )}
+                      </div>
+
+                      {/* Credit Card Section (disabled) */}
+                      <div className="border border-gray-200 rounded-lg p-6 opacity-60">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                              <CreditCard className="w-6 h-6 text-black" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-medium text-carbon">{t('payment.method.creditCard')}</h3>
+                              <p className="text-sm text-gray-600">{t('payment.method.creditCardDesc')}</p>
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-not-allowed">
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              disabled
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                          </label>
+                        </div>
                       </div>
 
                       {/* Save Button */}

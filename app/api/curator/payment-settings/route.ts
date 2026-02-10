@@ -41,7 +41,7 @@ export async function GET() {
           curatorId: curatorProfile.id,
           yapeEnabled: false,
           plinEnabled: false,
-          stripeEnabled: true,
+          stripeEnabled: false,
           defaultPaymentMethod: 'stripe',
           commissionRate: 0.10,
           updatedBy: session.user.id

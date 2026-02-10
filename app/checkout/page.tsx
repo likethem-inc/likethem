@@ -27,7 +27,7 @@ interface SavedAddress {
 interface PaymentMethod {
   id: string
   name: string
-  type: 'stripe' | 'yape' | 'plin'
+  type: PaymentMethodType
   enabled: boolean
   phoneNumber?: string
   qrCode?: string
@@ -35,9 +35,11 @@ interface PaymentMethod {
   icon: string
 }
 
+type PaymentMethodType = 'stripe' | 'yape' | 'plin'
+
 interface PaymentMethodsResponse {
   methods: PaymentMethod[]
-  defaultMethod: string
+  defaultMethod: string | null
   commissionRate: number
 }
 
@@ -61,7 +63,7 @@ export default function CheckoutPage() {
   const { data: session } = useSession()
   const { items, getSubtotal, clearCart, removeItem } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'yape' | 'plin'>('stripe')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType | null>(null)
   const [paymentProof, setPaymentProof] = useState<File | null>(null)
   const [transactionCode, setTransactionCode] = useState('')
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
@@ -239,9 +241,13 @@ export default function CheckoutPage() {
         
         // Auto-select default method or first enabled method
         if (data.methods.length > 0) {
-          const defaultMethod = data.methods.find(m => m.id === data.defaultMethod)
+          const defaultMethod = data.defaultMethod
+            ? data.methods.find(m => m.id === data.defaultMethod)
+            : null
           const methodToSelect = defaultMethod || data.methods[0]
           setPaymentMethod(methodToSelect.type)
+        } else {
+          setPaymentMethod(null)
         }
       } catch (error) {
         console.error('[checkout] Failed to fetch payment methods:', error)
@@ -324,6 +330,10 @@ export default function CheckoutPage() {
     e.preventDefault()
     if (unavailableItems.length > 0) {
       alert('Some items are unavailable or out of stock. Please remove them to continue.')
+      return
+    }
+    if (!paymentMethod) {
+      alert('Please select a payment method to continue.')
       return
     }
     setIsProcessing(true)
@@ -802,7 +812,7 @@ export default function CheckoutPage() {
                             name="paymentMethod"
                             value={method.type}
                             checked={paymentMethod === method.type}
-                            onChange={(e) => setPaymentMethod(e.target.value as 'stripe' | 'yape' | 'plin')}
+                            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethodType)}
                             className="text-carbon"
                           />
                           <div className="flex items-center space-x-3">
@@ -985,7 +995,7 @@ export default function CheckoutPage() {
               {/* Place Order Button */}
               <button
                 type="submit"
-                disabled={isProcessing || unavailableItems.length > 0}
+                disabled={isProcessing || unavailableItems.length > 0 || !paymentMethod}
                 className="w-full bg-carbon text-white py-4 px-6 font-medium text-lg hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? 'Processing...' : paymentMethod === 'stripe' ? 'Place Order' : 'Submit Order for Review'}
