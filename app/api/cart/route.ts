@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getApiUser, requireApiAuth, createApiErrorResponse, createApiSuccessResponse } from '@/lib/api-auth'
 import { PrismaClient } from '@prisma/client'
+import { checkVariantAvailability } from '@/lib/inventory/variants'
 
 // IMPORTANT: Prisma requires Node.js runtime
 export const runtime = 'nodejs';
@@ -44,18 +45,39 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Transform the data to match the frontend CartItem interface
-    const transformedItems = cartItems.map(item => ({
-      id: item.id,
-      name: item.product.title,
-      curator: item.product.curator.storeName,
-      price: item.product.price,
-      quantity: item.quantity,
-      image: item.product.images[0]?.url || '',
-      size: item.size,
-      color: item.color,
-      productId: item.productId
-    }))
+    // Transform the data to match the frontend CartItem interface and check stock
+    const transformedItems = await Promise.all(
+      cartItems.map(async (item) => {
+        let availableStock = item.product.stockQuantity
+        let isOutOfStock = false
+
+        // Check variant stock if size and color are specified
+        if (item.size && item.color) {
+          const variantAvailability = await checkVariantAvailability(
+            item.productId,
+            item.size,
+            item.color,
+            item.quantity
+          )
+          availableStock = variantAvailability.stockQuantity
+          isOutOfStock = !variantAvailability.available
+        }
+
+        return {
+          id: item.id,
+          name: item.product.title,
+          curator: item.product.curator.storeName,
+          price: item.product.price,
+          quantity: item.quantity,
+          image: item.product.images[0]?.url || '',
+          size: item.size,
+          color: item.color,
+          productId: item.productId,
+          availableStock,
+          isOutOfStock
+        }
+      })
+    )
 
     return createApiSuccessResponse({ items: transformedItems })
 
@@ -112,6 +134,24 @@ export async function POST(request: NextRequest) {
         color: color || null
       }
     })
+
+    // Check variant stock availability
+    if (size && color) {
+      const requestedQuantity = existingItem ? existingItem.quantity + quantity : quantity
+      const variantAvailability = await checkVariantAvailability(
+        productId,
+        size,
+        color,
+        requestedQuantity
+      )
+
+      if (!variantAvailability.available) {
+        return createApiErrorResponse(
+          `Insufficient stock. Only ${variantAvailability.stockQuantity} items available.`,
+          400
+        )
+      }
+    }
 
     let cartItem
 
@@ -228,6 +268,38 @@ export async function PUT(request: NextRequest) {
         success: true,
         message: 'Item removed from cart'
       })
+    }
+
+    // Get the cart item to check size and color
+    const existingCartItem = await prisma.cartItem.findUnique({
+      where: {
+        id: itemId,
+        userId: user.id
+      },
+      include: {
+        product: true
+      }
+    })
+
+    if (!existingCartItem) {
+      return createApiErrorResponse('Cart item not found', 404)
+    }
+
+    // Check variant stock availability
+    if (existingCartItem.size && existingCartItem.color) {
+      const variantAvailability = await checkVariantAvailability(
+        existingCartItem.productId,
+        existingCartItem.size,
+        existingCartItem.color,
+        quantity
+      )
+
+      if (!variantAvailability.available) {
+        return createApiErrorResponse(
+          `Insufficient stock. Only ${variantAvailability.stockQuantity} items available.`,
+          400
+        )
+      }
     }
 
     const cartItem = await prisma.cartItem.update({

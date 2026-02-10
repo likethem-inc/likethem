@@ -13,6 +13,8 @@ interface CartItem {
   size?: string
   color?: string
   productId?: string
+  availableStock?: number
+  isOutOfStock?: boolean
 }
 
 interface CartContextType {
@@ -106,16 +108,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }),
         credentials: 'include'
       })
-      .then(response => {
-        if (response.ok) {
-          // Refresh cart from database to ensure consistency
-          return syncWithDatabase()
+      .then(async response => {
+        const data = await response.json()
+        if (!response.ok) {
+          // Handle stock validation errors
+          console.error('Error adding item to cart:', data.error)
+          // Revert the optimistic update
+          setItems(prevItems => {
+            const existingItem = prevItems.find(item => item.id === newItem.id)
+            if (existingItem) {
+              if (existingItem.quantity === 1) {
+                return prevItems.filter(item => item.id !== newItem.id)
+              }
+              return prevItems.map(item =>
+                item.id === newItem.id
+                  ? { ...item, quantity: item.quantity - 1 }
+                  : item
+              )
+            }
+            return prevItems
+          })
+          throw new Error(data.error || 'Failed to add item to cart')
         }
-        throw new Error('Failed to add item to cart')
+        // Refresh cart from database to ensure consistency
+        return syncWithDatabase()
       })
       .catch(error => {
         console.error('Error adding item to cart:', error)
-        // Optionally revert local state on error
+        // Error handling is already done above
       })
     }
     // For unauthenticated users, localStorage is already handled by the useEffect
