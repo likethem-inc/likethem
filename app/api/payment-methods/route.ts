@@ -62,8 +62,10 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Add Stripe if enabled
-    if (settings.stripeEnabled) {
+    const stripeConfigured = Boolean(settings.stripeEnabled && settings.stripePublicKey && settings.stripeSecretKey)
+
+    // Add Stripe only when explicitly enabled and configured
+    if (stripeConfigured) {
       methods.push({
         id: 'stripe',
         name: 'Tarjeta de Crédito/Débito',
