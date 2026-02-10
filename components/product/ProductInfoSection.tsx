@@ -41,6 +41,10 @@ export default function ProductInfoSection({ product }: Props) {
     product.colors?.length > 0 ? product.colors[0] : undefined
   );
 
+  // Check if product has any stock
+  const hasStock = product.stockQuantity > 0 && (product.sizes.length > 0 || product.colors.length > 0);
+  const isOutOfStock = product.stockQuantity === 0 || (product.sizes.length === 0 && product.colors.length === 0);
+
   return (
     <section className="space-y-5">
       <div>
@@ -73,25 +77,37 @@ export default function ProductInfoSection({ product }: Props) {
       {/* Description (short) */}
       <p className="text-sm leading-6 text-neutral-600">{product.description}</p>
 
-      {/* Product Variant Selector */}
-      <ProductVariantSelector
-        sizes={product.sizes}
-        colors={product.colors}
-        selectedSize={selectedSize}
-        selectedColor={selectedColor}
-        onSizeChange={setSelectedSize}
-        onColorChange={setSelectedColor}
-        sizeLabel={t('product.size')}
-        colorLabel={t('product.color')}
-      />
+      {/* Out of Stock Message */}
+      {isOutOfStock && (
+        <div className="rounded-lg bg-neutral-100 p-4 text-center">
+          <p className="text-sm font-medium text-neutral-700">{t('product.outOfStock')}</p>
+          <p className="mt-1 text-xs text-neutral-500">Este producto no tiene stock disponible en este momento.</p>
+        </div>
+      )}
+
+      {/* Product Variant Selector - Only show if has stock */}
+      {hasStock && (
+        <ProductVariantSelector
+          sizes={product.sizes}
+          colors={product.colors}
+          selectedSize={selectedSize}
+          selectedColor={selectedColor}
+          onSizeChange={setSelectedSize}
+          onColorChange={setSelectedColor}
+          sizeLabel={t('product.size')}
+          colorLabel={t('product.color')}
+        />
+      )}
 
       {/* Product Clarity Note */}
-      <div className="pt-2 border-t border-neutral-200">
-        <p className="text-xs text-neutral-600 leading-relaxed">
-          {t('product.oneOfAKind')}
-          <span className="text-neutral-500"> {t('product.onlyOneAvailable')}</span>
-        </p>
-      </div>
+      {hasStock && (
+        <div className="pt-2 border-t border-neutral-200">
+          <p className="text-xs text-neutral-600 leading-relaxed">
+            {t('product.oneOfAKind')}
+            <span className="text-neutral-500"> {t('product.onlyOneAvailable')}</span>
+          </p>
+        </div>
+      )}
 
       {/* Purchase */}
       <div className="space-y-4">
@@ -110,10 +126,10 @@ export default function ProductInfoSection({ product }: Props) {
             curatorName={product.curator.storeName}
             size={selectedSize}
             color={selectedColor}
-            disabled={!product.isActive || product.stockQuantity <= 0}
+            disabled={!product.isActive || isOutOfStock}
             className="flex-1 rounded-xl bg-black px-5 py-3 text-sm text-white hover:bg-neutral-900 disabled:cursor-not-allowed disabled:bg-neutral-200"
           >
-            {product.stockQuantity > 0 ? t('product.addToCart') : t('product.outOfStock')}
+            {isOutOfStock ? t('product.outOfStock') : t('product.addToCart')}
           </AddToCartButton>
           <WishlistButton
             productSlug={product.slug}

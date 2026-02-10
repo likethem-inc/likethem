@@ -112,15 +112,24 @@ async function fetchData(curatorSlug: string, productSlug: string): Promise<Fetc
       };
     }
 
-    // Normalize sizes and colors from string to array
-    const sizes =
-      typeof product.sizes === "string" && product.sizes.trim()
-        ? product.sizes.split(",").map((s: string) => s.trim())
-        : [];
-    const colors =
-      typeof product.colors === "string" && product.colors.trim()
-        ? product.colors.split(",").map((s: string) => s.trim())
-        : [];
+    // Fetch product variants to get actual stock information
+    const variants = await prisma.productVariant.findMany({
+      where: { productId: product.id },
+      orderBy: [
+        { size: 'asc' },
+        { color: 'asc' }
+      ]
+    });
+
+    // Filter variants with stock > 0
+    const availableVariants = variants.filter(v => v.stockQuantity > 0);
+
+    // Extract unique sizes and colors from available variants
+    const availableSizes = [...new Set(availableVariants.map(v => v.size))];
+    const availableColors = [...new Set(availableVariants.map(v => v.color))];
+
+    // Calculate total available stock
+    const totalAvailableStock = availableVariants.reduce((sum, v) => sum + v.stockQuantity, 0);
 
     console.log(`[PRODUCT_DETAIL][${correlationId}][SUCCESS]`, {
       productId: product.id,
@@ -130,6 +139,9 @@ async function fetchData(curatorSlug: string, productSlug: string): Promise<Fetc
       curatorSlug: product.curator.slug,
       curatorIsPublic: product.curator.isPublic,
       imageCount: product.images.length,
+      totalVariants: variants.length,
+      availableVariants: availableVariants.length,
+      totalAvailableStock,
     });
 
     return {
@@ -139,9 +151,9 @@ async function fetchData(curatorSlug: string, productSlug: string): Promise<Fetc
       description: product.description,
       price: product.price,
       isActive: product.isActive,
-      stockQuantity: product.stockQuantity,
-      sizes,
-      colors,
+      stockQuantity: totalAvailableStock,
+      sizes: availableSizes,
+      colors: availableColors,
       curator: {
         id: product.curator.id,
         slug: product.curator.slug,
