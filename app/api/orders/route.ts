@@ -280,7 +280,7 @@ export async function POST(req: Request) {
         // Determine order status
         const orderStatus = paymentMethod === 'stripe' 
           ? 'PENDING' 
-          : 'PENDING_VERIFICATION';
+          : 'PENDING_PAYMENT';
 
         // Create order
         const order = await tx.order.create({
