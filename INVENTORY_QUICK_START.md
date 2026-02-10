@@ -215,12 +215,12 @@ Display to customers: 95 units (5 unit buffer)
 
 ## 🎓 Advanced Features
 
-### Custom Variants
-Add variants beyond the auto-generated ones:
-1. Click **"Add Custom Variant"** button
-2. Enter size and color manually
-3. Set stock and SKU
-4. Save
+### Edit Product Variants
+Variants are defined on the product itself:
+1. Click **"Editar producto"** button
+2. Update sizes and colors on the product
+3. Save the product
+4. Return here to set stock and SKU
 
 ### Bulk SKU Generation
 Auto-generated SKUs use this format:

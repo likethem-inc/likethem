@@ -85,7 +85,7 @@ npm run dev
 - Table view for easy editing
 - Inline stock quantity updates
 - Optional SKU configuration
-- Add custom variants
+- Edit product to adjust variants
 - Remove unwanted variants
 
 ### 4. Complete Integration

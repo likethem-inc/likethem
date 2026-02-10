@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Plus, Save, AlertCircle, Package } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { X, Pencil, Save, AlertCircle, Package } from 'lucide-react'
 import Toast, { ToastType } from '@/components/Toast'
 
 interface Product {
@@ -26,6 +27,7 @@ interface VariantManagerProps {
 }
 
 export default function VariantManager({ productId, onClose, onSuccess }: VariantManagerProps) {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [variants, setVariants] = useState<Variant[]>([])
@@ -221,13 +223,9 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
     setSelectedVariantIndexes(new Set())
   }
 
-  const addCustomVariant = () => {
-    setVariants(prev => [...prev, {
-      size: '',
-      color: '',
-      stockQuantity: 0,
-      sku: ''
-    }])
+  const handleEditProduct = () => {
+    if (!selectedProduct) return
+    router.push(`/dashboard/curator/products/${selectedProduct.id}/edit`)
   }
 
   const toggleVariantSelection = (index: number) => {
@@ -350,7 +348,7 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Manage Product Variants</h2>
           <p className="text-sm text-gray-600 mt-1">
-            Create and manage size/color combinations for your products
+            Review stock and SKUs for existing variants. Edit the product to change sizes or colors.
           </p>
         </div>
         {onClose && (
@@ -593,11 +591,11 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
           {/* Actions */}
           <div className="flex items-center justify-between gap-4">
             <button
-              onClick={addCustomVariant}
+              onClick={handleEditProduct}
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Custom Variant</span>
+              <Pencil className="w-4 h-4" />
+              <span>Editar producto</span>
             </button>
 
             <button

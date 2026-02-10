@@ -39,7 +39,7 @@
 │  [✓] Manual variant editing                                       │
 │  [✓] Stock quantity management                                    │
 │  [✓] SKU configuration                                            │
-│  [✓] Add custom variants                                          │
+│  [✓] Edit product to adjust variants                              │
 │  [✓] Remove variants                                              │
 │  [✓] Bulk save functionality                                      │
 │  [✓] Error handling                                               │

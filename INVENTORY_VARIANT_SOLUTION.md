@@ -20,7 +20,7 @@
 - Automatic variant generation from product's sizes/colors
 - Manual editing of individual variants
 - Stock quantity and SKU management
-- Add custom variants beyond predefined combinations
+- Edit product to adjust sizes/colors (variants come from product edit)
 - Direct integration with existing inventory API
 
 **How it works**:
@@ -132,7 +132,7 @@ model ProductVariant {
 
 ### Flexible Management
 - Edit auto-generated variants
-- Add custom variants not in original product
+- Edit product to change the variant set
 - Remove unwanted combinations
 - Bulk save all changes
 
