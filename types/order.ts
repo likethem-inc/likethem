@@ -7,7 +7,10 @@ export type PaymentMethod = 'stripe' | 'yape' | 'plin';
 
 export type OrderStatus = 
   | 'PENDING' 
-  | 'PENDING_VERIFICATION' 
+  | 'PENDING_VERIFICATION'
+  | 'PENDING_PAYMENT'
+  | 'PAID'
+  | 'REJECTED'
   | 'CONFIRMED' 
   | 'PROCESSING' 
   | 'SHIPPED' 
