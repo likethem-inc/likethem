@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { CheckCircle, XCircle, Clock, Package, Eye, DollarSign, User, Mail } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, Package, Eye, DollarSign, User, Mail, Truck, AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react'
 
 interface Order {
   id: string
@@ -12,6 +12,9 @@ interface Order {
   paymentMethod: string
   transactionCode?: string
   paymentProof?: string
+  courier?: string
+  trackingNumber?: string
+  estimatedDeliveryDate?: string
   createdAt: string
   buyer: {
     name: string
@@ -41,6 +44,12 @@ export default function CuratorOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [shippingInfo, setShippingInfo] = useState({
+    courier: '',
+    trackingNumber: '',
+    estimatedDeliveryDate: ''
+  })
+  const [showShippingForm, setShowShippingForm] = useState(false)
 
   useEffect(() => {
     fetchOrders()
@@ -62,27 +71,35 @@ export default function CuratorOrdersPage() {
     }
   }
 
-  const updateOrderStatus = async (orderId: string, status: string) => {
+  const updateOrderStatus = async (orderId: string, status: string, additionalData?: any) => {
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...additionalData }),
         credentials: 'include'
       })
 
       if (response.ok) {
         // Update local state
         setOrders(prev => prev.map(order => 
-          order.id === orderId ? { ...order, status } : order
+          order.id === orderId ? { ...order, status, ...additionalData } : order
         ))
         
-        // Close modal if open
+        // Close modal and reset form
         if (selectedOrder?.id === orderId) {
           setSelectedOrder(null)
         }
+        setShowShippingForm(false)
+        setShippingInfo({ courier: '', trackingNumber: '', estimatedDeliveryDate: '' })
+        
+        // Refresh orders to get latest data
+        fetchOrders()
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update order status')
       }
     } catch (error) {
       console.error('Error updating order status:', error)
@@ -90,18 +107,37 @@ export default function CuratorOrdersPage() {
     }
   }
 
+  const handleShipOrder = () => {
+    if (!selectedOrder) return
+    
+    if (!shippingInfo.courier) {
+      alert('Please enter a courier name')
+      return
+    }
+    
+    updateOrderStatus(selectedOrder.id, 'SHIPPED', shippingInfo)
+  }
+
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'PENDING_VERIFICATION':
-        return <Clock className="w-4 h-4 text-orange-600" />
       case 'PENDING_PAYMENT':
         return <Clock className="w-4 h-4 text-yellow-600" />
       case 'PAID':
         return <CheckCircle className="w-4 h-4 text-green-600" />
       case 'REJECTED':
         return <XCircle className="w-4 h-4 text-red-600" />
-      case 'CONFIRMED':
+      case 'PROCESSING':
         return <Package className="w-4 h-4 text-blue-600" />
+      case 'SHIPPED':
+        return <Truck className="w-4 h-4 text-indigo-600" />
+      case 'DELIVERED':
+        return <CheckCircle className="w-4 h-4 text-emerald-600" />
+      case 'FAILED_ATTEMPT':
+        return <AlertTriangle className="w-4 h-4 text-orange-600" />
+      case 'CANCELLED':
+        return <XCircle className="w-4 h-4 text-gray-600" />
+      case 'REFUNDED':
+        return <RotateCcw className="w-4 h-4 text-purple-600" />
       default:
         return <Clock className="w-4 h-4 text-gray-600" />
     }
@@ -109,16 +145,24 @@ export default function CuratorOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING_VERIFICATION':
-        return 'bg-orange-100 text-orange-800'
       case 'PENDING_PAYMENT':
         return 'bg-yellow-100 text-yellow-800'
       case 'PAID':
         return 'bg-green-100 text-green-800'
       case 'REJECTED':
         return 'bg-red-100 text-red-800'
-      case 'CONFIRMED':
+      case 'PROCESSING':
         return 'bg-blue-100 text-blue-800'
+      case 'SHIPPED':
+        return 'bg-indigo-100 text-indigo-800'
+      case 'DELIVERED':
+        return 'bg-emerald-100 text-emerald-800'
+      case 'FAILED_ATTEMPT':
+        return 'bg-orange-100 text-orange-800'
+      case 'CANCELLED':
+        return 'bg-gray-100 text-gray-800'
+      case 'REFUNDED':
+        return 'bg-purple-100 text-purple-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -194,8 +238,8 @@ export default function CuratorOrdersPage() {
             <div className="flex items-center space-x-3">
               <Package className="w-8 h-8 text-blue-600" />
               <div>
-                <p className="text-2xl font-light">{orders.filter(o => o.status === 'CONFIRMED').length}</p>
-                <p className="text-sm text-gray-600">Confirmed</p>
+                <p className="text-2xl font-light">{orders.filter(o => o.status === 'PROCESSING').length}</p>
+                <p className="text-sm text-gray-600">Processing</p>
               </div>
             </div>
           </div>
@@ -221,7 +265,7 @@ export default function CuratorOrdersPage() {
           className="mb-6"
         >
           <div className="flex flex-wrap gap-2">
-            {['all', 'PENDING_VERIFICATION', 'PENDING_PAYMENT', 'PAID', 'REJECTED', 'CONFIRMED'].map((status) => (
+            {['all', 'PENDING_PAYMENT', 'PAID', 'REJECTED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'FAILED_ATTEMPT', 'CANCELLED', 'REFUNDED'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -231,7 +275,7 @@ export default function CuratorOrdersPage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {status === 'all' ? 'All Orders' : status.replace('_', ' ')}
+                {status === 'all' ? 'All Orders' : status.replace(/_/g, ' ')}
               </button>
             ))}
           </div>
@@ -268,7 +312,7 @@ export default function CuratorOrdersPage() {
                   
                   <div className="flex items-center space-x-3">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order.status.replace('_', ' ')}
+                      {order.status.replace(/_/g, ' ')}
                     </span>
                     <span className="font-medium">${order.totalAmount.toFixed(2)}</span>
                     <button
@@ -295,9 +339,9 @@ export default function CuratorOrdersPage() {
                   </div>
                 </div>
 
-                {/* Action Buttons for Pending Payment Orders */}
+                {/* Action Buttons */}
                 {order.status === 'PENDING_PAYMENT' && (
-                  <div className="flex space-x-3 mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200">
                     <button
                       onClick={() => updateOrderStatus(order.id, 'PAID')}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -311,6 +355,61 @@ export default function CuratorOrdersPage() {
                     >
                       <XCircle className="w-4 h-4" />
                       <span>Reject Payment</span>
+                    </button>
+                  </div>
+                )}
+                
+                {order.status === 'PAID' && (
+                  <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'PROCESSING')}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Package className="w-4 h-4" />
+                      <span>Start Processing</span>
+                    </button>
+                  </div>
+                )}
+                
+                {order.status === 'PROCESSING' && (
+                  <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <Truck className="w-4 h-4" />
+                      <span>Mark as Shipped</span>
+                    </button>
+                  </div>
+                )}
+                
+                {order.status === 'SHIPPED' && (
+                  <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'DELIVERED')}
+                      className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Mark as Delivered</span>
+                    </button>
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'FAILED_ATTEMPT')}
+                      className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Failed Attempt</span>
+                    </button>
+                  </div>
+                )}
+                
+                {order.status === 'FAILED_ATTEMPT' && (
+                  <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Retry Shipping</span>
                     </button>
                   </div>
                 )}
@@ -354,7 +453,9 @@ export default function CuratorOrdersPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Status:</span>
-                        <span className="capitalize">{selectedOrder.status.replace('_', ' ')}</span>
+                        <span className={`capitalize px-2 py-1 rounded text-xs ${getStatusColor(selectedOrder.status)}`}>
+                          {selectedOrder.status.replace(/_/g, ' ')}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Payment Method:</span>
@@ -377,6 +478,31 @@ export default function CuratorOrdersPage() {
                       <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
                       <p>{selectedOrder.shippingAddress.country}</p>
                     </div>
+                    
+                    {/* Shipping Info */}
+                    {(selectedOrder.courier || selectedOrder.trackingNumber) && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <h4 className="font-medium text-sm mb-2">Shipping Details</h4>
+                        {selectedOrder.courier && (
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">Courier:</span>
+                            <span>{selectedOrder.courier}</span>
+                          </div>
+                        )}
+                        {selectedOrder.trackingNumber && (
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-gray-600">Tracking:</span>
+                            <span className="font-mono text-xs">{selectedOrder.trackingNumber}</span>
+                          </div>
+                        )}
+                        {selectedOrder.estimatedDeliveryDate && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Est. Delivery:</span>
+                            <span>{new Date(selectedOrder.estimatedDeliveryDate).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -425,28 +551,218 @@ export default function CuratorOrdersPage() {
 
                 {/* Action Buttons */}
                 {selectedOrder.status === 'PENDING_PAYMENT' && (
-                  <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
                     <button
-                      onClick={() => {
-                        updateOrderStatus(selectedOrder.id, 'PAID')
-                        setSelectedOrder(null)
-                      }}
+                      onClick={() => updateOrderStatus(selectedOrder.id, 'PAID')}
                       className="flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
                       <CheckCircle className="w-4 h-4" />
                       <span>Mark as Paid</span>
-
                     </button>
                     <button
-                      onClick={() => {
-                        updateOrderStatus(selectedOrder.id, 'REJECTED')
-                        setSelectedOrder(null)
-                      }}
+                      onClick={() => updateOrderStatus(selectedOrder.id, 'REJECTED')}
                       className="flex items-center space-x-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       <XCircle className="w-4 h-4" />
                       <span>Reject Payment</span>
                     </button>
+                  </div>
+                )}
+                
+                {selectedOrder.status === 'PAID' && (
+                  <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => updateOrderStatus(selectedOrder.id, 'PROCESSING')}
+                      className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Package className="w-4 h-4" />
+                      <span>Start Processing</span>
+                    </button>
+                  </div>
+                )}
+                
+                {selectedOrder.status === 'PROCESSING' && (
+                  <div className="pt-4 border-t border-gray-200">
+                    {!showShippingForm ? (
+                      <button
+                        onClick={() => setShowShippingForm(true)}
+                        className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                      >
+                        <Truck className="w-4 h-4" />
+                        <span>Mark as Shipped</span>
+                      </button>
+                    ) : (
+                      <div className="space-y-4">
+                        <h4 className="font-medium">Shipping Information</h4>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Courier <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={shippingInfo.courier}
+                            onChange={(e) => setShippingInfo({ ...shippingInfo, courier: e.target.value })}
+                            placeholder="e.g., FedEx, UPS, DHL"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Tracking Number (optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={shippingInfo.trackingNumber}
+                            onChange={(e) => setShippingInfo({ ...shippingInfo, trackingNumber: e.target.value })}
+                            placeholder="Enter tracking number"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Estimated Delivery Date (optional)
+                          </label>
+                          <input
+                            type="date"
+                            value={shippingInfo.estimatedDeliveryDate}
+                            onChange={(e) => setShippingInfo({ ...shippingInfo, estimatedDeliveryDate: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                        
+                        <div className="flex gap-3">
+                          <button
+                            onClick={handleShipOrder}
+                            className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                          >
+                            <Truck className="w-4 h-4" />
+                            <span>Confirm Shipment</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowShippingForm(false)
+                              setShippingInfo({ courier: '', trackingNumber: '', estimatedDeliveryDate: '' })
+                            }}
+                            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {selectedOrder.status === 'SHIPPED' && (
+                  <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => updateOrderStatus(selectedOrder.id, 'DELIVERED')}
+                      className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Mark as Delivered</span>
+                    </button>
+                    <button
+                      onClick={() => updateOrderStatus(selectedOrder.id, 'FAILED_ATTEMPT')}
+                      className="flex items-center space-x-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Failed Attempt</span>
+                    </button>
+                  </div>
+                )}
+                
+                {selectedOrder.status === 'FAILED_ATTEMPT' && (
+                  <div className="pt-4 border-t border-gray-200">
+                    {!showShippingForm ? (
+                      <button
+                        onClick={() => {
+                          setShowShippingForm(true)
+                          // Pre-fill with existing shipping info if available
+                          if (selectedOrder.courier) {
+                            setShippingInfo({
+                              courier: selectedOrder.courier,
+                              trackingNumber: selectedOrder.trackingNumber || '',
+                              estimatedDeliveryDate: selectedOrder.estimatedDeliveryDate || ''
+                            })
+                          }
+                        }}
+                        className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        <span>Retry Shipping</span>
+                      </button>
+                    ) : (
+                      <div className="space-y-4">
+                        <h4 className="font-medium">Update Shipping Information</h4>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Courier <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={shippingInfo.courier}
+                            onChange={(e) => setShippingInfo({ ...shippingInfo, courier: e.target.value })}
+                            placeholder="e.g., FedEx, UPS, DHL"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Tracking Number (optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={shippingInfo.trackingNumber}
+                            onChange={(e) => setShippingInfo({ ...shippingInfo, trackingNumber: e.target.value })}
+                            placeholder="Enter tracking number"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Estimated Delivery Date (optional)
+                          </label>
+                          <input
+                            type="date"
+                            value={shippingInfo.estimatedDeliveryDate}
+                            onChange={(e) => setShippingInfo({ ...shippingInfo, estimatedDeliveryDate: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                        
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => {
+                              if (!shippingInfo.courier) {
+                                alert('Please enter a courier name')
+                                return
+                              }
+                              updateOrderStatus(selectedOrder.id, 'SHIPPED', shippingInfo)
+                            }}
+                            className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                            <span>Retry Shipment</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowShippingForm(false)
+                              setShippingInfo({ courier: '', trackingNumber: '', estimatedDeliveryDate: '' })
+                            }}
+                            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
