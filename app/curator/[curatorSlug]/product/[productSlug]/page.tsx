@@ -124,9 +124,19 @@ async function fetchData(curatorSlug: string, productSlug: string): Promise<Fetc
     // Filter variants with stock > 0
     const availableVariants = variants.filter(v => v.stockQuantity > 0);
 
-    // Extract unique sizes and colors from available variants
-    const availableSizes = [...new Set(availableVariants.map(v => v.size))];
-    const availableColors = [...new Set(availableVariants.map(v => v.color))];
+    // Extract unique sizes and colors without relying on Set iteration
+    const availableSizes = availableVariants.reduce<string[]>((acc, variant) => {
+      if (!acc.includes(variant.size)) {
+        acc.push(variant.size);
+      }
+      return acc;
+    }, []);
+    const availableColors = availableVariants.reduce<string[]>((acc, variant) => {
+      if (!acc.includes(variant.color)) {
+        acc.push(variant.color);
+      }
+      return acc;
+    }, []);
 
     // Calculate total available stock
     const totalAvailableStock = availableVariants.reduce((sum, v) => sum + v.stockQuantity, 0);
