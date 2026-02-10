@@ -200,7 +200,7 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
             {!searchTerm ? (
               <>
                 Get started by creating variants for your products.<br />
-                Go to the <strong>"Manage Variants"</strong> tab to set up size and color combinations.
+                Go to the <strong>&quot;Manage Variants&quot;</strong> tab to set up size and color combinations.
               </>
             ) : (
               'Try adjusting your search terms'

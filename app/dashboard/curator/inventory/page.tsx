@@ -94,7 +94,7 @@ export default function InventoryPage() {
                 1
               </div>
               <div>
-                <strong>Variants Come From Products:</strong> Sizes and colors are defined when you create or edit a product. Use "Editar producto" to update sizes/colors, then return here to set stock and SKUs.
+                <strong>Variants Come From Products:</strong> Sizes and colors are defined when you create or edit a product. Use &quot;Editar producto&quot; to update sizes/colors, then return here to set stock and SKUs.
               </div>
             </div>
             <div className="flex items-start gap-3">
