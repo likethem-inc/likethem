@@ -94,7 +94,7 @@ export default function InventoryPage() {
                 1
               </div>
               <div>
-                <strong>Create Variants First:</strong> Before products appear in inventory, you need to create variants for each size/color combination. Use the "Manage Variants" tab to generate variants for your products.
+                <strong>Variants Come From Products:</strong> Sizes and colors are defined when you create or edit a product. Use "Editar producto" to update sizes/colors, then return here to set stock and SKUs.
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -102,7 +102,7 @@ export default function InventoryPage() {
                 2
               </div>
               <div>
-                <strong>Variant-Based Tracking:</strong> Inventory is tracked for each unique combination of size and color. This ensures accurate stock levels for specific variants.
+                <strong>Variant-Based Tracking:</strong> Inventory is tracked per size/color combination, with stock and SKU managed here for each variant.
               </div>
             </div>
             <div className="flex items-start gap-3">
