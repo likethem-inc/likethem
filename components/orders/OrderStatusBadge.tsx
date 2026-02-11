@@ -1,7 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/i18n/t";
+import type { Locale } from "@/lib/i18n/getLocale";
 
-const MAP: Record<string, string> = {
+type TranslationKey = Parameters<typeof t>[1];
+
+const MAP = {
   PENDING_PAYMENT: "order.status.pendingPayment",
   PAID: "order.status.paid",
   REJECTED: "order.status.rejected",
@@ -11,10 +14,12 @@ const MAP: Record<string, string> = {
   FAILED_ATTEMPT: "order.status.failedAttempt",
   CANCELLED: "order.status.cancelled",
   REFUNDED: "order.status.refunded",
-};
+} as const satisfies Record<string, TranslationKey>;
 
-export function OrderStatusBadge({ status, locale }: { status: string; locale: string }) {
-  const labelKey = MAP[status];
+export function OrderStatusBadge({ status, locale }: { status: string; locale: Locale }) {
+  const labelKey = Object.prototype.hasOwnProperty.call(MAP, status)
+    ? MAP[status as keyof typeof MAP]
+    : undefined;
   const label = labelKey ? t(locale, labelKey) : status;
   const tone =
     status === "DELIVERED" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :

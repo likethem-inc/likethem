@@ -174,7 +174,16 @@ export default function VariantManager({ productId, onClose, onSuccess }: Varian
       }
 
       const payload = data?.data ?? data
-      const existingVariants = payload?.variants || []
+      const existingVariants: Array<{
+        size: string
+        color: string
+        stockQuantity?: number | null
+        sku?: string | null
+      }> = Array.isArray(payload?.variants)
+        ? payload.variants
+        : Array.isArray(payload)
+        ? payload
+        : []
 
       if (existingVariants.length === 0) {
         return

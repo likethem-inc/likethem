@@ -4,8 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { safeSrc } from "@/lib/img";
 import { t } from "@/lib/i18n/t";
+import type { Locale } from "@/lib/i18n/getLocale";
 
-export function OrderListItem({ order, locale }: { order: any; locale: string }) {
+export function OrderListItem({ order, locale }: { order: any; locale: Locale }) {
   const date = new Date(order.createdAt).toLocaleDateString();
   const total = Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(order.totalAmount ?? 0);
   const thumbs = order.items?.slice(0, 4) ?? [];
