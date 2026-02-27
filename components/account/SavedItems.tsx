@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useT } from '@/hooks/useT'
 import { ProductImageWithFallback } from '@/components/ImageWithFallback'
 import { Heart } from 'lucide-react'
+import { formatCurrency } from '@/lib/format'
 
 interface SavedItem {
   id: string
@@ -141,7 +142,7 @@ export default function SavedItems() {
                   {item.curatorName}
                 </p>
                 <p className="text-sm font-medium text-neutral-900">
-                  ${item.price.toFixed(2)}
+                  {formatCurrency(item.price)}
                 </p>
               </div>
             </Link>

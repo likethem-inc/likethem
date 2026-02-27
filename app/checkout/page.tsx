@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useCart } from '@/contexts/CartContext'
 import { ArrowLeft, Lock, CreditCard, MapPin, User, Mail, Phone, QrCode, Upload, FileText, Check, Smartphone } from 'lucide-react'
+import { formatCurrency } from '@/lib/format'
 
 interface SavedAddress {
   id: string
@@ -1033,7 +1034,7 @@ export default function CheckoutPage() {
                       <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <span className="font-medium text-sm">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatCurrency(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -1043,20 +1044,20 @@ export default function CheckoutPage() {
               <div className="space-y-3 border-t border-gray-200 pt-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span>${shipping.toFixed(2)}</span>
+                  <span>{formatCurrency(shipping)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>{formatCurrency(tax)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between">
                     <span className="font-medium">Total</span>
-                    <span className="font-serif text-xl font-light">${total.toFixed(2)}</span>
+                    <span className="font-serif text-xl font-light">{formatCurrency(total)}</span>
                   </div>
                 </div>
               </div>

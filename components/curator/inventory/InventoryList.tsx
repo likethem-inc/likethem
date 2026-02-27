@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Toast, { ToastType } from '@/components/Toast'
+import { formatCurrency } from '@/lib/format'
 
 interface ProductVariant {
   id: string
@@ -250,7 +251,7 @@ export default function InventoryList({ onEdit }: InventoryListProps) {
                             {variant.product.title}
                           </div>
                           <div className="text-sm text-gray-500">
-                            ${variant.product.price.toFixed(2)}
+                            {formatCurrency(variant.product.price)}
                           </div>
                         </div>
                       </div>

@@ -4,6 +4,7 @@ import AdminPageShell from '@/components/admin/AdminPageShell'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { formatCurrency } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,7 +63,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2">Price</h3>
-              <p className="text-lg text-gray-900">${product.price.toFixed(2)}</p>
+              <p className="text-lg text-gray-900">{formatCurrency(product.price)}</p>
             </div>
             
             <div>

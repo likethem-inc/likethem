@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle, Clock, AlertCircle, ArrowRight, Package, CreditCard, QrCode } from 'lucide-react'
+import { formatCurrency } from '@/lib/format'
 
 interface OrderConfirmationProps {
   orderId?: string
@@ -135,7 +136,7 @@ export default function OrderConfirmationPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Total:</span>
-                      <span className="font-medium">${order.totalAmount.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(order.totalAmount)}</span>
                     </div>
                   </div>
                 </div>
@@ -173,7 +174,7 @@ export default function OrderConfirmationPage() {
                         {item.color && <p className="text-sm text-gray-600">Color: {item.color}</p>}
                       </div>
                       <div className="text-right">
-                        <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
                       </div>
                     </div>
                   ))}

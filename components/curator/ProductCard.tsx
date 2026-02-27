@@ -1,6 +1,7 @@
 // components/curator/ProductCard.tsx
 import Link from "next/link";
 import ProductImageWithFallback from "@/components/ImageWithFallback";
+import { formatCurrency } from "@/lib/format";
 
 export type ProductCardData = {
   id: string;
@@ -39,7 +40,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       </div>
       <div className="p-4">
         <div className="line-clamp-1 text-sm font-medium text-gray-900">{product.title}</div>
-        <div className="mt-1 text-sm font-semibold">${product.price.toFixed(2)}</div>
+        <div className="mt-1 text-sm font-semibold">{formatCurrency(product.price)}</div>
       </div>
     </Link>
   );

@@ -9,6 +9,7 @@ import { useCart } from '@/contexts/CartContext'
 import OptimizedImage, { ProductImage } from '@/components/OptimizedImage'
 import { CuratorImage } from '@/components/OptimizedImage'
 import Toast from '@/components/Toast'
+import { formatCurrency } from '@/lib/format'
 
 interface Product {
   id: string
@@ -297,7 +298,7 @@ export default function ProductDetailClient({ product, hasAccess = true, isInner
               {isInnerTier && !hasAccess ? (
                 <div className="flex items-center gap-2">
                   <p className="text-2xl font-semibold text-gray-400 blur-sm">
-                    ${product.price.toFixed(2)}
+                    {formatCurrency(product.price)}
                   </p>
                   <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
                     Hidden
@@ -305,7 +306,7 @@ export default function ProductDetailClient({ product, hasAccess = true, isInner
                 </div>
               ) : (
                 <p className="text-2xl font-semibold text-gray-900">
-                  ${product.price.toFixed(2)}
+                  {formatCurrency(product.price)}
                 </p>
               )}
             </div>
