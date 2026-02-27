@@ -3,8 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+// IMPORTANT: Prisma requires Node.js runtime
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const revalidate = 60 // Cache for 60 seconds
 
 type SortOption = 'editors-pick' | 'popular' | 'newest' | 'alphabetical'
 type PriceRange = 'under-100' | '100-300' | '300-plus'
