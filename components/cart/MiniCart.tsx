@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/format";
 
 type Props = {
   open: boolean;
@@ -72,7 +73,7 @@ export default function MiniCart({ open, onClose, anchorId }: Props) {
                         </p>
                       )}
                     </div>
-                    <p className="text-sm text-neutral-800">${item.price.toFixed(2)}</p>
+                    <p className="text-sm text-neutral-800">{formatCurrency(item.price)}</p>
                   </div>
                   <div className="mt-2 flex items-center gap-3">
                     <div className="inline-flex items-center rounded-full border border-neutral-300">
@@ -109,7 +110,7 @@ export default function MiniCart({ open, onClose, anchorId }: Props) {
       <div className="border-t border-neutral-200 px-4 py-4">
         <div className="mb-3 flex items-center justify-between text-sm">
           <span className="text-neutral-600">Subtotal</span>
-          <span className="font-medium text-neutral-900">${subtotal.toFixed(2)}</span>
+          <span className="font-medium text-neutral-900">{formatCurrency(subtotal)}</span>
         </div>
         <div className="flex gap-2">
           <Link

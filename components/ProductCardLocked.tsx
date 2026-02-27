@@ -4,6 +4,7 @@ import { Lock } from "lucide-react";
 import { useState } from "react";
 import AccessModal from "./AccessModal";
 import { ProductImageWithFallback } from "@/components/ImageWithFallback";
+import { formatCurrency } from "@/lib/format";
 
 export type ProductCardData = {
   id: string;
@@ -77,7 +78,7 @@ export default function ProductCardLocked({ product, curatorId, curatorSlug }: P
             {product.title}
           </div>
           <div className="mt-1 text-sm font-semibold text-gray-400 blur-sm">
-            ${product.price.toFixed(2)}
+            {formatCurrency(product.price)}
           </div>
           <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
             <Lock className="size-3" /> Inner Closet

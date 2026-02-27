@@ -19,6 +19,7 @@ import {
   XCircle
 } from 'lucide-react'
 import ProductDropdownMenu from '@/components/curator/ProductDropdownMenu'
+import { formatCurrency } from '@/lib/format'
 
 interface Product {
   id: string
@@ -351,7 +352,7 @@ export default function ProductsPage() {
                   </div>
                   
                   <p className="font-serif text-lg font-light text-carbon mb-3">
-                    ${product.price.toFixed(2)}
+                    {formatCurrency(product.price)}
                   </p>
 
                   {/* Tags */}

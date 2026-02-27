@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { CheckCircle, XCircle, Clock, Package, Eye, DollarSign, User, Mail, Truck, AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react'
 import { useT } from '@/hooks/useT'
+import { formatCurrency } from '@/lib/format'
 
 interface Order {
   id: string
@@ -269,7 +270,7 @@ export default function CuratorOrdersPage() {
               <DollarSign className="w-8 h-8 text-green-600" />
               <div>
                 <p className="text-2xl font-light">
-                  ${orders.reduce((total, order) => total + order.totalAmount, 0).toFixed(2)}
+                  {formatCurrency(orders.reduce((total, order) => total + order.totalAmount, 0))}
                 </p>
                 <p className="text-sm text-gray-600">{t('curator.orders.stats.totalRevenue')}</p>
               </div>
@@ -336,7 +337,7 @@ export default function CuratorOrdersPage() {
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {getStatusLabel(order.status)}
                     </span>
-                    <span className="font-medium">${order.totalAmount.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(order.totalAmount)}</span>
                     <button
                       onClick={() => setSelectedOrder(order)}
                       className="p-2 text-gray-600 hover:text-carbon transition-colors"
@@ -567,7 +568,7 @@ export default function CuratorOrdersPage() {
                           <p className="text-xs text-gray-600">{t('curator.orders.fields.qty', { quantity: item.quantity })}</p>
                         </div>
                         <div className="text-right">
-                          <span className="font-medium text-sm">${(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="font-medium text-sm">{formatCurrency(item.price * item.quantity)}</span>
                         </div>
                       </div>
                     ))}

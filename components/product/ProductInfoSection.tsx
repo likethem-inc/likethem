@@ -9,6 +9,7 @@ import CollapsibleSection from "@/components/ui/CollapsibleSection";
 import ProductVariantSelector from "@/components/product/ProductVariantSelector";
 import { CuratorImageWithFallback } from "@/components/ImageWithFallback";
 import { useT } from "@/hooks/useT";
+import { formatCurrency } from "@/lib/format";
 
 type Props = {
   product: {
@@ -70,7 +71,7 @@ export default function ProductInfoSection({ product }: Props) {
       {/* Price */}
       <div className="flex items-center gap-4">
         <div className="text-xl text-neutral-900">
-          ${product.price.toFixed(2)}
+          {formatCurrency(product.price)}
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProductInfoSection from "@/components/product/ProductInfoSection";
 import ProductUnavailable from "@/components/product/ProductUnavailable";
+import { formatCurrency } from "@/lib/format";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -431,7 +432,7 @@ async function RelatedProducts({ curatorId, currentProductId }: { curatorId: str
                 </div>
                 <div className="mt-2 text-sm text-neutral-900">{p.title}</div>
                 <div className="text-xs text-neutral-500">
-                  ${p.price.toFixed(2)}
+                  {formatCurrency(p.price)}
                 </div>
               </Link>
             );

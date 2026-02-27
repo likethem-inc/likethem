@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Heart, Share2, Instagram, Twitter, Youtube } from 'lucide-react'
 import { ProductImage } from '@/components/OptimizedImage'
 import { CuratorImage } from '@/components/OptimizedImage'
+import { formatCurrency } from '@/lib/format'
 
 interface Curator {
   id: string
@@ -264,7 +265,7 @@ export default function CuratorDetailClient({ curator }: CuratorDetailClientProp
                         {product.title}
                       </h3>
                       <p className="text-lg font-semibold text-gray-900">
-                        ${product.price.toFixed(2)}
+                        {formatCurrency(product.price)}
                       </p>
                       {product.curatorNote && (
                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">

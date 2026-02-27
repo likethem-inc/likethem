@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import { X, Trash2, ShoppingBag, ChevronRight } from 'lucide-react'
+import { formatCurrency } from '@/lib/format'
 
 interface CartItem {
   id: string
@@ -146,7 +147,7 @@ export default function MiniCart({ isOpen, onClose, items, onRemoveItem, onUpdat
                             </select>
                           </div>
                           <span className="font-medium text-carbon">
-                            ${item.price.toFixed(2)}
+                            {formatCurrency(item.price)}
                           </span>
                         </div>
                       </div>
@@ -172,7 +173,7 @@ export default function MiniCart({ isOpen, onClose, items, onRemoveItem, onUpdat
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Subtotal</span>
                   <span className="font-serif text-lg font-light">
-                    ${subtotal.toFixed(2)}
+                    {formatCurrency(subtotal)}
                   </span>
                 </div>
 

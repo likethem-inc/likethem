@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import CuratorIdentityForm from './CuratorIdentityForm'
+import { formatCurrency } from '@/lib/format'
 
 interface CuratorDetailClientProps {
   curatorProfile: {
@@ -215,7 +216,7 @@ export default function CuratorDetailClient({
                   <tr key={product.id}>
                     <td className="px-4 py-2 text-sm text-gray-900">{product.title}</td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      ${product.price.toFixed(2)}
+                      {formatCurrency(product.price)}
                     </td>
                     <td className="px-4 py-2">
                       <span
