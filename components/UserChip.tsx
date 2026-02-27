@@ -52,7 +52,7 @@ export default function UserChip({ user }: { user: User | null }) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 max-w-[180px] hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"
       >
-        <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-sm">
+        <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-sm">
           {user.image ? (
             <Image src={safeSrc(user.image)} alt={userName || "User"} width={32} height={32} className="object-cover" />
           ) : (
