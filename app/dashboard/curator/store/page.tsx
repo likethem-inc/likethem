@@ -22,6 +22,7 @@ import {
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useT } from '@/hooks/useT'
 
 interface StoreProfile {
   name: string
@@ -52,6 +53,7 @@ const availableTags = [
 export default function StorePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const t = useT()
   const [isLoading, setIsLoading] = useState(true)
   const [profile, setProfile] = useState<StoreProfile>({
     name: '',
@@ -146,14 +148,14 @@ export default function StorePage() {
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMessage('File size must be less than 5MB')
+      setErrorMessage(t('store.errors.fileSizeLarge'))
       setShowErrorToast(true)
       return
     }
 
     // Validate file type
     if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) {
-      setErrorMessage('Please upload a JPG, PNG, or WebP file')
+      setErrorMessage(t('store.errors.fileTypeInvalid'))
       setShowErrorToast(true)
       return
     }
@@ -176,14 +178,14 @@ export default function StorePage() {
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMessage('File size must be less than 5MB')
+      setErrorMessage(t('store.errors.fileSizeLarge'))
       setShowErrorToast(true)
       return
     }
 
     // Validate file type
     if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) {
-      setErrorMessage('Please upload a JPG, PNG, or WebP file')
+      setErrorMessage(t('store.errors.fileTypeInvalid'))
       setShowErrorToast(true)
       return
     }
@@ -323,7 +325,7 @@ export default function StorePage() {
       
     } catch (error) {
       console.error('Error saving profile:', error)
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to save profile')
+      setErrorMessage(error instanceof Error ? error.message : t('store.errors.failedToSave'))
       setShowErrorToast(true)
       setTimeout(() => setShowErrorToast(false), 5000)
     } finally {
@@ -340,7 +342,7 @@ export default function StorePage() {
 
   const handleCancel = () => {
     if (hasUnsavedChanges) {
-      if (confirm('You have unsaved changes. Are you sure you want to leave?')) {
+      if (confirm(t('store.unsavedChanges'))) {
         window.location.href = '/dashboard/curator'
       }
     } else {
@@ -353,7 +355,7 @@ export default function StorePage() {
       <div className="min-h-screen bg-gray-50 py-24 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-carbon mx-auto mb-4" />
-          <p className="text-gray-600">Loading your store profile...</p>
+          <p className="text-gray-600">{t('store.loading')}</p>
         </div>
       </div>
     )
@@ -376,7 +378,7 @@ export default function StorePage() {
                 className="flex items-center space-x-2 text-carbon hover:text-black transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back to Dashboard</span>
+                <span>{t('store.backToDashboard')}</span>
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -387,16 +389,16 @@ export default function StorePage() {
                   className="flex items-center space-x-2 text-carbon hover:text-black transition-colors"
                 >
                   <Eye className="w-4 h-4" />
-                  <span>Preview My Store</span>
+                  <span>{t('store.previewStore')}</span>
                 </a>
               )}
             </div>
           </div>
           
           <div className="mt-6">
-            <h1 className="font-serif text-3xl font-light mb-2">Edit Store Profile</h1>
+            <h1 className="font-serif text-3xl font-light mb-2">{t('store.title')}</h1>
             <p className="text-gray-600">
-              Update your store information and appearance
+              {t('store.subtitle')}
             </p>
           </div>
 
@@ -404,7 +406,7 @@ export default function StorePage() {
           {profile.isEditorPick && (
             <div className="mt-4 flex items-center space-x-2">
               <Star className="w-5 h-5 text-yellow-500" />
-              <span className="text-sm font-medium text-yellow-700">Editor&apos;s Pick</span>
+              <span className="text-sm font-medium text-yellow-700">{t('store.editorsPick')}</span>
             </div>
           )}
         </motion.div>
@@ -419,12 +421,12 @@ export default function StorePage() {
           >
             {/* Basic Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Basic Information</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('store.basicInfo.title')}</h2>
               
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Curator Display Name *
+                    {t('store.basicInfo.displayName')}
                   </label>
                   <input
                     type="text"
@@ -432,16 +434,16 @@ export default function StorePage() {
                     onChange={(e) => handleFieldChange('name', e.target.value)}
                     maxLength={50}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
-                    placeholder="Your store name"
+                    placeholder={t('store.basicInfo.displayNamePlaceholder')}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {profile.name.length}/50 characters
+                    {t('store.basicInfo.charCount', { count: profile.name.length, max: 50 })}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bio / Store Description *
+                    {t('store.basicInfo.bio')}
                   </label>
                   <textarea
                     value={profile.bio}
@@ -449,37 +451,37 @@ export default function StorePage() {
                     maxLength={280}
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon resize-none"
-                    placeholder="Tell visitors about your style and curation philosophy..."
+                    placeholder={t('store.basicInfo.bioPlaceholder')}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {profile.bio.length}/280 characters
+                    {t('store.basicInfo.charCount', { count: profile.bio.length, max: 280 })}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Location / City
+                      {t('store.basicInfo.location')}
                     </label>
                     <input
                       type="text"
                       value={profile.city}
                       onChange={(e) => handleFieldChange('city', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
-                      placeholder="e.g., New York"
+                      placeholder={t('store.basicInfo.locationPlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Style Tags
+                      {t('store.basicInfo.styleTags')}
                     </label>
                     <input
                       type="text"
                       value={profile.style}
                       onChange={(e) => handleFieldChange('style', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
-                      placeholder="e.g., minimal, oversized, neutral"
+                      placeholder={t('store.basicInfo.styleTagsPlaceholder')}
                     />
                   </div>
                 </div>
@@ -488,11 +490,11 @@ export default function StorePage() {
 
             {/* Store Tags */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Store Tags / Style Labels</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('store.storeTags.title')}</h2>
               
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
-                  Select tags that best describe your curation style
+                  {t('store.storeTags.subtitle')}
                 </p>
                 
                 <div className="flex flex-wrap gap-2">
@@ -515,7 +517,7 @@ export default function StorePage() {
 
             {/* Social Links */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Social Media</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('store.socialMedia.title')}</h2>
               
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
@@ -547,7 +549,7 @@ export default function StorePage() {
                     value={profile.socialLinks.youtube || ''}
                     onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
                     className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
-                    placeholder="Channel URL"
+                    placeholder={t('store.socialMedia.channelUrl')}
                   />
                 </div>
 
@@ -558,7 +560,7 @@ export default function StorePage() {
                     value={profile.socialLinks.website || ''}
                     onChange={(e) => handleSocialLinkChange('website', e.target.value)}
                     className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-carbon"
-                    placeholder="https://your-website.com"
+                    placeholder={t('store.socialMedia.websitePlaceholder')}
                   />
                 </div>
               </div>
@@ -566,14 +568,14 @@ export default function StorePage() {
 
             {/* Store Settings */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Store Settings</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('store.settings.title')}</h2>
               
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900">Store Status</h3>
+                    <h3 className="font-medium text-gray-900">{t('store.settings.storeStatus')}</h3>
                     <p className="text-sm text-gray-600">
-                      {profile.isPublic ? 'Public' : 'Private'} - {profile.isPublic ? 'Visitors can browse your store' : 'Store is hidden from visitors'}
+                      {profile.isPublic ? t('store.settings.statusPublic') : t('store.settings.statusPrivate')}
                     </p>
                   </div>
                   <button
@@ -590,9 +592,9 @@ export default function StorePage() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900">Editor&apos;s Pick</h3>
+                    <h3 className="font-medium text-gray-900">{t('store.settings.editorsPick')}</h3>
                     <p className="text-sm text-gray-600">
-                      Featured curator status (admin controlled)
+                      {t('store.settings.editorsPickDesc')}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -600,7 +602,7 @@ export default function StorePage() {
                       <Star className="w-5 h-5 text-yellow-500" />
                     )}
                     <span className="text-sm text-gray-500">
-                      {profile.isEditorPick ? 'Active' : 'Inactive'}
+                      {profile.isEditorPick ? t('store.settings.active') : t('store.settings.inactive')}
                     </span>
                   </div>
                 </div>
@@ -617,7 +619,7 @@ export default function StorePage() {
           >
             {/* Profile Photo Upload */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Profile Picture</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('store.profilePicture.title')}</h2>
               
               <div className="space-y-4">
                 <div className="relative mx-auto w-32 h-32">
@@ -641,10 +643,10 @@ export default function StorePage() {
                 
                 <div className="text-center">
                   <p className="text-xs text-gray-500 mb-2">
-                    Crop to circle, display at 1:1 ratio
+                    {t('store.profilePicture.hint')}
                   </p>
                   <p className="text-xs text-gray-500">
-                    JPG, PNG up to 5MB
+                    {t('store.profilePicture.format')}
                   </p>
                 </div>
               </div>
@@ -652,7 +654,7 @@ export default function StorePage() {
 
             {/* Banner Upload */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Banner Image</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('store.banner.title')}</h2>
               
               <div className="space-y-4">
                 <div className="relative w-full h-32">
@@ -676,10 +678,10 @@ export default function StorePage() {
                 
                 <div className="text-center">
                   <p className="text-xs text-gray-500">
-                    Recommended: 1440x400px
+                    {t('store.banner.recommended')}
                   </p>
                   <p className="text-xs text-gray-500">
-                    JPG, PNG up to 5MB
+                    {t('store.profilePicture.format')}
                   </p>
                 </div>
               </div>
@@ -687,7 +689,7 @@ export default function StorePage() {
 
             {/* Badges */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="font-serif text-xl font-light mb-6">Badges</h2>
+              <h2 className="font-serif text-xl font-light mb-6">{t('store.badges.title')}</h2>
               
               <div className="space-y-3">
                 {profile.badges.map((badge) => (
@@ -702,7 +704,7 @@ export default function StorePage() {
                 
                 {profile.badges.length === 0 && (
                   <p className="text-sm text-gray-500 text-center py-4">
-                    No badges yet. Keep curating to earn them!
+                    {t('store.badges.empty')}
                   </p>
                 )}
               </div>
@@ -719,12 +721,12 @@ export default function StorePage() {
                   {isSaving ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Saving...</span>
+                      <span>{t('store.actions.saving')}</span>
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      <span>Save Changes</span>
+                      <span>{t('store.actions.saveChanges')}</span>
                     </>
                   )}
                 </button>
@@ -733,7 +735,7 @@ export default function StorePage() {
                   onClick={handleCancel}
                   className="w-full py-3 px-6 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  Cancel
+                  {t('store.actions.cancel')}
                 </button>
               </div>
             </div>
@@ -750,7 +752,7 @@ export default function StorePage() {
           className="fixed bottom-8 right-8 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 z-50"
         >
           <Check className="w-5 h-5" />
-          <span>Profile updated successfully!</span>
+          <span>{t('store.toast.success')}</span>
           <button
             onClick={() => setShowSuccessToast(false)}
             className="ml-4"

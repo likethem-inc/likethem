@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import ProductDropdownMenu from '@/components/curator/ProductDropdownMenu'
 import { formatCurrency } from '@/lib/format'
+import { useT } from '@/hooks/useT'
 
 interface Product {
   id: string
@@ -71,6 +72,7 @@ const parseTags = (tags: string | null | undefined): string[] => {
 
 export default function ProductsPage() {
   const router = useRouter()
+  const t = useT()
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -206,13 +208,13 @@ export default function ProductsPage() {
             <div className="text-red-600 mb-4">
               <XCircle className="w-12 h-12 mx-auto" />
             </div>
-            <h3 className="font-medium text-gray-900 mb-2">Error loading products</h3>
+            <h3 className="font-medium text-gray-900 mb-2">{t('products.error.loading')}</h3>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={fetchProducts}
               className="bg-carbon text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
             >
-              Try Again
+              {t('common.tryAgain')}
             </button>
           </div>
         </div>
@@ -232,9 +234,9 @@ export default function ProductsPage() {
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="font-serif text-3xl font-light mb-2">My Products</h1>
+              <h1 className="font-serif text-3xl font-light mb-2">{t('products.title')}</h1>
               <p className="text-gray-600">
-                Manage your curated collection ({products.length} products)
+                {t('products.subtitle', { count: products.length })}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -243,14 +245,14 @@ export default function ProductsPage() {
                 className="flex items-center space-x-2 border border-gray-300 bg-white text-gray-700 px-5 py-3 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Package className="w-5 h-5" />
-                <span>Manage Inventory</span>
+                <span>{t('products.manageInventory')}</span>
               </Link>
               <Link
                 href="/dashboard/curator/products/new"
                 className="flex items-center space-x-2 bg-carbon text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                <span>Add Product</span>
+                <span>{t('common.add')}</span>
               </Link>
             </div>
           </div>
@@ -262,7 +264,7 @@ export default function ProductsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder={t('products.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-carbon focus:border-transparent"
@@ -275,9 +277,9 @@ export default function ProductsPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-carbon focus:border-transparent"
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="all">{t('products.filter.allStatus')}</option>
+              <option value="active">{t('product.status.active')}</option>
+              <option value="inactive">{t('product.status.inactive')}</option>
             </select>
 
             {/* Sort */}
@@ -286,11 +288,11 @@ export default function ProductsPage() {
               onChange={(e) => setSortBy(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-carbon focus:border-transparent"
             >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="name">Name A-Z</option>
+              <option value="newest">{t('products.sort.newest')}</option>
+              <option value="oldest">{t('products.sort.oldest')}</option>
+              <option value="price-high">{t('products.sort.priceHigh')}</option>
+              <option value="price-low">{t('products.sort.priceLow')}</option>
+              <option value="name">{t('products.sort.nameAZ')}</option>
             </select>
           </div>
         </motion.div>
@@ -328,12 +330,12 @@ export default function ProductsPage() {
                     {product.isActive ? (
                       <span className="flex items-center space-x-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                         <CheckCircle className="w-3 h-3" />
-                        <span>Active</span>
+                        <span>{t('product.status.active')}</span>
                       </span>
                     ) : (
                       <span className="flex items-center space-x-1 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
                         <XCircle className="w-3 h-3" />
-                        <span>Inactive</span>
+                        <span>{t('product.status.inactive')}</span>
                       </span>
                     )}
                   </div>
@@ -375,7 +377,7 @@ export default function ProductsPage() {
                   {/* Stats */}
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <span>{product.category}</span>
-                    <span>{product.images.length} images</span>
+                    <span>{t('products.images', { count: product.images.length })}</span>
                     <span>{new Date(product.createdAt).toLocaleDateString()}</span>
                   </div>
 
@@ -396,11 +398,11 @@ export default function ProductsPage() {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ShoppingBag className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="font-medium text-gray-900 mb-2">No products found</h3>
+              <h3 className="font-medium text-gray-900 mb-2">{t('products.empty.title')}</h3>
               <p className="text-gray-600 mb-6">
                 {searchTerm || statusFilter !== 'all' 
-                  ? 'Try adjusting your search or filters'
-                  : 'Start building your curated collection'
+                  ? t('products.empty.searchDesc')
+                  : t('products.empty.startDesc')
                 }
               </p>
               {!searchTerm && statusFilter === 'all' && (
@@ -409,7 +411,7 @@ export default function ProductsPage() {
                   className="inline-flex items-center space-x-2 bg-carbon text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   <Plus className="w-5 h-5" />
-                  <span>Add Your First Product</span>
+                  <span>{t('products.empty.addFirst')}</span>
                 </Link>
               )}
             </div>

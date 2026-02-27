@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useT } from '@/hooks/useT'
 import InventoryList from '@/components/curator/inventory/InventoryList'
 import CSVImportExport from '@/components/curator/inventory/CSVImportExport'
 import VariantManager from '@/components/curator/inventory/VariantManager'
 
 export default function InventoryPage() {
-  const { t } = useTranslation()
+  const t = useT()
   const [activeTab, setActiveTab] = useState<'list' | 'variants' | 'import'>('list')
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -30,9 +30,9 @@ export default function InventoryPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('inventory.title')}</h1>
           <p className="mt-2 text-gray-600">
-            Manage stock levels for all your product variants
+            {t('inventory.subtitle')}
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function InventoryPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Inventory List
+              {t('inventory.tabs.list')}
             </button>
             <button
               onClick={() => setActiveTab('variants')}
@@ -57,7 +57,7 @@ export default function InventoryPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Manage Variants
+              {t('inventory.tabs.variants')}
             </button>
             <button
               onClick={() => setActiveTab('import')}
@@ -67,7 +67,7 @@ export default function InventoryPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Import/Export
+              {t('inventory.tabs.import')}
             </button>
           </nav>
         </div>
@@ -86,7 +86,7 @@ export default function InventoryPage() {
         {/* Help Section */}
         <div className="mt-8 bg-blue-50 rounded-lg border border-blue-200 p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-3">
-            How Inventory Management Works
+            {t('inventory.help.title')}
           </h3>
           <div className="space-y-3 text-sm text-blue-800">
             <div className="flex items-start gap-3">
@@ -94,7 +94,7 @@ export default function InventoryPage() {
                 1
               </div>
               <div>
-                <strong>Variants Come From Products:</strong> Sizes and colors are defined when you create or edit a product. Use &quot;Editar producto&quot; to update sizes/colors, then return here to set stock and SKUs.
+                <strong>{t('inventory.help.step1.title')}</strong> {t('inventory.help.step1.desc')}
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -102,7 +102,7 @@ export default function InventoryPage() {
                 2
               </div>
               <div>
-                <strong>Variant-Based Tracking:</strong> Inventory is tracked per size/color combination, with stock and SKU managed here for each variant.
+                <strong>{t('inventory.help.step2.title')}</strong> {t('inventory.help.step2.desc')}
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -110,7 +110,7 @@ export default function InventoryPage() {
                 3
               </div>
               <div>
-                <strong>Stock Reservation:</strong> Stock is only reduced when an order is paid for, not when items are added to cart. This prevents overselling.
+                <strong>{t('inventory.help.step3.title')}</strong> {t('inventory.help.step3.desc')}
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -118,7 +118,7 @@ export default function InventoryPage() {
                 4
               </div>
               <div>
-                <strong>Bulk Management:</strong> Use CSV import/export for managing large inventories efficiently. Perfect for updating stock across multiple products at once.
+                <strong>{t('inventory.help.step4.title')}</strong> {t('inventory.help.step4.desc')}
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -126,7 +126,7 @@ export default function InventoryPage() {
                 5
               </div>
               <div>
-                <strong>Real-time Updates:</strong> Changes to stock levels are reflected immediately. Customers will see accurate availability when browsing.
+                <strong>{t('inventory.help.step5.title')}</strong> {t('inventory.help.step5.desc')}
               </div>
             </div>
           </div>

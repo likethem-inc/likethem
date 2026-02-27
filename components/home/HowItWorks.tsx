@@ -2,49 +2,52 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-
-const steps = [
-  {
-    key: 'scroll',
-    step: 'Step 1',
-    title: 'Scroll',
-    desc: 'Find curators you love. Follow their style and explore their closets.',
-    img: '/images/how/scroll.jpg',
-    alt: 'Discover curators and their closets'
-  },
-  {
-    key: 'shop',
-    step: 'Step 2',
-    title: 'Shop',
-    desc: 'Add pieces to your cart. Secure checkout with real-time availability.',
-    img: '/images/how/shop.jpg',
-    alt: 'Shop curated products'
-  },
-  {
-    key: 'wear',
-    step: 'Step 3',
-    title: 'Wear',
-    desc: 'Delivered to you. Keep what feels like you.',
-    img: '/images/how/wear.jpg',
-    alt: 'Wear your new look'
-  },
-];
+import { useT } from '@/hooks/useT';
 
 export default function HowItWorks() {
+  const t = useT();
+
+  const steps = [
+    {
+      key: 'scroll',
+      step: t('home.howItWorks.step1.step'),
+      title: t('home.howItWorks.step1.title'),
+      desc: t('home.howItWorks.step1.desc'),
+      img: '/images/how/scroll.jpg',
+      alt: t('home.howItWorks.step1.alt'),
+    },
+    {
+      key: 'shop',
+      step: t('home.howItWorks.step2.step'),
+      title: t('home.howItWorks.step2.title'),
+      desc: t('home.howItWorks.step2.desc'),
+      img: '/images/how/shop.jpg',
+      alt: t('home.howItWorks.step2.alt'),
+    },
+    {
+      key: 'wear',
+      step: t('home.howItWorks.step3.step'),
+      title: t('home.howItWorks.step3.title'),
+      desc: t('home.howItWorks.step3.desc'),
+      img: '/images/how/wear.jpg',
+      alt: t('home.howItWorks.step3.alt'),
+    },
+  ];
+
   return (
     <section className="w-full bg-white">
       <div className="max-w-6xl mx-auto px-6 md:px-10 py-20 md:py-24">
         {/* Eyebrow */}
         <div className="text-center">
           <div className="text-xs tracking-[0.18em] uppercase text-neutral-500 mb-3">
-            How it works
+            {t('home.howItWorks.eyebrow')}
           </div>
           {/* Headline + subheadline */}
           <h2 className="font-serif text-3xl md:text-4xl tracking-tight text-zinc-900">
-            Effortless. From discovery to delivery.
+            {t('home.howItWorks.title')}
           </h2>
           <p className="text-neutral-600 mt-3">
-            Three simple steps—curated for your taste.
+            {t('home.howItWorks.subtitle')}
           </p>
 
           {/* Subtle divider */}
