@@ -12,10 +12,10 @@ type StatsData = {
   earnings: number;
   favorites: number;
   deltas: {
-    visits: number;
-    items: number;
-    earnings: number;
-    favorites: number;
+    visits?: number;
+    items?: number;
+    earnings?: number;
+    favorites?: number;
   };
   recentActivity: Array<{
     type: "order" | "favorite" | "review";
