@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useT } from '@/hooks/useT'
 
 const testimonials = [
   {
@@ -24,6 +25,8 @@ const testimonials = [
 ]
 
 export default function Testimonials() {
+  const t = useT()
+
   return (
     <section className="py-24 bg-white">
       <div className="container-custom">
@@ -35,7 +38,7 @@ export default function Testimonials() {
           className="text-center mb-16"
         >
           <h2 className="font-serif text-4xl md:text-5xl font-light mb-6">
-            What Our Members Say
+            {t('home.testimonials.title')}
           </h2>
         </motion.div>
 

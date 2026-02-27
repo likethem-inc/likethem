@@ -5,6 +5,7 @@ import { KpiCard } from "./KpiCard";
 import { ActionCard } from "./ActionCard";
 import { RecentActivity } from "./RecentActivity";
 import { DollarSign, Eye, Heart, Package, Edit, BarChart3 } from "lucide-react";
+import { useT } from "@/hooks/useT";
 
 type StatsData = {
   storeVisits: number;
@@ -26,6 +27,7 @@ type StatsData = {
 };
 
 export function CuratorDashboard({ user }: { user: { name?: string } }) {
+  const t = useT();
   const [data, setData] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,35 +46,41 @@ export function CuratorDashboard({ user }: { user: { name?: string } }) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <h1 className="text-3xl font-semibold tracking-tight">Curator Dashboard</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">{t('dashboard.title')}</h1>
       <p className="mt-1 text-muted-foreground">
-        Welcome back{user?.name ? `, ${user.name}` : ""}. Here&apos;s what&apos;s happening with your store.
+        {user?.name
+          ? t('dashboard.welcome.withName', { name: user.name })
+          : t('dashboard.welcome.noName')}
       </p>
 
       {/* KPIs */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard 
-          label="Store Visits" 
+          label={t('dashboard.kpi.storeVisits')}
           value={data?.storeVisits ?? "—"} 
-          deltaPct={data?.deltas?.visits} 
+          deltaPct={data?.deltas?.visits}
+          deltaLabel={t('dashboard.kpi.fromLastMonth')}
           icon={<Eye />} 
         />
         <KpiCard 
-          label="Items Sold" 
+          label={t('dashboard.kpi.itemsSold')}
           value={data?.itemsSold ?? "—"} 
-          deltaPct={data?.deltas?.items} 
+          deltaPct={data?.deltas?.items}
+          deltaLabel={t('dashboard.kpi.fromLastMonth')}
           icon={<Package />} 
         />
         <KpiCard 
-          label="Earnings" 
+          label={t('dashboard.kpi.earnings')}
           value={typeof data?.earnings === "number" ? `$${data.earnings}` : "—"} 
-          deltaPct={data?.deltas?.earnings} 
+          deltaPct={data?.deltas?.earnings}
+          deltaLabel={t('dashboard.kpi.fromLastMonth')}
           icon={<DollarSign />} 
         />
         <KpiCard 
-          label="Favorites" 
+          label={t('dashboard.kpi.favorites')}
           value={data?.favorites ?? "—"} 
-          deltaPct={data?.deltas?.favorites} 
+          deltaPct={data?.deltas?.favorites}
+          deltaLabel={t('dashboard.kpi.fromLastMonth')}
           icon={<Heart />} 
         />
       </div>
@@ -80,26 +88,26 @@ export function CuratorDashboard({ user }: { user: { name?: string } }) {
       {/* Quick actions */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <ActionCard 
-          title="Manage Products" 
-          description="Add products and manage inventory" 
+          title={t('dashboard.actions.manageProducts.title')}
+          description={t('dashboard.actions.manageProducts.desc')}
           href="/dashboard/curator/products" 
           icon={<Package className="w-5 h-5" />}
         />
         <ActionCard 
-          title="Edit Store Profile" 
-          description="Update your bio and store settings" 
+          title={t('dashboard.actions.editStore.title')}
+          description={t('dashboard.actions.editStore.desc')}
           href="/dashboard/curator/settings" 
           icon={<Edit className="w-5 h-5" />}
         />
         <ActionCard 
-          title="View Analytics" 
-          description="Check your performance insights" 
+          title={t('dashboard.actions.viewAnalytics.title')}
+          description={t('dashboard.actions.viewAnalytics.desc')}
           href="/dashboard/curator/analytics" 
           icon={<BarChart3 className="w-5 h-5" />}
         />
         <ActionCard 
-          title="Manage Orders" 
-          description="View and fulfill customer orders" 
+          title={t('dashboard.actions.manageOrders.title')}
+          description={t('dashboard.actions.manageOrders.desc')}
           href="/dashboard/curator/orders" 
           icon={<Package className="w-5 h-5" />}
         />
@@ -107,7 +115,10 @@ export function CuratorDashboard({ user }: { user: { name?: string } }) {
 
       {/* Recent activity */}
       <div className="mt-6">
-        <RecentActivity items={data?.recentActivity ?? []} />
+        <RecentActivity
+          title={t('dashboard.recentActivity')}
+          items={data?.recentActivity ?? []}
+        />
       </div>
     </div>
   );

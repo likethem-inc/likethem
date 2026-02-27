@@ -1,4 +1,5 @@
-export function RecentActivity({ items }: {
+export function RecentActivity({ title = "Recent Activity", items }: {
+  title?: string;
   items: { 
     type: "order"|"favorite"|"review"; 
     title: string; 
@@ -8,7 +9,7 @@ export function RecentActivity({ items }: {
 }) {
   return (
     <div className="rounded-2xl border bg-card">
-      <div className="px-5 py-4 font-medium">Recent Activity</div>
+      <div className="px-5 py-4 font-medium">{title}</div>
       <ul className="divide-y">
         {items.map((it, i) => (
           <li key={i} className="px-5 py-4 flex items-start gap-3">

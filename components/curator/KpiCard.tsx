@@ -4,11 +4,13 @@ export function KpiCard({
   label,
   value,
   deltaPct,
+  deltaLabel = "from last month",
   icon,
 }: { 
   label: string; 
   value: string | number; 
-  deltaPct?: number; 
+  deltaPct?: number;
+  deltaLabel?: string;
   icon?: React.ReactNode 
 }) {
   const positive = (deltaPct ?? 0) >= 0;
@@ -21,7 +23,7 @@ export function KpiCard({
           {deltaPct != null && (
             <div className={`mt-1 text-xs ${positive ? "text-emerald-600" : "text-rose-600"}`}>
               {positive ? "+" : ""}
-              {deltaPct}% from last month
+              {deltaPct}% {deltaLabel}
             </div>
           )}
         </div>

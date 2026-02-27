@@ -3,8 +3,11 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import CTAButton from '@/components/ui/CTAButton'
+import { useT } from '@/hooks/useT'
 
 export default function Hero() {
+  const t = useT()
+
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image - High-end Editorial Style */}
@@ -27,20 +30,20 @@ export default function Hero() {
           transition={{ duration: 0.8 }}
         >
           <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-light mb-6 tracking-wide uppercase">
-            From your feed to your closet.
+            {t('home.hero.title')}
           </h1>
           
           <p className="text-lg md:text-xl text-white/90 mb-12 max-w-2xl mx-auto font-light">
-            Curated fashion by top influencers. Exclusive access to the pieces that matter.
+            {t('home.hero.subtitle')}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <CTAButton as="link" href="/explore" variant="primary" size="lg" className="tracking-[0.01em] md:tracking-normal">
-              Discover Stores
+              {t('home.hero.discoverStores')}
             </CTAButton>
 
             <CTAButton as="link" href="/apply" variant="secondary" size="lg" className="tracking-[0.01em] md:tracking-normal">
-              Apply to Sell
+              {t('home.hero.applyToSell')}
             </CTAButton>
           </div>
         </motion.div>

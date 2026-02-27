@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle, Clock, AlertCircle, ArrowRight, Package, CreditCard, QrCode } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
+import { useT } from '@/hooks/useT'
 
 interface OrderConfirmationProps {
   orderId?: string
@@ -14,6 +15,7 @@ interface OrderConfirmationProps {
 }
 
 export default function OrderConfirmationPage() {
+  const t = useT()
   const searchParams = useSearchParams()
   const orderId = searchParams.get('orderId')
   const status = searchParams.get('status')
@@ -48,8 +50,8 @@ export default function OrderConfirmationPage() {
       case 'PENDING_PAYMENT':
         return {
           icon: Clock,
-          title: 'Payment Pending',
-          description: 'Your order has been submitted and is waiting for payment confirmation.',
+          title: t('orderConfirmation.status.pendingPayment.title'),
+          description: t('orderConfirmation.status.pendingPayment.description'),
           color: 'text-yellow-600',
           bgColor: 'bg-yellow-50',
           borderColor: 'border-yellow-200'
@@ -57,8 +59,8 @@ export default function OrderConfirmationPage() {
       case 'PAID':
         return {
           icon: CheckCircle,
-          title: 'Payment Confirmed',
-          description: 'Your payment has been confirmed and your order is being processed.',
+          title: t('orderConfirmation.status.paid.title'),
+          description: t('orderConfirmation.status.paid.description'),
           color: 'text-green-600',
           bgColor: 'bg-green-50',
           borderColor: 'border-green-200'
@@ -66,8 +68,8 @@ export default function OrderConfirmationPage() {
       case 'REJECTED':
         return {
           icon: AlertCircle,
-          title: 'Payment Rejected',
-          description: 'Your payment was not verified. Please contact support for assistance.',
+          title: t('orderConfirmation.status.rejected.title'),
+          description: t('orderConfirmation.status.rejected.description'),
           color: 'text-red-600',
           bgColor: 'bg-red-50',
           borderColor: 'border-red-200'
@@ -75,8 +77,8 @@ export default function OrderConfirmationPage() {
       default:
         return {
           icon: CheckCircle,
-          title: 'Order Confirmed',
-          description: 'Your order has been successfully placed and is being processed.',
+          title: t('orderConfirmation.status.default.title'),
+          description: t('orderConfirmation.status.default.description'),
           color: 'text-green-600',
           bgColor: 'bg-green-50',
           borderColor: 'border-green-200'
@@ -116,33 +118,33 @@ export default function OrderConfirmationPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="bg-gray-50 rounded-lg p-8 mb-8"
             >
-              <h2 className="font-serif text-2xl font-light mb-6">Order Details</h2>
+              <h2 className="font-serif text-2xl font-light mb-6">{t('orderConfirmation.orderDetails.title')}</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                 <div>
-                  <h3 className="font-medium mb-3">Order Information</h3>
+                  <h3 className="font-medium mb-3">{t('orderConfirmation.orderDetails.orderInfo')}</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Order ID:</span>
+                      <span className="text-gray-600">{t('orderConfirmation.orderDetails.orderId')}</span>
                       <span className="font-mono">{order.id}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Date:</span>
+                      <span className="text-gray-600">{t('orderConfirmation.orderDetails.date')}</span>
                       <span>{new Date(order.createdAt).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Status:</span>
+                      <span className="text-gray-600">{t('orderConfirmation.orderDetails.status')}</span>
                       <span className="capitalize">{order.status.replace('_', ' ').toLowerCase()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Total:</span>
+                      <span className="text-gray-600">{t('orderConfirmation.orderDetails.total')}</span>
                       <span className="font-medium">{formatCurrency(order.totalAmount)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-3">Shipping Address</h3>
+                  <h3 className="font-medium mb-3">{t('orderConfirmation.orderDetails.shippingAddress')}</h3>
                   <div className="text-sm text-gray-600">
                     <p>{order.shippingAddress.name}</p>
                     <p>{order.shippingAddress.address}</p>
@@ -154,7 +156,7 @@ export default function OrderConfirmationPage() {
 
               {/* Order Items */}
               <div className="mt-8">
-                <h3 className="font-medium mb-4">Items Ordered</h3>
+                <h3 className="font-medium mb-4">{t('orderConfirmation.orderDetails.items')}</h3>
                 <div className="space-y-4">
                   {order.items.map((item: any) => (
                     <div key={item.id} className="flex items-center space-x-4 p-4 bg-white rounded-lg">
@@ -169,9 +171,9 @@ export default function OrderConfirmationPage() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium">{item.product.title}</h4>
-                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                        {item.size && <p className="text-sm text-gray-600">Size: {item.size}</p>}
-                        {item.color && <p className="text-sm text-gray-600">Color: {item.color}</p>}
+                        <p className="text-sm text-gray-600">{t('orderConfirmation.orderDetails.qty', { quantity: item.quantity })}</p>
+                        {item.size && <p className="text-sm text-gray-600">{t('orderConfirmation.orderDetails.size', { size: item.size })}</p>}
+                        {item.color && <p className="text-sm text-gray-600">{t('orderConfirmation.orderDetails.color', { color: item.color })}</p>}
                       </div>
                       <div className="text-right">
                         <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
@@ -192,23 +194,23 @@ export default function OrderConfirmationPage() {
           >
             {status === 'PENDING_PAYMENT' && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="font-medium text-blue-800 mb-3">Next Steps</h3>
+                <h3 className="font-medium text-blue-800 mb-3">{t('orderConfirmation.nextSteps.pendingTitle')}</h3>
                 <div className="text-sm text-blue-700 space-y-2">
-                  <p>1. Complete your payment using the method you selected</p>
-                  <p>2. Upload payment proof if you haven&apos;t already</p>
-                  <p>3. Wait for payment verification (usually within 24 hours)</p>
-                  <p>4. You&apos;ll receive an email confirmation once payment is verified</p>
+                  <p>{t('orderConfirmation.nextSteps.pending1')}</p>
+                  <p>{t('orderConfirmation.nextSteps.pending2')}</p>
+                  <p>{t('orderConfirmation.nextSteps.pending3')}</p>
+                  <p>{t('orderConfirmation.nextSteps.pending4')}</p>
                 </div>
               </div>
             )}
 
             {status === 'PAID' && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="font-medium text-green-800 mb-3">What&apos;s Next?</h3>
+                <h3 className="font-medium text-green-800 mb-3">{t('orderConfirmation.nextSteps.paidTitle')}</h3>
                 <div className="text-sm text-green-700 space-y-2">
-                  <p>1. Your order is being prepared for shipment</p>
-                  <p>2. You&apos;ll receive tracking information via email</p>
-                  <p>3. Expected delivery: 3-5 business days</p>
+                  <p>{t('orderConfirmation.nextSteps.paid1')}</p>
+                  <p>{t('orderConfirmation.nextSteps.paid2')}</p>
+                  <p>{t('orderConfirmation.nextSteps.paid3')}</p>
                 </div>
               </div>
             )}
@@ -220,7 +222,7 @@ export default function OrderConfirmationPage() {
                 className="inline-flex items-center space-x-2 bg-carbon text-white px-6 py-3 font-medium hover:bg-gray-800 transition-colors duration-200"
               >
                 <Package className="w-4 h-4" />
-                <span>View My Orders</span>
+                <span>{t('orderConfirmation.actions.viewOrders')}</span>
               </Link>
               
               <Link
@@ -228,13 +230,13 @@ export default function OrderConfirmationPage() {
                 className="inline-flex items-center space-x-2 bg-white text-carbon border border-carbon px-6 py-3 font-medium hover:bg-gray-50 transition-colors duration-200"
               >
                 <ArrowRight className="w-4 h-4" />
-                <span>Continue Shopping</span>
+                <span>{t('orderConfirmation.actions.continueShopping')}</span>
               </Link>
             </div>
 
             {/* Support Contact */}
             <div className="text-sm text-gray-500">
-              <p>Need help? Contact us at{' '}
+              <p>{t('orderConfirmation.support')}{' '}
                 <a href="mailto:support@likethem.com" className="text-carbon hover:underline">
                   support@likethem.com
                 </a>
@@ -245,4 +247,4 @@ export default function OrderConfirmationPage() {
       </div>
     </div>
   )
-} 
+}

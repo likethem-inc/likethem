@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import Image from 'next/image'
 import AskNigelButton from './AskNigelButton'
+import { useT } from '@/hooks/useT'
 
 export default function NigelDemo() {
+  const t = useT()
   const [activeFeature, setActiveFeature] = useState<number | null>(null)
 
   const demoProduct = {
@@ -17,17 +19,17 @@ export default function NigelDemo() {
 
   const features = [
     {
-      title: "Smart Recommendations",
-      description: "Analyzes your preferences and visual patterns to curate what suits you."
+      title: t('home.nigel.feature1.title'),
+      description: t('home.nigel.feature1.desc'),
     },
     {
-      title: "Style Context", 
-      description: "Understands the story behind each look — materials, cuts, and fit."
+      title: t('home.nigel.feature2.title'),
+      description: t('home.nigel.feature2.desc'),
     },
     {
-      title: "Adaptive Learning",
-      description: "Learns your aesthetic from every interaction, refining its taste."
-    }
+      title: t('home.nigel.feature3.title'),
+      description: t('home.nigel.feature3.desc'),
+    },
   ]
 
   return (
@@ -42,10 +44,10 @@ export default function NigelDemo() {
         >
           <div className="space-y-4">
             <h2 className="text-4xl font-serif font-light text-zinc-900">
-              Meet Nigel.
+              {t('home.nigel.title')}
             </h2>
             <p className="text-zinc-600 text-lg leading-relaxed">
-              Your intelligent style companion. Nigel helps you discover, analyze, and refine your personal aesthetic.
+              {t('home.nigel.description')}
             </p>
           </div>
 
@@ -106,7 +108,7 @@ export default function NigelDemo() {
                   {demoProduct.name}
                 </h4>
                 <p className="text-sm opacity-90 mb-2">
-                  Curated by {demoProduct.curator}
+                  {t('home.nigel.curatedBy', { curator: demoProduct.curator })}
                 </p>
                 <p className="text-lg font-medium">
                   ${demoProduct.price}
