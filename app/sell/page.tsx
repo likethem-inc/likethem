@@ -358,7 +358,7 @@ export default function BecomeCurator() {
           <div className="mt-8 text-center text-sm text-gray-500">
             <p>
               By creating a store, you agree to our{' '}
-              <a href="#" className="text-black hover:underline">
+              <a href="/terms-of-service" className="text-black hover:underline">
                 Terms of Service
               </a>{' '}
               and{' '}
